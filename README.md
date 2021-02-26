@@ -1,5 +1,5 @@
 # 「小技巧」
-[JS 代码优化小技巧]
+[JS 代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
 # 「JavaScript 深入系列」
 [深入理解垃圾回收](https://github.com/18888628835/Blogs/issues/8)
