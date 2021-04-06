@@ -24,6 +24,8 @@
 # 「ES6系列」
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
+2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
+
 
 
 
