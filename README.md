@@ -22,7 +22,7 @@
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
 # 「ES6系列」
-1.[let、const与var的区别](ttps://github.com/18888628835/Blog/issues/11)
+1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
 
 
