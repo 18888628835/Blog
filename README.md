@@ -21,6 +21,9 @@
 # 「数据结构和算法系列」
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
+2.[线性表（数组）](https://github.com/18888628835/Blogs/issues/14)
+
+
 # 「ES6系列」
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
