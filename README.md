@@ -23,6 +23,7 @@
 
 2.[线性表（数组）](https://github.com/18888628835/Blogs/issues/14)
 
+3.[选择排序](https://github.com/18888628835/Blogs/issues/15)
 
 # 「ES6系列」
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
