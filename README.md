@@ -25,6 +25,8 @@
 
 3.[选择排序](https://github.com/18888628835/Blogs/issues/15)
 
+4.[插入排序](https://github.com/18888628835/Blogs/issues/16)
+
 # 「ES6系列」
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
