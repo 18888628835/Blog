@@ -40,6 +40,8 @@
 
 5.[Symbol](https://github.com/18888628835/Blog/issues/19)
 
+6.[async和await](https://github.com/18888628835/Blog/issues/20)
+
 
 
 
