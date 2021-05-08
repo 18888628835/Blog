@@ -1,7 +1,6 @@
 # 「小技巧」
 [JS 代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
-[深入浅出正则表达式](https://github.com/18888628835/Blog/issues/21)
 # 「JavaScript 深入系列」
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
 
@@ -19,6 +18,7 @@
 
 8.[深入理解垃圾回收](https://github.com/18888628835/Blogs/issues/8)
 
+9.[深入浅出正则表达式](https://github.com/18888628835/Blog/issues/21)
 # 「数据结构和算法系列」
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
