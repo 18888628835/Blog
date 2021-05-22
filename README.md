@@ -57,3 +57,5 @@
 6.[从 url 输入页面到页面展示到底发生了什么](https://github.com/18888628835/Blog/issues/27)
 
 7.[HTTP 报文长什么样](https://github.com/18888628835/Blog/issues/28)
+
+8.[请求方法](https://github.com/18888628835/Blog/issues/29)
