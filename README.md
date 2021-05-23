@@ -59,3 +59,5 @@
 7.[HTTP 报文长什么样](https://github.com/18888628835/Blog/issues/28)
 
 8.[请求方法](https://github.com/18888628835/Blog/issues/29)
+
+9.[URI](https://github.com/18888628835/Blog/issues/30)
