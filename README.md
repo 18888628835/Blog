@@ -63,3 +63,5 @@
 9.[URI](https://github.com/18888628835/Blog/issues/30)
 
 10.[HTTP 状态码](https://github.com/18888628835/Blog/issues/31)
+
+11.[HTTP 的特点](https://github.com/18888628835/Blog/issues/32)
