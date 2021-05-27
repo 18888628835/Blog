@@ -67,3 +67,5 @@
 11.[HTTP 的特点](https://github.com/18888628835/Blog/issues/32)
 
 12.[Body数据的内容协商](https://github.com/18888628835/Blog/issues/33)
+
+13.[传输大文件的方法](https://github.com/18888628835/Blog/issues/34)
