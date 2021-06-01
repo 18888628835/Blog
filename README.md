@@ -69,3 +69,7 @@
 12.[Body数据的内容协商](https://github.com/18888628835/Blog/issues/33)
 
 13.[传输大文件的方法](https://github.com/18888628835/Blog/issues/34)
+
+14.[Cookie 机制](https://github.com/18888628835/Blog/issues/35)
+
+15.[HTTP 的缓存控制](https://github.com/18888628835/Blog/issues/36)
