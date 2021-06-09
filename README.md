@@ -47,6 +47,8 @@
 
 8.[对比class与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
 
+9.[手动实现 new 关键字](https://github.com/18888628835/Blog/issues/40)
+
 # 「深入浅出HTTP协议」
 1.[HTTP的由来](https://github.com/18888628835/Blog/issues/22)
 
