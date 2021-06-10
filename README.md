@@ -24,6 +24,9 @@
 9.[深入浅出正则表达式](https://github.com/18888628835/Blog/issues/21)
 
 10.[手动实现 new 关键字](https://github.com/18888628835/Blog/issues/40)
+
+11.[手写 call、apply、bind](https://github.com/18888628835/Blog/issues/41)
+
 ## 数据结构和算法系列
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
