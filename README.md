@@ -1,10 +1,10 @@
 # 彦兮的博客
-## 作者主页
-[掘金](https://juejin.cn/user/3940246036424679/posts)
-## 「小技巧」
-[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
+## 专栏
+[掘金全集](https://juejin.cn/user/3940246036424679/posts)
+## 小技巧
+1.[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
-## 「JavaScript 深入系列」
+## JavaScript 深入系列
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
 
 2.[深入理解词法作用域](https://github.com/18888628835/Blogs/issues/2)
@@ -24,7 +24,7 @@
 9.[深入浅出正则表达式](https://github.com/18888628835/Blog/issues/21)
 
 10.[手动实现 new 关键字](https://github.com/18888628835/Blog/issues/40)
-## 「数据结构和算法系列」
+## 数据结构和算法系列
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
 2.[线性表（数组）](https://github.com/18888628835/Blogs/issues/14)
@@ -35,7 +35,7 @@
 
 5.[栈](https://github.com/18888628835/Blog/issues/17)
 
-## 「ES6系列」
+## ES6系列
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
 2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
@@ -52,7 +52,7 @@
 
 8.[对比class与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
 
-## 「深入浅出HTTP协议」
+## 深入浅出HTTP协议
 1.[HTTP的由来](https://github.com/18888628835/Blog/issues/22)
 
 2.[HTTP是什么](https://github.com/18888628835/Blog/issues/23)
