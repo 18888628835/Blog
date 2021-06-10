@@ -19,6 +19,8 @@
 8.[深入理解垃圾回收](https://github.com/18888628835/Blogs/issues/8)
 
 9.[深入浅出正则表达式](https://github.com/18888628835/Blog/issues/21)
+
+10.[手动实现 new 关键字](https://github.com/18888628835/Blog/issues/40)
 # 「数据结构和算法系列」
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
@@ -46,8 +48,6 @@
 7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
 
 8.[对比class与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
-
-9.[手动实现 new 关键字](https://github.com/18888628835/Blog/issues/40)
 
 # 「深入浅出HTTP协议」
 1.[HTTP的由来](https://github.com/18888628835/Blog/issues/22)
