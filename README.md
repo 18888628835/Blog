@@ -1,6 +1,7 @@
 # 彦兮的博客
 ## 专栏
 [掘金全集](https://juejin.cn/user/3940246036424679/posts)
+
 ## 小技巧
 1.[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
@@ -26,6 +27,8 @@
 10.[手动实现 new 关键字](https://github.com/18888628835/Blog/issues/40)
 
 11.[手写 call、apply、bind](https://github.com/18888628835/Blog/issues/41)
+
+12.[手写防抖和节流](https://github.com/18888628835/Blog/issues/42)
 
 ## 数据结构和算法系列
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
@@ -87,6 +90,7 @@
 15.[HTTP 的缓存控制](https://github.com/18888628835/Blog/issues/36)
 
 16.[HTTP 代理](https://github.com/18888628835/Blog/issues/37)
+
 ## 勘误及提问
 如果有错误或者不严谨的地方，请务必给予指正，十分感谢。
 
