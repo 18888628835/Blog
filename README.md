@@ -32,6 +32,10 @@
 
 13.[函数memory](https://github.com/18888628835/Blog/issues/43)
 
+14.[函数柯里化](https://github.com/18888628835/Blog/issues/44)
+
+15.[实现一个深拷贝](https://github.com/18888628835/Blog/issues/45)
+
 ## 数据结构和算法系列
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
