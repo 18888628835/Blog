@@ -30,6 +30,8 @@
 
 12.[手写防抖和节流](https://github.com/18888628835/Blog/issues/42)
 
+13.[函数memory](https://github.com/18888628835/Blog/issues/43)
+
 ## 数据结构和算法系列
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
