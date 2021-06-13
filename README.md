@@ -36,6 +36,8 @@
 
 15.[实现一个深拷贝](https://github.com/18888628835/Blog/issues/45)
 
+16.[JS 上传文件预览功能原理](https://github.com/18888628835/Blog/issues/46)
+
 ## 数据结构和算法系列
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
 
