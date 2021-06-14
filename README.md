@@ -49,6 +49,8 @@
 
 5.[栈](https://github.com/18888628835/Blog/issues/17)
 
+6.[队列](https://github.com/18888628835/Blog/issues/47)
+
 ## ES6系列
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
