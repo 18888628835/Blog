@@ -34,7 +34,7 @@
 
 14.[函数柯里化](https://github.com/18888628835/Blog/issues/44)
 
-15.[实现一个深拷贝](https://github.com/18888628835/Blog/issues/45)
+15.[手写深拷贝](https://github.com/18888628835/Blog/issues/45)
 
 16.[原生实现上传文件预览](https://github.com/18888628835/Blog/issues/46)
 
