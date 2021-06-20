@@ -53,6 +53,8 @@
 
 6.[队列](https://github.com/18888628835/Blog/issues/47)
 
+7.[链表](https://github.com/18888628835/Blog/issues/49)
+
 ## ES6系列
 1.[let、const与var的区别](https://github.com/18888628835/Blog/issues/11)
 
