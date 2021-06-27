@@ -1,10 +1,10 @@
-function defaultEquals(a, b) {
+function defaultEquals(a: any, b: any) {
   return a === b;
 }
 class CreateNode {
-  element;
-  next;
-  constructor(element) {
+  element: any;
+  next: null;
+  constructor(element: any) {
     this.element = element;
     this.next = null;
   }
@@ -14,9 +14,9 @@ class LinkedList {
   head: any = null; //保存第一个元素的引用
   constructor() {}
   //链表最后元素添加新元素
-  push(element) {
+  push(element: any) {
     let node = new CreateNode(element);
-    let current; //当前引用的指针
+    let current: { next: any }; //当前引用的指针
     if (!this.head) {
       this.head = node;
     } else {
@@ -29,7 +29,7 @@ class LinkedList {
     this.count += 1;
   }
   //链表的特定位置插入一个新元素
-  insert(index, element) {
+  insert(index: number, element: number) {
     //首先，我们需要验证 index 是否在范围内，即小于 等于节点数，大于等于0。
     if (index <= this.count && index >= 0) {
       let node = new CreateNode(element);
@@ -50,7 +50,7 @@ class LinkedList {
     return false;
   }
   //返回链表中特定位置的元素,如果不存在，返回 undefined
-  getElementAt(index) {
+  getElementAt(index: number) {
     if (index >= this.count || index < 0) {
       return undefined;
     }
@@ -60,20 +60,20 @@ class LinkedList {
     }
     return current;
   }
-  remove(element) {} //删除一个元素
-  indexOf(element) {} //返回元素在链表中的索引。如果链表中没有该元素则返回-1。
+  remove(element: any) {} //删除一个元素
+  indexOf(element: any) {} //返回元素在链表中的索引。如果链表中没有该元素则返回-1。
   //从链表的指定索引移除一个元素。
-  removeAt(index) {
+  removeAt(index: number) {
     //空链表或者传入位置大于等于链表的节点数量或者小于0，都直接不操作
     if (this.head === null || index >= this.count || index < 0) {
       return null;
     }
+    let previous: any; //记录要删除元素位置的上一个元素
     //如果index 是0，则将head 引用直接改为其next
     if (index === 0) {
       this.head = this.head.next;
     } else {
       let current = this.head;
-      let previous; //记录要删除元素位置的上一个元素
       for (let i = 0; i < index; i++) {
         previous = current;
         current = current.next;
@@ -99,19 +99,17 @@ linkedList.insert(0, 0);
 linkedList.insert(2, 2);
 console.log(linkedList);
 
-/**
- * Definition for singly-linked list.
- * function ListNode(val, next) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.next = (next===undefined ? null : next)
- * }
- */
+function ListNode(this: any, val?, next?) {
+  this.val = val === undefined ? 0 : val;
+  this.next = next === undefined ? null : next;
+}
+
 /**删除链表元素
  * @param {ListNode} head
  * @param {number} val
  * @return {ListNode}
  */
-var removeElements = function (head, val) {
+var removeElements = function (head: any, val: any) {
   let root = new ListNode(); //创建一个根节点
   root.next = head; //根节点的后面是头节点
   let previous = root; //指针 previous 指向 root 节点
@@ -144,9 +142,9 @@ var removeElements = function (head, val) {
  * @param {ListNode} head
  * @return {ListNode}
  */
-var reverseList = function (head) {
+var reverseList = function (head: any) {
   let current = head;
-  let array = [];
+  let array: any[] = [];
   let root = new ListNode();
   let previous = root;
   while (current) {
@@ -162,7 +160,7 @@ var reverseList = function (head) {
   return root.next;
 };
 
-var reverseList = function (head) {
+var reverseList2 = function (head: any) {
   let root = null; //创建 root节点，由于链表的末尾元素是 null，这里就是 null
   let current = head;
   while (current) {
