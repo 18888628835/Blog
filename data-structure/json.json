@@ -1,39 +1,31 @@
 {
   "root": {
-    "key": 7,
+    "key": 11,
     "left": {
-      "key": 5,
+      "key": 7,
       "left": {
-        "key": 3,
-        "left": null,
-        "right": null
+        "key": 5,
+        "left": { "key": 3, "left": null, "right": null },
+        "right": { "key": 6, "left": null, "right": null }
       },
       "right": {
-        "key": 6,
-        "left": null,
-        "right": null
+        "key": 9,
+        "left": { "key": 8, "left": null, "right": null },
+        "right": { "key": 10, "left": null, "right": null }
       }
     },
     "right": {
       "key": 15,
       "left": {
-        "key": 9,
-        "left": {
-          "key": 8,
-          "left": null,
-          "right": null
-        },
-        "right": {
-          "key": 10,
-          "left": null,
-          "right": {
-            "key": 13,
-            "left": null,
-            "right": null
-          }
-        }
+        "key": 13,
+        "left": { "key": 12, "left": null, "right": null },
+        "right": { "key": 14, "left": null, "right": null }
       },
-      "right": null
+      "right": {
+        "key": 20,
+        "left": { "key": 18, "left": null, "right": null },
+        "right": { "key": 25, "left": null, "right": null }
+      }
     }
   }
 }

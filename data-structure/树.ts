@@ -36,15 +36,55 @@ class BinarySearchTree {
       this.insertNode(this.root, key);
     }
   }
+  //中序遍历的辅助函数
+  private inOrderTraverseNode(node, callback) {
+    if (node !== null) {
+      this.inOrderTraverseNode(node.left, callback);
+      callback(node.key);
+      this.inOrderTraverseNode(node.right, callback);
+    }
+  }
+  //中序遍历
+  inOrderTraverse(callback) {
+    this.inOrderTraverseNode(this.root, callback);
+  }
+  private preOrderTraverseNode(node, callback) {
+    if (node !== null) {
+      callback(node.key);
+      this.preOrderTraverseNode(node.left, callback);
+      this.preOrderTraverseNode(node.right, callback);
+    }
+  }
+  preOrderTraverse(callback) {
+    this.preOrderTraverseNode(this.root, callback);
+  }
+  private postOrderTraverseNode(node, callback) {
+    if (node !== null) {
+      this.postOrderTraverseNode(node.left, callback);
+      this.postOrderTraverseNode(node.right, callback);
+      callback(node.key);
+    }
+  }
+  postOrderTraverse(callback) {
+    this.postOrderTraverseNode(this.root, callback);
+  }
 }
 let tree = new BinarySearchTree();
+tree.insert(11);
 tree.insert(7);
 tree.insert(15);
 tree.insert(5);
-tree.insert(6);
 tree.insert(3);
 tree.insert(9);
 tree.insert(8);
 tree.insert(10);
 tree.insert(13);
-console.log(JSON.stringify(tree));
+tree.insert(12);
+tree.insert(14);
+tree.insert(20);
+tree.insert(18);
+tree.insert(25);
+tree.insert(6);
+tree.postOrderTraverse(key => {
+  console.log(key);
+});
