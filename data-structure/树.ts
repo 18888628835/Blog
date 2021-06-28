@@ -29,6 +29,7 @@ class BinarySearchTree {
       }
     }
   }
+  //插入节点
   insert(key) {
     if (this.root === null) {
       this.root = new TreeNode(key);
@@ -48,6 +49,7 @@ class BinarySearchTree {
   inOrderTraverse(callback) {
     this.inOrderTraverseNode(this.root, callback);
   }
+  //先序遍历的辅助函数
   private preOrderTraverseNode(node, callback) {
     if (node !== null) {
       callback(node.key);
@@ -55,9 +57,11 @@ class BinarySearchTree {
       this.preOrderTraverseNode(node.right, callback);
     }
   }
+  // 先序遍历
   preOrderTraverse(callback) {
     this.preOrderTraverseNode(this.root, callback);
   }
+  //后序遍历的辅助函数
   private postOrderTraverseNode(node, callback) {
     if (node !== null) {
       this.postOrderTraverseNode(node.left, callback);
@@ -65,8 +69,45 @@ class BinarySearchTree {
       callback(node.key);
     }
   }
+  //后序遍历
   postOrderTraverse(callback) {
     this.postOrderTraverseNode(this.root, callback);
+  }
+  minNode(node) {
+    let current = node;
+    while (current !== null && current.left !== null) {
+      current = current.left;
+    }
+    return current;
+  }
+  min() {
+    return this.minNode(this.root);
+  }
+  maxNode(node) {
+    let current = node;
+    while (current && current.right) {
+      current = current.right;
+    }
+    return current;
+  }
+  max() {
+    return this.maxNode(this.root);
+  }
+  searchNode(node, key) {
+    if (node === null) {
+      return false;
+    }
+    if (node.key === key) {
+      return true;
+    }
+    if (key < node.key) {
+      return this.searchNode(node.left, key);
+    } else if (key > node.key) {
+      return this.searchNode(node.right, key);
+    }
+  }
+  search(key) {
+    return this.searchNode(this.root, key);
   }
 }
 let tree = new BinarySearchTree();
@@ -85,6 +126,4 @@ tree.insert(20);
 tree.insert(18);
 tree.insert(25);
 tree.insert(6);
-tree.postOrderTraverse(key => {
-  console.log(key);
-});
+console.log(tree.search(26));

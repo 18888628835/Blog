@@ -64,7 +64,7 @@
 
 8.[理解递归](https://github.com/18888628835/Blog/issues/50)
 
-9.[理解递归](https://github.com/18888628835/Blog/issues/51)
+9.[树](https://github.com/18888628835/Blog/issues/51)
 
 ## ES6 系列
 
