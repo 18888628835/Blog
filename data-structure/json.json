@@ -17,9 +17,9 @@
     "right": {
       "key": 15,
       "left": {
-        "key": 13,
+        "key": 14,
         "left": { "key": 12, "left": null, "right": null },
-        "right": { "key": 14, "left": null, "right": null }
+        "right": null
       },
       "right": {
         "key": 20,

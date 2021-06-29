@@ -73,7 +73,7 @@ class BinarySearchTree {
   postOrderTraverse(callback) {
     this.postOrderTraverseNode(this.root, callback);
   }
-  minNode(node) {
+  private minNode(node) {
     let current = node;
     while (current !== null && current.left !== null) {
       current = current.left;
@@ -83,7 +83,7 @@ class BinarySearchTree {
   min() {
     return this.minNode(this.root);
   }
-  maxNode(node) {
+  private maxNode(node) {
     let current = node;
     while (current && current.right) {
       current = current.right;
@@ -93,7 +93,7 @@ class BinarySearchTree {
   max() {
     return this.maxNode(this.root);
   }
-  searchNode(node, key) {
+  private searchNode(node, key) {
     if (node === null) {
       return false;
     }
@@ -108,6 +108,46 @@ class BinarySearchTree {
   }
   search(key) {
     return this.searchNode(this.root, key);
+  }
+  removeNode(node, key) {
+    //{2}
+    if (node === null) {
+      return null;
+    }
+    // 判断方向{3}
+    if (node.key > key) {
+      //当前节点大于 key，要往左边走
+      node.left = this.removeNode(node.left, key); //{4}
+      return node; //{5}
+    } else if (node.key < key) {
+      //当前节点小于 key，要往右边走
+      node.right = this.removeNode(node.right, key); //{6}
+      return node; //{7}
+    } else {
+      //当前节点等于 key
+      //第一种情况：删除叶节点
+      if (node.left === null && node.right === null) {
+        node = null; //{8}
+        return node; //{9}
+      }
+      //第二种情况：删除单边节点
+      if (node.left === null) {
+        node = node.right;
+        return node;
+      } else if (node.right === null) {
+        node = node.left;
+        return node;
+      } else {
+        //第三种情况:删除双边节点
+        let rightMin = this.minNode(node.right);
+        node.key = rightMin.key;
+        node.right = this.removeNode(node.right, node.key);
+        return node;
+      }
+    }
+  }
+  remove(key) {
+    this.removeNode(this.root, key); //{1}
   }
 }
 let tree = new BinarySearchTree();
@@ -126,4 +166,5 @@ tree.insert(20);
 tree.insert(18);
 tree.insert(25);
 tree.insert(6);
-console.log(tree.search(26));
+
+console.log(JSON.stringify(tree));

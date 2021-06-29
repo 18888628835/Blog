@@ -8,6 +8,12 @@
 
 1.[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
+2.[原生实现上传文件预览](https://github.com/18888628835/Blog/issues/46)
+
+3.[原生实现图片懒加载](https://github.com/18888628835/Blog/issues/48)
+
+4.[如何处理后端传递过来的图片二进制流？](https://github.com/18888628835/Blog/issues/52)
+
 ## JavaScript 深入系列
 
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
@@ -39,12 +45,6 @@
 14.[函数柯里化](https://github.com/18888628835/Blog/issues/44)
 
 15.[手写深拷贝](https://github.com/18888628835/Blog/issues/45)
-
-16.[原生实现上传文件预览](https://github.com/18888628835/Blog/issues/46)
-
-17.[原生实现图片懒加载](https://github.com/18888628835/Blog/issues/48)
-
-18.[如何处理后端传递过来的图片二进制流？](https://github.com/18888628835/Blog/issues/52)
 
 ## 数据结构和算法系列
 
