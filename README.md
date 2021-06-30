@@ -64,7 +64,9 @@
 
 8.[理解递归](https://github.com/18888628835/Blog/issues/50)
 
-9.[二叉树](https://github.com/18888628835/Blog/issues/51)
+9.[二叉搜索树](https://github.com/18888628835/Blog/issues/51)
+
+10.[冒泡排序](https://github.com/18888628835/Blog/issues/53)
 
 ## ES6 系列
 
