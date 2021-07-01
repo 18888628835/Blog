@@ -68,6 +68,8 @@
 
 10.[冒泡排序](https://github.com/18888628835/Blog/issues/53)
 
+11.[快速排序](https://github.com/18888628835/Blog/issues/54)
+
 ## ES6 系列
 
 1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
