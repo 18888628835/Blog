@@ -4,7 +4,7 @@
 
 [掘金全集](https://juejin.cn/user/3940246036424679/posts)
 
-## 小技巧
+## JavaScript you should know
 
 1.[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
@@ -13,6 +13,8 @@
 3.[原生实现图片懒加载](https://github.com/18888628835/Blog/issues/48)
 
 4.[如何处理后端传递过来的图片二进制流？](https://github.com/18888628835/Blog/issues/52)
+
+5.[如何实现 JWT？](https://github.com/18888628835/Blog/issues/53)
 
 ## JavaScript 深入系列
 
