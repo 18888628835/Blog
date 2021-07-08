@@ -14,7 +14,7 @@
 
 4.[如何处理后端传递过来的图片二进制流？](https://github.com/18888628835/Blog/issues/52)
 
-5.[如何实现 JWT？](https://github.com/18888628835/Blog/issues/53)
+5.[如何实现 JWT？](https://github.com/18888628835/Blog/issues/55)
 
 ## JavaScript 深入系列
 
