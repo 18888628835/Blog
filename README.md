@@ -48,6 +48,28 @@
 
 15.[手写深拷贝](https://github.com/18888628835/Blog/issues/45)
 
+## ES6 系列
+
+1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
+
+2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
+
+3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
+
+4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
+
+5.[Symbol](https://github.com/18888628835/Blog/issues/19)
+
+6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
+
+7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
+
+8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
+
+## 前端全栈之路
+
+1.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
+
 ## 数据结构和算法系列
 
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
@@ -71,24 +93,6 @@
 10.[冒泡排序](https://github.com/18888628835/Blog/issues/53)
 
 11.[快速排序](https://github.com/18888628835/Blog/issues/54)
-
-## ES6 系列
-
-1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
-
-2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
-
-3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
-
-4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
-
-5.[Symbol](https://github.com/18888628835/Blog/issues/19)
-
-6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
-
-7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
-
-8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
 
 ## 深入浅出 HTTP 协议
 
