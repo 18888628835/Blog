@@ -70,6 +70,8 @@
 
 1.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
 
+2.[Sequelize 文档学习（查询篇）](https://github.com/18888628835/Blog/issues/57)
+
 ## 数据结构和算法系列
 
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
