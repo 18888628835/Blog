@@ -68,9 +68,11 @@
 
 ## 前端全栈之路
 
-1.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
+1.[MySQL 基础（单表查询）](https://github.com/18888628835/Blog/issues/58)
 
-2.[Sequelize 文档学习（查询篇）](https://github.com/18888628835/Blog/issues/57)
+2.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
+
+3.[Sequelize 文档学习（CRUD 查询篇）](https://github.com/18888628835/Blog/issues/57)
 
 ## 数据结构和算法系列
 
