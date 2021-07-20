@@ -16,6 +16,8 @@
 
 5.[如何实现 JWT？](https://github.com/18888628835/Blog/issues/55)
 
+6.[封装一个请求工具函数](https://github.com/18888628835/Blog/issues/59)
+
 ## JavaScript 深入系列
 
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
