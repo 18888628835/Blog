@@ -72,7 +72,7 @@
 
 1.[MySQL 基础（单表查询）](https://github.com/18888628835/Blog/issues/58)
 
-2.[MySQL 基础（单表查询）](https://github.com/18888628835/Blog/issues/60)
+2.[MySQL 基础（多表查询）](https://github.com/18888628835/Blog/issues/60)
 
 2.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
 
