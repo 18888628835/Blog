@@ -70,13 +70,15 @@
 
 ## 前端全栈之路
 
-1.[MySQL 基础（单表查询）](https://github.com/18888628835/Blog/issues/58)
+1.[MySQL 基础（DQL 单表查询）](https://github.com/18888628835/Blog/issues/58)
 
-2.[MySQL 基础（多表查询）](https://github.com/18888628835/Blog/issues/60)
+2.[MySQL 基础（DQL 多表查询）](https://github.com/18888628835/Blog/issues/60)
 
-2.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
+3.[MySQL 基础（高级概念和试验）](https://github.com/18888628835/Blog/issues/61)
 
-3.[Sequelize 文档学习（CRUD 查询篇）](https://github.com/18888628835/Blog/issues/57)
+4.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
+
+5.[Sequelize 文档学习（CRUD 查询篇）](https://github.com/18888628835/Blog/issues/57)
 
 ## 数据结构和算法系列
 
