@@ -2,6 +2,8 @@
 
 ## 专栏
 
+[优秀技术文章分享](https://github.com/18888628835/Blog/issues/62)
+
 [掘金全集](https://juejin.cn/user/3940246036424679/posts)
 
 ## JavaScript you should know
