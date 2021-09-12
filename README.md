@@ -8,7 +8,7 @@
 
 ## CSS
 
-1.[CSS 编码技巧](https://github.com/18888628835/Blogs/issues/63) 2.[背景和边框]()
+1.[CSS 编码技巧](https://github.com/18888628835/Blogs/issues/63) 2.[背景和边框](https://github.com/18888628835/Blog/blob/main/CSS/%E8%83%8C%E6%99%AF%E5%92%8C%E8%BE%B9%E6%A1%86.md)
 
 ## JavaScript you should know
 
