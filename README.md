@@ -86,7 +86,7 @@
 
 5.[Sequelize 文档学习（CRUD 查询篇）](https://github.com/18888628835/Blog/issues/57)
 ## 前端可视化
-
+1.[如何使用 Echarts 和 SVG文件写大屏地图](https://github.com/18888628835/Blog/blob/main/%E5%89%8D%E7%AB%AF%E5%8F%AF%E8%A7%86%E5%8C%96/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%20Echarts%20%E5%92%8C%20SVG%E6%96%87%E4%BB%B6%E5%86%99%E5%A4%A7%E5%B1%8F%E5%9C%B0%E5%9B%BE.md)
 ## 数据结构和算法系列
 
 1.[复杂度分析](https://github.com/18888628835/Blogs/issues/10)
