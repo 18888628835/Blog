@@ -10,11 +10,11 @@
 
 1.[CSS 编码技巧](https://github.com/18888628835/Blogs/issues/63)
 
-2.[背景和边框](https://github.com/18888628835/Blog/blob/main/CSS/%E8%83%8C%E6%99%AF%E5%92%8C%E8%BE%B9%E6%A1%86.md)
+2.[背景和边框](https://github.com/18888628835/Blog/blob/main/CSS/背景和边框.md)
 
-3.[形状](https://github.com/18888628835/Blog/blob/main/CSS/%E5%BD%A2%E7%8A%B6.md)
+3.[形状](https://github.com/18888628835/Blog/blob/main/CSS/形状.md)
 
-4.[视觉效果](https://github.com/18888628835/Blog/blob/main/CSS/%E8%A7%86%E8%A7%89%E6%95%88%E6%9E%9C.md)
+4.[视觉效果](https://github.com/18888628835/Blog/blob/main/CSS/视觉效果.md)
 
 5.[结构与布局](https://github.com/18888628835/Blog/blob/main/CSS/结构与布局.md)
 
@@ -96,7 +96,7 @@
 
 ## 前端可视化
 
-1.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/%E5%89%8D%E7%AB%AF%E5%8F%AF%E8%A7%86%E5%8C%96/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%20Echarts%20%E5%92%8C%20SVG%E6%96%87%E4%BB%B6%E5%86%99%E5%A4%A7%E5%B1%8F%E5%9C%B0%E5%9B%BE.md)
+1.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/前端可视化/如何使用%20Echarts%20和%20SVG文件写大屏地图.md)
 
 ## 数据结构和算法系列
 
