@@ -6,7 +6,7 @@
 
 [掘金全集](https://juejin.cn/user/3940246036424679/posts)
 
-## CSS 高级写法案例
+## CSS 高级技巧案例
 
 1.[CSS 编码技巧](https://github.com/18888628835/Blogs/issues/63)
 
