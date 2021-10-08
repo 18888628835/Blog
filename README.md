@@ -20,6 +20,8 @@
 
 6.[用户体验](https://github.com/18888628835/Blog/blob/main/CSS/用户体验.md)
 
+7.[动画效果](https://github.com/18888628835/Blog/blob/main/CSS/动画效果.md)
+
 ## JavaScript you should know
 
 1.[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
