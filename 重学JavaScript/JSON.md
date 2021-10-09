@@ -6,7 +6,7 @@
 
 # JSON 是什么
 
-JSON 是 Javascript 的子集，是一种数据格式，利用 JavaScript 的机种模式来表示结构化的数据。
+JSON 是 Javascript 的子集，是一种数据格式，利用 JavaScript 的几种模式来表示结构化的数据。
 
 JSON 并不属于 JavaScript，只是它们拥有相同的语法，很多语言都有解析和序列化 JSON 的能力，所以 JSON 是一种通用的数据格式。
 
