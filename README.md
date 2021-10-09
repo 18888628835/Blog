@@ -38,7 +38,7 @@
 
 ## 重学 JavaScript
 
-28.[JSON](https://github.com/18888628835/Blog/blob/main/CSS/JSON.md)
+28.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
 ## JavaScript 深入系列
 
@@ -104,7 +104,7 @@
 
 ## 前端可视化
 
-1.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/前端可视化/如何使用%20Echarts%20和%20SVG文件写大屏地图.md)
+1.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/前端可视化/如何使用Echarts和SVG文件写大屏地图.md)
 
 ## 数据结构和算法系列
 
