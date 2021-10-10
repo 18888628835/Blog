@@ -40,6 +40,10 @@
 
 28.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
+## 浏览器工作原理
+
+1.[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/事件循环.md)
+
 ## JavaScript 深入系列
 
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
