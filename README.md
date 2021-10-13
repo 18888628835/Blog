@@ -38,7 +38,9 @@
 
 ## 重学 JavaScript
 
-28.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
+1.[模块化](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/模块(Module).md>)
+
+2.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
 ## 浏览器工作原理
 
