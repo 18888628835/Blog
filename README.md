@@ -42,9 +42,11 @@
 
 2.[script 的 async 和 defer](https://github.com/18888628835/Blog/blob/main/重学JavaScript/script的async和defer.md)
 
-2.[模块(Module)](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/模块(Module).md>)
+3.[资源加载跟踪](https://github.com/18888628835/Blog/blob/main/重学JavaScript/资源加载跟踪.md)
 
-3.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
+4.[模块(Module)](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/模块(Module).md>)
+
+5.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
 ## 浏览器工作原理
 
