@@ -40,7 +40,7 @@
 
 1.[页面加载生命周期](https://github.com/18888628835/Blog/blob/main/重学JavaScript/页面加载生命周期.md)
 
-2.[模块化](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/模块(Module).md>)
+2.[模块(Module)](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/模块(Module).md>)
 
 3.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
