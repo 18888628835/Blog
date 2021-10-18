@@ -48,7 +48,7 @@
 
 5.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
-6.[Generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Generator函数.md)
+6.[Generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Generator.md)
 
 ## 浏览器工作原理
 
