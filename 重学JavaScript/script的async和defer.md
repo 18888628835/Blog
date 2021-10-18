@@ -174,7 +174,8 @@ loadScript('/article/script-async-defer/small.js');
 
 `defer`和`async`的共同点是:都不会阻塞页面的渲染,都会在后台同步并行下载。
 
-|       | 语义 | 顺序         | 与 ` 的关系                                   |
+|       | 语义 | 顺序         | 与DOMContentLoaded的关系                      |
 | ----- | ---- | ------------ | --------------------------------------------- |
 | defer | 推迟 | 文档顺序优先 | DOM 构建完成后,在`DOMContentLoaded`生命周期前 |
 | async | 异步 | 加载顺序优先 | 不会等待任何东西                              |
+
