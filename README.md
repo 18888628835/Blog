@@ -36,6 +36,24 @@
 
 6.[封装一个请求工具函数](https://github.com/18888628835/Blog/issues/59)
 
+## ES6 系列
+
+1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
+
+2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
+
+3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
+
+4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
+
+5.[Symbol](https://github.com/18888628835/Blog/issues/19)
+
+6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
+
+7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
+
+8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
+
 ## 重学 JavaScript
 
 1.[页面加载生命周期](https://github.com/18888628835/Blog/blob/main/重学JavaScript/页面加载生命周期.md)
@@ -48,7 +66,7 @@
 
 5.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
 
-6.[Generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Generator.md)
+6.[Generator(生成器)](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Generator.md)
 
 ## 浏览器工作原理
 
@@ -87,24 +105,6 @@
 14.[函数柯里化](https://github.com/18888628835/Blog/issues/44)
 
 15.[手写深拷贝](https://github.com/18888628835/Blog/issues/45)
-
-## ES6 系列
-
-1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
-
-2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
-
-3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
-
-4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
-
-5.[Symbol](https://github.com/18888628835/Blog/issues/19)
-
-6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
-
-7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
-
-8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
 
 ## 前端全栈之路
 
