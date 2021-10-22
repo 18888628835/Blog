@@ -68,6 +68,8 @@
 
 6.[Generator(生成器)](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Generator.md)
 
+7.[异步迭代和 generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/异步迭代和generator.md)
+
 ## 浏览器工作原理
 
 1.[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/浏览器渲染过程.md)
