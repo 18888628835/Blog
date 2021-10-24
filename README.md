@@ -70,6 +70,8 @@
 
 7.[异步迭代和 generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/异步迭代和generator.md)
 
+8.[JavaScript 设计模式与开发实践读书笔记](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JavaScript设计模式与开发实践读书笔记.md)
+
 ## 浏览器工作原理
 
 1.[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/浏览器渲染过程.md)
