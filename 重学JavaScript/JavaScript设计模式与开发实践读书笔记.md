@@ -392,3 +392,208 @@ JavaScript中的原型还可以根据构造函数来指定原型，通过请求�
 
 原型链条并不是无限长的，它的终点指向null，表示链表节点的结束。
 
+
+
+# 第二章 this、call和apply
+
+本章主要理解`this`关键字、`Function.prototype.call`和`Function.prototype.apply`的概念
+
+## 2.1 this
+
+JavaScript中的this总是指向一个对象，具体指向哪个对象则是在运行时基于函数的运行环境来动态绑定的，而不是函数声明时的环境（词法作用域则是根据函数声明时的环境生成的）。
+
+## 2.1.1 this的指向
+
+this的指向大概可以分为以下4种：
+
+* 作为对象的方法调用
+* 作为普通函数调用
+* 作为构造函数调用
+* `Function.prototype.call`或者`Function.prototype.apply`调用
+
+1. 当作为对象的方法调用时，this指向该对象
+
+```javascript
+    var obj = {
+        a: 1,
+        getA: function(){
+          alert ( this === obj );    // 输出：true
+          alert ( this.a );    // 输出： 1
+        }
+    };
+
+    obj.getA();
+```
+
+2. 当作为普通函数调用时，指向全局对象，浏览器环境下的全局对象是window
+
+```JavaScript
+    window.name = 'globalName';
+
+    var getName = function(){
+        return this.name;
+    };
+
+    console.log( getName() );    // 输出：globalName
+```
+
+或者
+
+```javascript
+    window.name = 'globalName';
+
+    var myObject = {
+        name: 'sven',
+        getName: function(){
+          return this.name;
+        }
+    };
+
+    var getName = myObject.getName;
+    console.log( getName() );    // globalName
+```
+
+有时候我们需要在事件函数内部使用一个callback方法，这个方法内可能需要用到this，我们希望它指向触发点击事件的节点，可以这么做
+
+```html
+<div id='div'>
+  我是一个div
+</div>
+```
+
+```javascript
+div.addEventListener('click', function() {
+  const that = this // 使用一个变量保存this
+  function callback() {
+    console.log(this.id) //undefined
+    console.log(that.id) // div
+  }
+  callback()
+})
+```
+
+否则`callback`就是普通函数调用，默认this指向window。
+
+在严格模式下，普通函数调用规定不会指向window，而是undefined。
+
+```javascript
+  function callback() {
+    'use strict'
+    console.log(this) //undefined
+  }
+```
+
+3. 构造器调用
+
+构造器跟普通函数没有区别，只是我们调用它的方式不同。当使用new运算符调用时，该函数会返回一个对象。默认情况下，this会指向返回的这个对象。
+
+```javascript
+        var MyClass = function(){
+            this.name = 'sven';
+        };
+
+        var obj = new MyClass();// new会新创建一个对象obj，并且让this指向它。相当于obj.name ='sven'
+        alert ( obj.name );     // 输出：sven
+```
+
+当使用new关键字时，还需要注意一个问题，如果构造器显式返回一个object类型的对象，那么最终会返回这个对象。而不是this原指向的对象。
+
+```JavaScript
+        var MyClass = function(){
+            this.name = 'sven';
+            return {    // 显式地返回一个对象
+              name: 'anne'
+            }
+        };
+
+        var obj = new MyClass(); // 由new关键字创建的并拥有this指向的obj不会被返回了
+        alert ( obj.name );     // 输出：anne
+```
+
+如果构造器不显式地返回任何数据或者不返回对象类型的数据，那么就不会有问题
+
+```JavaScript
+        var MyClass = function(){
+            this.name = 'sven'
+            return 'anne';    // 返回string类型
+        };
+
+        var obj = new MyClass();
+        alert ( obj.name );     // 输出：sven
+```
+
+4. Function.prototype.call或Function.prototype.apply调用
+
+使用Function.prototype.call或Function.prototype.apply可以动态地改变传入函数的this
+
+```JavaScript
+        var obj1 = {
+            name: 'sven',
+            getName: function(){
+              return this.name;
+            }
+        };
+
+        var obj2 = {
+            name: 'anne'
+        };
+
+        console.log( obj1.getName() );     // 输出： sven
+        console.log( obj1.getName.call( obj2 ) );    // 输出：anne
+```
+
+## 2.1.2 丢失的this
+
+```JavaScript
+        var obj = {
+            myName: 'sven',
+            getName: function(){
+              return this.myName;
+            }
+        };
+
+        console.log( obj.getName() );    // 输出：'sven'
+
+        var getName2 = obj.getName;
+        console.log( getName2() );    // 输出：undefined
+```
+
+当调用obj.getName时，getName方法是作为obj对象的属性被调用的，此时的this指向obj对象。
+
+当用另外一个变量getName2来引用obj.getName，此时是普通函数调用方式，this是指向全局window的，所以程序的执行结果是undefined。
+
+再来看一个例子，比如我希望封装一个函数来获取ID以替代`document.getElementByid()`的写法，我封装的函数是这样的：
+
+```javascript
+function getId(id){
+  return document.getElementById(id)
+}
+
+getId('div')
+```
+
+这种方式没问题。
+
+如果换成这样不是更简单吗？
+
+```javascript
+const getId=document.getElementById
+getId('div')
+```
+
+**当运行一下，就会发现这样的代码会抛出异常**。
+
+原因是`document.getElementByid`内部使用了this。
+
+当`getElementById`方法作为`document`对象的属性被调用时，方法内部的`this`确实是指向`document`的
+
+但当用`getId`来引用`document.getElementById`之后，再调用`getId`，此时就成了普通函数调用，函数内部的`this`指向了`window`，而不是原来的`document`。
+
+我们可以尝试使用call或者apply或者bind来将this绑定到document上，这样就可以运行`getId`了
+
+```javascript
+const getId=document.getElementById.bind(document)
+getId('div')
+console.log(getId('div').id) // 'div'
+```
+
