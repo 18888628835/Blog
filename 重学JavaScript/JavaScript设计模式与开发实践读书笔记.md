@@ -304,4 +304,91 @@ console.log(clonePlane.defenseLevel) //输出7
 
 4. 如果对象无法响应某个请求，它会把这个请求委托给它自己的原型
 
+   这条规则是原型继承的精髓所在。
+
+   虽然JavaScript的对象最初都是由`Object.prototype`克隆而来，但对象构造器的原型并不限于`Object.prototype`，而是动态地指向其他对象。这样一来，当对象a需要借用对象b的能力时，可以有选择地把对象a的构造器的原型指向对象b，从而达到继承的效果。
+
+   ```javascript
+   var obj = {
+     name: 'qiuyanxi'
+   }
+   var A = function() {}
+   A.prototype = obj // 将函数的原型指向obj
+   var a = new A() // 构造器A构造对象a
+   console.log(a.name) // a通过.__proto__ 访问到A.prototype
+   ```
+
+   这段代码是这样做的：
+
+   * 遍历对象a的所有属性，但是没用找到`name`属性
+   * 查找`name`属性这个请求委托给对象a的构造器A的原型，也就是A.prototype
+   * `A.prototype`被设置成obj，所以返回`obj`的name
+
+   当我们希望一个“类”（实际上是构造器）继承另一个类时，往往会用下面的代码来模拟
+
+   ```javascript
+   var A=function (){}
+   A.prototype={name:'qiuyanxi'}
    
+   var B=function (){}
+   B.prototype=new A()
+   // B.prototype =Object.create(A.prototype) 也可以用这个方法
+   var b=new B()
+   console.log(b.name) // "qiuyanxi"
+   ```
+
+   这段代码是这样做的：
+
+   * 让B的原型等于A的实例，这样B的原型就可以通过`__proto__`访问到A的原型
+   * 当b需要访问name时，遍历b身上的属性发现没有，于是请求委托顺着`__proto__`去访问构造器B的原型
+   * 此时`B.prototype`是个空对象，于是继续顺着`__proto__`去访问构造器A的原型
+   * `A.prototype`身上具有name属性，于是返回它的值
+
+原型链并不是无限长的，根对象`Object.prototype.__proto__`是`null`,说明原型链后面已经没有节点了。
+
+如果请求委托在根对象上依然找不到属性，最终会返回`undefined`
+
+### 1.4.6 原型继承的未来
+
+除了根对象`Object.prototype`外，任何对象都会有一个原型。而通过Object.create( null )可以创建出没有原型的对象。
+
+`Object.create()`是原型模式的天然实现。
+
+ES6带来了新的class语法，让JavaScript看起来像一门基于类的语言，但其背后依然是基于原型机制创建对象。
+
+以下是简单的代码示例
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name
+  }
+  getName() {
+    return this.name
+  }
+}
+class Dog extends Animal {
+  constructor(name) {
+    super(name)
+  }
+  speak() {
+    return 'jimi'
+  }
+}
+var dog=new Dog('jimi')
+
+console.log(dog.getName()===dog.speak()) // true
+```
+
+### 1.4.7 小结
+
+原型模式是一种设计模式，也是一种编程泛型。它构成了JavaScript这门语言的根本。
+
+原型模式在于克隆，克隆是便捷创建对象的一种手段。
+
+原始的克隆是直接按照根对象`Object.prototype`来克隆出一个新的对象，新对象的`__proto__`属性会访问到它的原型，即根对象。
+
+JavaScript中的原型还可以根据构造函数来指定原型，通过请求委托的方式来实现原型的继承，每个请求都会通过对象的`__proto__`属性委托给它的原型处理，形成一个原型链条。
+
+原型链条并不是无限长的，它的终点指向null，表示链表节点的结束。
+
