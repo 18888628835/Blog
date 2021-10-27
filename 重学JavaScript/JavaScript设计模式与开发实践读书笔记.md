@@ -589,11 +589,116 @@ getId('div')
 
 但当用`getId`来引用`document.getElementById`之后，再调用`getId`，此时就成了普通函数调用，函数内部的`this`指向了`window`，而不是原来的`document`。
 
-我们可以尝试使用call或者apply或者bind来将this绑定到document上，这样就可以运行`getId`了
+我们可以尝试使用`call`或者`apply`或者`bind`来将this绑定到`document`上，这样就可以运行`getId`了
 
 ```javascript
 const getId=document.getElementById.bind(document)
 getId('div')
 console.log(getId('div').id) // 'div'
 ```
+
+## 2.2 call和apply
+
+`Function.prototype`中有两个方法，它们分别是`call`和`apply`，在函数式风格的代码中，它们尤为有用。
+
+### 2.2.1 call和apply的区别
+
+call和apply的作用一模一样，区别只在于传参形式的不同。
+
+apply接受两个参数，第一个参数指定函数体内的this指向，第二个参数是一个数组，也可以是类数组。apply把第二个参数传递给被调用的函数。
+
+```JavaScript
+var func=function(a,b,c){
+  console.log(a,b,c)
+}
+func.apply(null,[1,2,3]) // 1 2 3
+```
+
+`call`是包装在`apply`上面的语法糖，第一个参数也指定函数体内的this指向，从第二个参数开始，所有参数都会被传递给被调用的函数。
+
+```javascript
+var func=function(a,b,c){
+  console.log(a,b,c)
+}
+func.call(null,1,2,3) // 1 2 3
+```
+
+当`call`和`apply`的第一个参数是null时，函数内的`this`默认指向`window`。
+
+```JavaScript
+        var func = function( a, b, c ){
+            alert ( this === window );    // 输出true
+        };
+
+        func.apply( null, [ 1, 2, 3 ] );
+```
+
+如果是严格模式，那么`this`指向`null`
+
+```JavaScript
+        var func = function( a, b, c ){
+            "use strict";
+            alert ( this === null );     // 输出true
+        }
+
+        func.apply( null, [ 1, 2, 3 ] );
+```
+
+有时候我们使用`call`或者`apply`的目的是借用其他对象的方法，而不是指定`this`的指向那么我们可以传递`null`来替代某个具体的对象
+
+```javascript
+Math.max.apply(null,[1,2,3,4,5]) // 5
+```
+
+### 2.2.2 call和apply的用途
+
+1. 改变`this`指向
+
+   `call`和`apply`最常见的用途就是改变函数内部的`this`指向。
+
+   
+
+2. 模拟`Function.prototype.bind`
+
+   ```javascript
+   Function.prototype.myBind = function(context,...rest) {
+     const thisFuc = this // 这里的this为调用bind的函数
+     return function() {
+       //调用call时让函数内部的this指向context
+       return thisFuc.call(context, ...rest)
+     }
+   }
+   const getName = function() {
+     console.log(this.name)
+   }
+   const obj = {
+     name: 'qiuyanxi',
+   }
+   getName.myBind(obj)()
+   ```
+
+3. 借用其他对象的方法
+
+   * 通过借用构造函数的方法，可以实现继承的效果
+
+     ```JavaScript
+             var A = function( name ){
+                 this.name = name;
+             };
+     
+             var B = function(){
+                 A.apply( this, arguments );
+             };
+     
+             B.prototype.getName = function(){
+                 return this.name;
+             };
+     
+             var b = new B( 'sven' );
+             console.log( b.getName() );  // 输出： 'sven'
+     ```
+
+   * 通过借用其他对象的方法，可以实现某些功能
+
+     函数的`arguments`是一个伪数组，它并没有数组的原型方法，除了使用`Array.from`将其变成真正的数组外，
 
