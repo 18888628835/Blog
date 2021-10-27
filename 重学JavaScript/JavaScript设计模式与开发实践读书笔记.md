@@ -702,7 +702,7 @@ Math.max.apply(null,[1,2,3,4,5]) // 5
 
      函数的`arguments`是一个伪数组，它并没有数组的原型方法，除了使用`Array.from`将其变成真正的数组外，还可以使用`call`或者`apply`来借用数组的方法
 
-     ```
+     ```javascript
      function fn() {
        Array.prototype.push.call(arguments, 3)
        console.log(arguments) // [1,2,3]
@@ -768,4 +768,123 @@ Math.max.apply(null,[1,2,3,4,5]) // 5
      `n`不是对象，属性不可存取，所以push不成功
 
      `fn`函数的`	length`是形参，只读属性，不可修改，所以报错了
+
+# 第三章 闭包和高阶函数
+
+## 3.1 闭包
+
+**闭包的形成与变量的作用域以及变量的生存周期密切相关**
+
+### 3.1.1 变量的作用域
+
+变量的作用域指的是变量的有效范围。我们最常提到的是函数中声明的变量作用域。
+
+当在函数中声明一个变量时，如果没有`var`关键字，那么这个变量就会变成全局变量。
+
+当拥有`var`关键字时，这时候的变量是局部变量，只有在函数内部才能访问得到。
+
+```JavaScript
+        var func = function(){
+            var a = 1;
+            alert ( a );     // 输出： 1
+        };
+        func();
+        alert ( a );     // 输出：Uncaught ReferenceError: a is not defined
+```
+
+函数可以创造函数作用域。此时函数外面访问不到函数内部的变量，函数内部可以访问函数外部的变量。
+
+这是因为当在函数内搜索一个变量时，如果该函数内没有声明这个变量，那么此次搜索就会顺着代码执行环境所创建的作用域链往外层搜索，一直搜索到全局变量为止。变量的搜索是从内到外的。
+
+就像下面这段代码
+
+```JavaScript
+var a = 1
+var func1 = function() {
+  var b = 2
+  var func2 = function() {
+    var c = 3
+    alert(a)//输出1
+    alert(b)//输出2
+  }
+  func2()
+  alert(c)//"ReferenceError: c is not defined
+}
+func1()
+```
+
+### 3.1.2 变量的生存周期
+
+全局变量的生存周期是永久的，除非我们主动销毁这个全局变量。
+
+但对于在函数内使用`var`关键字声明的局部变量来说，当退出函数时，这些局部变量就失去了它们的价值，它们会随着函数的调用结束而销毁。
+
+```JavaScript
+        var func = function(){
+            var a = 1;      // 退出函数后局部变量a将被销毁
+            alert ( a );
+        };
+
+        func();
+```
+
+如果把这段代码修改一下：
+
+```JavaScript
+        var func = function(){
+            var a = 1;
+            return function(){
+              a++;
+              alert ( a );
+            }
+        };
+
+        var f = func();
+
+        f();    // 输出：2
+        f();    // 输出：3
+        f();    // 输出：4
+        f();    // 输出：5
+```
+
+从结论中可以发现`a`变量并没有销毁掉，而是一直存在于内存中。
+
+这是因为`var f =func()`时，`f`保存了一个匿名函数的引用，它可以访问到`func()`被调用时产生的环境，而局部变量`a`则一直存在于这个环境内。如果说局部环境内所在的局部变量依然能被外界所访问，那么这个局部变量就有了不被销毁的理由。
+
+下面看关于闭包的经典应用
+
+```html
+<div>1</div>
+<div>2</div>
+<div>3</div>
+<div>4</div>
+<div>5</div>
+<div>6</div>
+```
+
+```javascript
+var nodes = document.querySelectorAll('div')
+for (var i = 0; i < nodes.length; i++) {
+  nodes[i].onclick = function() {
+    alert(i)
+  }
+}
+```
+
+上面的代码经过测试，不管点击哪个`div`，都会打印`6`。
+
+这是因为`div`节点的`onclick`事件是异步的，当事件触发时，`for`循环已结束。此时i为5，所以div的onclick事件顺着作用域链找变量`i`时，查找到的值永远是`6`。
+
+解决的方法是使用闭包，用一个立即执行函数把每次循环的i值给包起来。这样当事件函数内的代码顺着作用域链从内到外查找变量`i`时，会找到闭包环境中的`i`，如果有6个`div`，那么就有6个`i`，这里分别是0，1，2，3，4，5
+
+```javascript
+var nodes = document.querySelectorAll('div')
+for (var i = 0; i < nodes.length; i++) {
+  (function(i) {
+    nodes[i].onclick = function() {
+      alert(i)
+    }
+  })(i)
+}
+```
 
