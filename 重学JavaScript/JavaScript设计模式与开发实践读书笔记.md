@@ -700,5 +700,72 @@ Math.max.apply(null,[1,2,3,4,5]) // 5
 
    * 通过借用其他对象的方法，可以实现某些功能
 
-     函数的`arguments`是一个伪数组，它并没有数组的原型方法，除了使用`Array.from`将其变成真正的数组外，
+     函数的`arguments`是一个伪数组，它并没有数组的原型方法，除了使用`Array.from`将其变成真正的数组外，还可以使用`call`或者`apply`来借用数组的方法
+
+     ```
+     function fn() {
+       Array.prototype.push.call(arguments, 3)
+       console.log(arguments) // [1,2,3]
+     }
+     fn(1, 2)
+     ```
+
+     **能够使用这种方法让arguments具备数组的能力的原因来自于V8的引擎源码：**
+
+     ```JavaScript
+             function ArrayPush() {
+                 var n = TO_UINT32( this.length );    // 被push的对象的length
+                 var m = %_ArgumentsLength();     // push的参数个数
+                 for (var i = 0; i < m; i++) {
+                   this[ i + n ] = %_Arguments( i );   // 复制元素     (1)
+                 }
+                 this.length = n + m;      // 修正length属性的值    (2)
+                 return this.length;
+             };
+     ```
+
+     结合例子分析一下源码：
+
+     * 先获取被push对象的长度，对应例子中的`arguments`为被push的对象，它的长度为2
+     * 获取push的参数个数，对应例子中的参数3
+     * 循环遍历被push的参数个数，然后直接在`arguments`的末尾位置挨个插入被push的值，`%_Arguments`用来获取V8源码中的参数对象，`%_Arguments( i )`获取到的是3。
+     * `this[ i + n ] = %_Arguments( i )`就相当于运行`arguments[2]=3`
+     * 返回`length`属性
+
+     从源码可以看出，V8源码不在乎调用`push`方法的是否为真实的数组,它只需要能够获取调用方法的对象的`length`属性，然后按照下标依次添加到被`push`对象上面，顺便修改掉`length`属性就可以了。
+
+     
+
+     通过`ArrayPush`函数，我们可以知道想要实现`Array.prototype.push.call`类似的效果，需要具备两个条件：
+
+     1. 被`push`对象属性可修改
+
+     2. 被`push`对象属性具有可读写的`length`属性
+
+     验证一下：
+
+     ```javascript
+     const obj = {
+       length: 0
+     }
+     const n = 1
+     
+     function fn(a) {
+       console.log(a)
+     }
+     
+     Array.prototype.push.call(obj, 1)
+     console.log(obj) // {0:1,length:1} 
+     
+     Array.prototype.push.call(n, 3)
+     console.log(n) // 1
+     
+     Array.prototype.push.call(fn, 3) //"TypeError: Cannot assign to read only property 'length' of function
+     ```
+
+     `obj`对象属性可存取，所以push成功了
+
+     `n`不是对象，属性不可存取，所以push不成功
+
+     `fn`函数的`	length`是形参，只读属性，不可修改，所以报错了
 
