@@ -1102,3 +1102,129 @@ setCommand(createCommand(Tv));
 
 如果我们想要解决循环引用带来的内存泄漏问题，只需要把循环引用中的变量设置为null即可，这意味着切断变量与它引用的值之间的连接。当这些值不能被访问到时，垃圾回收器在运行时就会删除这些值并回收它们占用的内存。
 
+## 3.2 高阶函数
+
+高阶函数是具备以下任一条件的函数：
+
+* 函数作为参数被输入
+* 函数作为返回值被输出
+
+下面介绍高阶函数的应用场景
+
+### 3.2.1 函数作为参数传递
+
+1. 回调函数
+
+   当我们想在ajax请求返回时做一些操作，但又不知道请求返回的时间时，可以传递一个回调函数给调用ajax的方法，等到请求完成后调用回调函数。
+
+   ```javascript
+   var getUserInfo = function(userId, callback) {
+     $.ajax('http://xxx.com/getUserInfo? ' + userId, function(data) {
+       if (typeof callback === 'function') {
+         callback(data);
+       }
+     });
+   }
+   
+   getUserInfo(13157, function(data) {
+     alert(data.userName);
+   });
+   ```
+
+   回调函数除了用于异步请求外，目前更多的场景是应用于拆分业务逻辑，通过封装互相关系并不大的代码，降低代码之间的耦合，使之可读性更高。比如说下面将一个拆分出逻辑的函数当作参数传递给另一个函数，来委托它执行。
+
+   ```javascript
+   var appendDiv = function(callback) {
+     for (var i = 0; i < 100; i++) {
+       var div = document.createElement('div');
+       div.innerHTML = i;
+       document.body.appendChild(div);
+       if (typeof callback === 'function') {
+         callback(div)
+       }
+     }
+   };
+   
+   const hiddenElement = function(element) {
+     element.style.display = 'none'
+   }
+   appendDiv(hiddenElement);
+   ```
+
+   将元素隐藏的逻辑跟添加元素的逻辑代码关联并不大，所以我们将其拆分出来，通过callback的形式传递给appendDiv，这样appendDiv函数的复用性要强很多。
+
+2. Array.prototype.sort
+
+   Array.prototype.sort接受一个函数当作参数，这个函数里面封装了数组元素的排序规则。从它的使用来看，我们的目的是对数组排序，这是不可变的部分，而如何排序，这属于可变部分。把可变部分封装到函数参数中，动态传递给sort函数，使sort函数变成一个非常灵活的方法
+
+   ```javascript
+   var numbers = [4, 2, 5, 1, 3];
+   numbers.sort((a, b) => a - b);
+   console.log(numbers);
+   
+   // [1, 2, 3, 4, 5]
+   ```
+
+### 3.2.2 函数作为返回值输出
+
+将函数作为返回值输出的场景比函数作为参数的场景更多。
+
+1. 判断数据的类型
+
+   判断数据是否为数组有很多种方法，比如使用i`nstanceOf`关键字、`isArray`方法，比较好的方法是用`Object.prototype.toString.call`
+
+   ```javascript
+   console.log(Object.prototype.toString.call([1,2,3])) // "[object Array]"
+   console.log(Object.prototype.toString.call(1)) // "[object Number]"
+   console.log(Object.prototype.toString.call('1')) // "[object String]"
+   console.log(Object.prototype.toString.call(function(){})) // "[object Function]"
+   console.log(Object.prototype.toString.call(null)) // "[object Null]"
+   console.log(Object.prototype.toString.call(undefined)) // "[object Undefined]"
+   ```
+
+   我们可以封装一个专用于判断类型的函数
+
+   ```javascript
+   var isString = function(obj) {
+     return Object.prototype.toString.call(obj) === '[object String]';
+   };
+   
+   var isArray = function(obj) {
+     return Object.prototype.toString.call(obj) === '[object Array]';
+   };
+   
+   var isNumber = function(obj) {
+     return Object.prototype.toString.call(obj) === '[object Number]';
+   };
+   ```
+
+   这些函数大部分逻辑都是一样的，区别只是`[objct xxx]`字符串的值。我们可以将封装一个`isType`函数，然后将这些不同的字符串当成参数传递给`isType`函数
+
+   ```javascript
+   function isType(type){
+     return (obj)=> Object.prototype.toString.call(obj) === `[object ${type}]`
+   }
+   const isString=isType('String')
+   const isArray=isType('Array')
+   const isNumber=isType('Number')
+   
+   console.log(isNumber(1))
+   console.log(isString('1'))
+   console.log(isArray([1,2,3]))
+   ```
+
+   仔细看，`isType`函数的调用也重复写了很多次，所以我们还可以封装一下来自动注册`isType`函数
+
+   ```javascript
+   const Type = {};
+   ['String', 'Array', 'Number'].map((type) => {
+     Type[`is${type}`] = (obj) => Object.prototype.toString.call(obj) === `[object ${type}]`
+   })
+   
+   console.log(Type.isString('123'))
+   console.log(Type.isArray([1,2,3]))
+   console.log(Type.isNumber(123))
+   ```
+
+   
+
