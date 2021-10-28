@@ -888,3 +888,217 @@ for (var i = 0; i < nodes.length; i++) {
 }
 ```
 
+### 3.1.3 闭包的更多作用
+
+1. 封装变量
+
+   闭包可以将一些不需要暴露在全局的变量给封装成“私有变量”。
+
+   比如做“函数缓存”：
+
+   ```javascript
+   var mult = (function() {
+     var cache = {}
+     return function(arg) {
+       console.log(cache)
+       if (String(arg) in cache) {
+         return cache[arg]
+       }
+       return cache[arg] = arg * arg
+     }
+   })()
+   
+   console.log(mult(2))
+   ```
+
+   mult这个函数是用来计算平方数的，对于一些相同的参数来说，每次计算可能都是一次性能浪费，可以加入缓存机制来提高这个函数的性能。
+
+   处理的手段就是运用一个cache的对象来保存键（传入的参数）值（第一次计算后的结果）。
+
+   由于cache仅仅在mult函数中使用，所以运用闭包的技巧将cache变量封闭在mult函数内部，可以减少代码中的全局变量，还可以避免这个变量在其他地方被不小心修改而引发错误。
+
+   提炼函数是代码重构的一种常见技巧。如果一个大函数中有一些代码块能够独立出来，我们将这些代码封装在独立的小函数中，独立出来的小函数有助于代码复用，这些小函数本身也可能起到注释的作用，我们也可以将这些小函数用闭包给封闭起来。
+
+   上面的代码还可以这样修改
+
+   ```javascript
+   var mult = (function() {
+     var cache = {}
+   
+     function calculate(number) { //计算逻辑
+       return number * number
+     }
+   
+     return function(arg) {
+       if (String(arg) in cache) {
+         console.log(cache)
+         return cache[arg]
+       }
+       return cache[arg] = calculate(arg)
+     }
+   })()
+   
+   console.log(mult(2))
+   console.log(mult(2))
+   ```
+
+2. 延续局部变量的寿命
+
+   ```JavaScript
+           var report = function( src ){
+               var img = new Image();
+               img.src = src;
+           };
+   
+           report( 'http://xxx.com/getUserInfo' );
+   ```
+
+   因为一些低版本浏览器的实现存在bug，在浏览器下使用report函数进行数据上报时会丢失30%左右的数据，也就是说，report函数并不是每一次都成功发起http请求。丢失数据的原因是img是report函数的局部变量，当report函数的调用结束后，img局部变量就被销毁了，此时或者还没来得及发送http请求，所以这次请求会丢失。
+
+   现在我们用闭包的原理将img变量给封闭起来，就可以解决请求丢失的问题。
+
+   ```JavaScript
+           var report = (function(){
+             var imgs = [];
+             return function( src ){
+                 var img = new Image();
+                 imgs.push( img );
+                 img.src = src;
+             }
+          })();
+   ```
+
+### 3.1.4 闭包和面向对象设计
+
+运用闭包能实现通常面向对象才能够实现的功能。
+
+比如下面这段代码
+
+```javascript
+ const obj = {
+  value: 1,
+  call: function() {
+    this.value += 1
+    console.log(this.value)
+  }
+}
+obj.call() // 2
+obj.call() // 3
+obj.call() // 4
+```
+
+使用闭包也可能过实现
+
+```javascript
+function fnc() {
+  let value = 1
+  return function() {
+    value++
+    console.log(value)
+  }
+}
+const call = fnc()
+call() // 2
+call() // 3
+call() // 4
+```
+
+### 3.1.5 用闭包实现命令模式
+
+命令模式的意图是将请求封装为对象，从而分离请求的发起者和请求执行者之间的耦合关系。在命令被执行之前，可以预先往命令对象中植入命令的接受者。
+
+比如下面示例
+
+```html
+  <button id="execute">点击我执行命令</button>
+  <button id="undo">点击我执行命令</button>
+```
+
+```javascript
+var Tv = { // 命令接收者：它具备所有要做的操作
+  open: function() {
+    console.log('打开电视机');
+  },
+  close: function() {
+    console.log('关上电视机');
+  }
+};
+//命令对象构造器
+var OpenTvCommand = function(receiver) { // 命令会被这个构造器所构造的命令对象当作属性保存起来
+  this.receiver = receiver;
+};
+
+OpenTvCommand.prototype.execute = function() { // 命令对象的命令放在原型上
+  this.receiver.open(); // 执行命令，打开电视机
+};
+
+OpenTvCommand.prototype.undo = function() {
+  this.receiver.close(); // 撤销命令，关闭电视机
+};
+//设置命令-接收一个命令对象
+var setCommand = function(command) {
+  document.getElementById('execute').onclick = function() {
+    command.execute(); // 输出：打开电视机
+  }
+  document.getElementById('undo').onclick = function() {
+    command.undo(); // 输出：关闭电视机
+  }
+};
+
+setCommand(new OpenTvCommand(Tv));
+```
+
+上面的代码可以使用**函数**而不是普通对象来封装命令请求，这样更加自然。如果需要往函数对象中预先植入命令的接收者，那么闭包就可以完成这个工作。
+
+```javascript
+var Tv = {
+  open: function() {
+    console.log('打开电视机');
+  },
+  close: function() {
+    console.log('关上电视机');
+  }
+};
+
+// 创建命令的函数，传入命令接收者返回一个命令对象
+const createCommand = function(receiver) {
+  const execute = function() {
+    receiver.open()
+  }
+  const undo = function() {
+    receiver.close()
+  }
+
+  return {
+    execute,
+    undo
+  }
+}
+
+
+var setCommand = function(command) {
+  document.getElementById('execute').onclick = function() {
+    command.execute(); // 输出：打开电视机
+  }
+  document.getElementById('undo').onclick = function() {
+    command.undo(); // 输出：关闭电视机
+  }
+};
+
+setCommand(createCommand(Tv));
+```
+
+在面向对象版本的命令模式中，预先植入的命令接收者被当成**对象的属性保存起来**。而在闭包版本的命令模式中，命令的接收者则会被**封闭在闭包形成的环境**中。
+
+### 3.1.6 闭包与内存管理
+
+ 闭包是非常强大的特性，人们对它有一种误解：闭包会造成内存泄漏，所以要尽量减少闭包的使用。
+
+局部变量本来应该在函数退出时被解除引用。如果局部变量在闭包形成的环境里，那么这个局部变量的确可以一直生存下去，这些数据也无法被及时销毁。
+
+但使用闭包的一个原因是开发者可能以后还需要用到这些变量，把这些变量放在闭包环境中还是全局环境中对内存的影响是一致的。所以不能说是内存泄漏。
+
+唯一跟内存泄漏有关系的是，使用闭包时，比较容易形成循环引用。如果闭包的作用域链中保存着一些DOM节点，这时候就可能造成内存泄漏。这本身的原因并非JavaScript或者闭包的问题。而是由于早期IE浏览器中，由于BOM和DOM对象是使用C++以COM对象的方式实现的，而COM对象的垃圾收集机制采用的是引用计数策略。在基于技术策略的垃圾回收机制中，如果两个对象之间形成了循环引用，那么两个对象都无法被回收。循环引用造成的内存泄漏在本质上也并非闭包造成的。
+
+如果我们想要解决循环引用带来的内存泄漏问题，只需要把循环引用中的变量设置为null即可，这意味着切断变量与它引用的值之间的连接。当这些值不能被访问到时，垃圾回收器在运行时就会删除这些值并回收它们占用的内存。
+
