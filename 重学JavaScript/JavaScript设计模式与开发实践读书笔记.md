@@ -1331,43 +1331,43 @@ Function.prototype.after = function(afterFunc) {
    console.log(cost()); //600
    ```
 
-   2. 节流
+2. 节流
 
-      在有些情况下，函数会被频繁调用，造成性能问题。常见的场景分三种：
+   在有些情况下，函数会被频繁调用，造成性能问题。常见的场景分三种：
 
-      * window.onresize事件
+   * window.onresize事件
 
-        我们给window绑定了resize事件，当浏览器窗口被拖动而改变时，这个事件函数触发的频繁非常高，如果我们在里面放一些DOM节点相关的操作，那么浏览器可能会吃不消而卡顿。
+     我们给window绑定了resize事件，当浏览器窗口被拖动而改变时，这个事件函数触发的频繁非常高，如果我们在里面放一些DOM节点相关的操作，那么浏览器可能会吃不消而卡顿。
 
-      * mousemove事件
+   * mousemove事件
 
-        我们给一个div绑定拖拽事件，当div被拖动时，也会频繁触发事件函数
+     我们给一个div绑定拖拽事件，当div被拖动时，也会频繁触发事件函数
 
-      * 上传进度
+   * 上传进度
 
-        微云的上传功能使用了公司提供的一个浏览器插件。该浏览器插件在真正开始上传文件之前，会对文件进行扫描并随时通知JavaScript函数，以便在页面中显示当前的扫描进度。但该插件通知的频率非常之高，大约一秒钟10次，很显然我们在页面中不需要如此频繁地去提示用户。
+     微云的上传功能使用了公司提供的一个浏览器插件。该浏览器插件在真正开始上传文件之前，会对文件进行扫描并随时通知JavaScript函数，以便在页面中显示当前的扫描进度。但该插件通知的频率非常之高，大约一秒钟10次，很显然我们在页面中不需要如此频繁地去提示用户。
 
-      节流主要用于函数被触发的频率太高的问题。很多时候，我们并不需要频繁调用这些函数，这就需要我们按照时间来忽略掉某些函数处理的过程。我们可以借助`setTimeout`来完成这件事。
+   节流主要用于函数被触发的频率太高的问题。很多时候，我们并不需要频繁调用这些函数，这就需要我们按照时间来忽略掉某些函数处理的过程。我们可以借助`setTimeout`来完成这件事。
 
-      下面的throttle函数的原理是，将即将被执行的函数用setTimeout延迟一段时间执行。如果该次延迟执行还没有完成，则忽略接下来调用该函数的请求
+   下面的throttle函数的原理是，将即将被执行的函数用setTimeout延迟一段时间执行。如果该次延迟执行还没有完成，则忽略接下来调用该函数的请求
 
-      ```javascript
-      function throttle(handle, delay) {
-        var flag = false //开关
-        var timer //定时器id
-        return function() {
-          const _self = this //谁调用这个函数
-          if (flag) {
-            return
-          }
-          flag = true
-          timer = setTimeout(() => {
-            handle.apply(_self, arguments)
-            flag = false
-            clearTimeout(timer)
-          }, delay)
-        }
-      }
-      ```
+   ```javascript
+   function throttle(handle, delay) {
+     var flag = false //开关
+     var timer //定时器id
+     return function() {
+       const _self = this //谁调用这个函数
+       if (flag) {
+         return
+       }
+       flag = true
+       timer = setTimeout(() => {
+         handle.apply(_self, arguments)
+         flag = false
+         clearTimeout(timer)
+       }, delay)
+     }
+   }
+   ```
 
-      
+   
