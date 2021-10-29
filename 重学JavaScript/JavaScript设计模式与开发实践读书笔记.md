@@ -1226,5 +1226,148 @@ setCommand(createCommand(Tv));
    console.log(Type.isNumber(123))
    ```
 
-   
+2. getSingle
 
+   下面是一个单例模式的例子，它接受一个函数作为参数，又让函数执行返回另外一个函数
+
+   ```javascript
+   var getSingle = function(fn) {
+     var ret;
+     return function() {
+       return ret || (ret = fn.apply(this, arguments))
+     }
+   }
+   var getScript = getSingle(function() {
+     return document.createElement('script')
+   })
+   var script1 = getScript()
+   var script2 = getScript()
+   console.log(script1 === script2) // true
+   ```
+
+   这个单例模式传递一个函数，并返回一个函数，当调用返回的这个函数时，拿到的都是闭包中的变量。
+
+### 3.2.3 高阶函数实现AOP
+
+AOP(面向切面编程)的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。把这些功能抽离出来后，再通过动态织入的方式掺入业务逻辑模块中。这样做的好处是保持业务逻辑模块的纯净和高内聚性，其次是可以方便复用。
+
+比如目前有一个业务模块是需要实现以下的代码效果：
+
+```javascript
+function func2() {
+  console.log(2)
+  return 888
+}
+
+const action=func2.before(() => {
+  console.log(1)
+}).after(() => {
+  console.log(3)
+})
+const result=action() // 1 2 3
+result // 888
+```
+
+在javascript中实现AOP，都是把一个函数动态织入另一个函数之中，这里通过扩展`Function.prototype`来做到这一点。
+
+```javascript
+Function.prototype.before = function(beforeFunc) {
+  const _self = this
+  return function() {
+    beforeFunc.apply(this, arguments)
+      //返回主函数的结果
+    return _self.apply(this, arguments)
+  }
+}
+
+Function.prototype.after = function(afterFunc) {
+  const _self = this
+  return function() {
+    const result = _self.apply(this, arguments)
+    afterFunc.apply(this, arguments)
+      //返回主函数的结果
+    return result
+  }
+}
+```
+
+这种AOP的方式给函数添加职责，也是JavaScript语言中一种非常特别和巧妙的装饰者模式的实现，这种模式在实际开发中非常有用。
+
+### 3.2.4 高阶函数的其他应用
+
+1. currying
+
+   函数柯里化又称部分求值。一个柯里化函数首先会接受一些参数，接受这些参数后，该函数不会立即求值，而是继续返回另外一个函数，刚才传入的参数在函数形成的闭包中被保存起来。等到函数真正需要求值的时候，之前传入的所有参数都会被用于一次性求值。
+
+   比如，我每天都将开销传入一个函数，直到某天我想查看所有开销：
+
+   ```javascript
+   cost(100); // 未真正求值
+   cost(200); // 未真正求值
+   cost(300); // 未真正求值
+   
+   console.log(cost()); // 求值并输出：600
+   ```
+
+   我们可以利用柯里化的思想来帮助我们完成cost函数
+
+   ```javascript
+   const cost = (function() {
+     const args = []
+     return function() {
+       if (arguments.length === 0) {
+         const result = args.reduce((pre, cur) => pre + cur, 0)
+         return result
+       }
+       args.push.apply(args, arguments)
+       return args
+     }
+   })()
+   
+   cost(100); // 未真正求值
+   cost(200); // 未真正求值
+   cost(300); // 未真正求值
+   
+   console.log(cost()); //600
+   ```
+
+   2. 节流
+
+      在有些情况下，函数会被频繁调用，造成性能问题。常见的场景分三种：
+
+      * window.onresize事件
+
+        我们给window绑定了resize事件，当浏览器窗口被拖动而改变时，这个事件函数触发的频繁非常高，如果我们在里面放一些DOM节点相关的操作，那么浏览器可能会吃不消而卡顿。
+
+      * mousemove事件
+
+        我们给一个div绑定拖拽事件，当div被拖动时，也会频繁触发事件函数
+
+      * 上传进度
+
+        微云的上传功能使用了公司提供的一个浏览器插件。该浏览器插件在真正开始上传文件之前，会对文件进行扫描并随时通知JavaScript函数，以便在页面中显示当前的扫描进度。但该插件通知的频率非常之高，大约一秒钟10次，很显然我们在页面中不需要如此频繁地去提示用户。
+
+      节流主要用于函数被触发的频率太高的问题。很多时候，我们并不需要频繁调用这些函数，这就需要我们按照时间来忽略掉某些函数处理的过程。我们可以借助`setTimeout`来完成这件事。
+
+      下面的throttle函数的原理是，将即将被执行的函数用setTimeout延迟一段时间执行。如果该次延迟执行还没有完成，则忽略接下来调用该函数的请求
+
+      ```javascript
+      function throttle(handle, delay) {
+        var flag = false //开关
+        var timer //定时器id
+        return function() {
+          const _self = this //谁调用这个函数
+          if (flag) {
+            return
+          }
+          flag = true
+          timer = setTimeout(() => {
+            handle.apply(_self, arguments)
+            flag = false
+            clearTimeout(timer)
+          }, delay)
+        }
+      }
+      ```
+
+      
