@@ -10,17 +10,17 @@
 
 1.[CSS 编码技巧](https://github.com/18888628835/Blogs/issues/63)
 
-2.[背景和边框](https://github.com/18888628835/Blog/blob/main/CSS/背景和边框.md)
+2.[背景和边框](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/背景和边框.md)
 
-3.[形状](https://github.com/18888628835/Blog/blob/main/CSS/形状.md)
+3.[形状](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/形状.md)
 
-4.[视觉效果](https://github.com/18888628835/Blog/blob/main/CSS/视觉效果.md)
+4.[视觉效果](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/视觉效果.md)
 
-5.[结构与布局](https://github.com/18888628835/Blog/blob/main/CSS/结构与布局.md)
+5.[结构与布局](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/结构与布局.md)
 
-6.[用户体验](https://github.com/18888628835/Blog/blob/main/CSS/用户体验.md)
+6.[用户体验](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/用户体验.md)
 
-7.[动画效果](https://github.com/18888628835/Blog/blob/main/CSS/动画效果.md)
+7.[动画效果](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/动画效果.md)
 
 ## JavaScript you should know
 
