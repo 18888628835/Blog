@@ -1370,4 +1370,137 @@ Function.prototype.after = function(afterFunc) {
    }
    ```
 
+3. 分时函数
+
+   上面的节流函数时采用限制频繁调用函数的方式来优化性能，下面有一种新的需求，我不得不频繁调用函数。
+
+   比如我需要创建用户列表，一次性创建1000个节点的话，浏览器很有可能就吃不消了。
+
+   ```javascript
+     let array = []
+     for (let i = 0; i < 1000; i++) {
+       array.push(i) //这里的i假设为用户数据
+     }
    
+     function renderList() {
+       for (let data of array) {
+         const div = document.createElement('div')
+         div.innerHTML = data
+         document.body.appendChild(div)
+       }
+     }
+     renderList()
+   ```
+
+   这个问题的解决方案之一是封装一个`timeChunk`函数，每次都让创建节点的函数分批进行，而不是一次性渲染完成，比如每隔200毫秒来渲染8个节点。
+
+   ```javascript
+     let array = []
+     for (let i = 0; i < 1000; i++) {
+       array.push(i) //这里的i假设为用户数据
+     }
+   
+     function renderItem(data) {
+       const div = document.createElement('div')
+       div.innerHTML = data
+       document.body.appendChild(div)
+     }
+   
+     function timeChunk(array, handler, count) {
+       let data
+       let timer
+   
+       function start() {
+         for (let i = 0; i < count; i++) {
+           data = array.shift()
+           handler(data)
+         }
+       }
+       timer = setInterval(function() {
+         if (array.length === 0) {
+           return clearInterval(timer)
+         }
+         start()
+       }, 200)
+     }
+     timeChunk(array, renderItem, 8)
+   ```
+
+   上面的代码是将原来的renderList函数里面的循环逻辑提炼出来，只专注于渲染节点（renderItem），将渲染次数交给timechunk函数来处理，这个timechunk函数的特点是会间隔一段时间不断调用renderItem函数。
+
+   可以看出分时函数跟节流函数的关注点大相径庭，分时函数注重的是将函数执行次数的单位周期拉长，而节流函数注重将函数的执行次数减短。
+
+4. 惰性加载函数
+
+   为了兼容新老版本浏览器，下面是一段封装过的绑定事件的代码
+
+   ```javascript
+   var addEvent = function(target, type, handler) {
+     if (window.addEventListener) {
+       return target.addEventListener(type, handler, false)
+     }
+     if (window.attachEvent) {
+       return target.attachEvent(`on${type}`, handler)
+     }
+   }
+   ```
+
+   这个函数有个缺点，每次绑定事件时都会执行if语句，虽然没多大影响，但是能不能优化一下呢？
+
+   我直接写一个立即执行函数，然后在里面做判断，再返回一个新的绑定事件函数不就可以了？这样的话条件判断就只是执行了一次。
+
+   ```javascript
+   var addEvent = (function() {
+     if (window.addEventListener) {
+       return function(target, type, handler) {
+         target.addEventListener(type, handler, false)
+       }
+     }
+     if (window.attachEvent) {
+       return function(target, type, handler) {
+         target.attachEvent(`on${type}`, handler)
+       }
+     }
+   })()
+   ```
+
+   但是这个问题可能还有问题，假设我从来没绑定过事件，那么这个函数立即执行一次就没有任何意义。
+
+   是不是能封装一个更高级的函数？
+
+   答案是惰性加载函数。
+
+   惰性加载函数的原理是，在函数内部重写这个函数，重写的方式就是将变量名的引用连接到一个新函数上。
+
+   重写之后的函数就是我们期望的函数，而且还已经帮助我们做好了条件判断。
+
+   ```javascript
+   var addEvent = function(target, type, handler) {
+     if (window.addEventListener) {
+       addEvent = function(target, type, handler) {
+         target.addEventListener(type, handler)
+       }
+   
+     } else if (window.attachEvent) {
+       addEvent = function(target, type, handler) {
+         target.attachEvent(`on${type}`, handler)
+       }
+     }
+     // 第一次调用时需要执行一次
+     addEvent(target, type, handler)
+   }
+   console.log(addEvent) // 没执行前依然是原函数
+   addEvent(window, 'click', function() {}) // 原函数依然执行了一次
+   console.log(addEvent) // 执行一次后就重写了这个函数
+   ```
+
+## 3.3 小结
+
+由于JavaScript语言的特点，它的设计模式的实现跟传统面向对象语言差别非常大。
+
+在JavaScript中，很多设计模式都是借助闭包和高阶函数来完成的，闭包和高阶函数的应用非常多。
+
+相对于其实现过程，我们更应该关注设计模式可以帮助我们完成什么。
+
+
+
