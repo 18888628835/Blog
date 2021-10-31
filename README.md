@@ -36,23 +36,11 @@
 
 6.[封装一个请求工具函数](https://github.com/18888628835/Blog/issues/59)
 
-## ES6 系列
+## JavaScript 设计模式
 
-1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
+1.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
 
-2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
-
-3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
-
-4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
-
-5.[Symbol](https://github.com/18888628835/Blog/issues/19)
-
-6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
-
-7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
-
-8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
+2.[JavaScript 设计模式与开发实践读书笔记(设计模式篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(设计模式篇).md>)
 
 ## 重学 JavaScript
 
@@ -70,13 +58,23 @@
 
 7.[异步迭代和 generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/异步迭代和generator.md)
 
-8.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
+## ES6 系列
 
-## 浏览器工作原理
+1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
 
-1.[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/浏览器渲染过程.md)
+2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
 
-2.[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/事件循环.md)
+3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
+
+4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
+
+5.[Symbol](https://github.com/18888628835/Blog/issues/19)
+
+6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
+
+7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
+
+8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
 
 ## JavaScript 深入系列
 
@@ -109,6 +107,12 @@
 14.[函数柯里化](https://github.com/18888628835/Blog/issues/44)
 
 15.[手写深拷贝](https://github.com/18888628835/Blog/issues/45)
+
+## 浏览器工作原理
+
+1.[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/浏览器渲染过程.md)
+
+2.[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/事件循环.md)
 
 ## 前端全栈之路
 
