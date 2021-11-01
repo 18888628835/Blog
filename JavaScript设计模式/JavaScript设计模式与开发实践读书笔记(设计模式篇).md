@@ -381,3 +381,178 @@ $("#foo").one("click", function() {
 单例模式非常简单且实用，特别是惰性单例技术，在合适的时候才创建对象，并且只创建唯一的一个对象。
 
 当我们在写单例模式时，最好将创建对象和管理单例的职责进行分离，等到它们组合在一起，就形成一个可复用，可读性更高的单例模式。
+
+# 第五章 策略模式
+
+策略模式的定义是：定义一系列的算法，把它们一个个封装起来，并且使它们可以互相替换。
+
+## 5.1 使用策略模式计算奖金
+
+以年终奖计算为例：
+
+假设绩效S的年终奖有4倍工资，绩效A的年终奖有3倍工资，绩效B的则为2倍工资。
+
+我们可以写这样一段代码
+
+```javascript
+var calculateBonus = function(performanceLevel, salary) {
+  switch (performanceLevel) {
+    case 'S':
+      return salary * 4;
+    case 'A':
+      return salary * 3;
+    case 'B':
+      return salary * 2;
+  }
+};
+calculateBonus('B', 20000); // 输出：40000
+calculateBonus('S', 6000); // 输出：24000
+```
+
+calculateBonus函数接受两个参数，分别是绩效等级和工资水平。
+
+这段代码非常简单，但是存在缺点：
+
+* 存在太多条件判断分支
+* 缺乏弹性，如果增加一种新的绩效等级，那么我们就需要来改代码，这违反了开放-封闭原则
+* 复用性差
+
+下面是使用组合函数来重构代码。组合函数就是将业务逻辑拆分成很多小函数，将其进行组合。这里是将计算的业务逻辑与判断等级的业务逻辑分开
+
+```javascript
+        var performanceS = function( salary ){
+            return salary * 4;
+        };
+
+        var performanceA = function( salary ){
+            return salary * 3;
+        };
+
+        var performanceB = function( salary ){
+            return salary * 2;
+        };
+
+        var calculateBonus = function( performanceLevel, salary ){
+
+            if ( performanceLevel === 'S' ){
+              return performanceS( salary );
+            }
+
+            if ( performanceLevel === 'A' ){
+              return performanceA( salary );
+            }
+
+            if ( performanceLevel === 'B' ){
+              return performanceB( salary );
+            }
+
+        };
+
+        calculateBonus(  'A' , 10000 );    // 输出：30000
+```
+
+虽然目前来看逻辑是分开了，但是依然很臃肿，系统变化时也缺乏弹性。
+
+**使用策略模式来修改代码。**
+
+策略模式指的是定义一系列的算法，把它们一个个封装起来。将不变的部分和变化的部分隔开时每个设计模式的主题，策略模式的目的就是将算法的使用和算法的实现隔离开来。
+
+这个例子中，算法的使用方式是不变的，都是根据某个算法来得出金额。算法的实现是多种多样和可变化的，每种绩效对应不同的规则。
+
+一个基于策略模式的程序由两部分组成。第一部分是一组策略类，策略类封装了具体的算法，并负责具体的计算过程。第二个部分是环境类Context，Context接受客户的算法，随后把请求委托给某一个策略类。要做到这一点，说明Context中需要保存对某个策略对象的引用。
+
+我们先定义一组策略类，将每种绩效的计算规则都封装在对应的策略类中
+
+```javascript
+var performanceS = function() {};
+
+performanceS.prototype.calculate = function(salary) {
+  return salary * 4;
+};
+
+var performanceA = function() {};
+
+performanceA.prototype.calculate = function(salary) {
+  return salary * 3;
+};
+
+var performanceB = function() {};
+
+performanceB.prototype.calculate = function(salary) {
+  return salary * 2;
+}
+```
+
+然后创建一个Context环境类，它需要保存策略对象的引用。
+
+```javascript
+// Bontus就是环境类，它用来保存策略对象的引用
+var Bontus = function() {
+  this.salary = null //保存金额 这里是额外属性
+  this.strategy = null //这个属性用来保存策略对象的引用
+}
+
+Bontus.prototype.setSalary = function(salary) {
+  this.salary = salary
+}
+
+Bontus.prototype.setStrategy = function(strategy) {
+  //设置策略对象
+  this.strategy = strategy
+}
+
+Bontus.prototype.getBonus = function() {
+  return this.strategy.calculate(this.strategy)
+}
+```
+
+使用时，先设置金额，再设置策略对象，最后获取结果
+
+```javascript
+var bon = new Bontus()
+bon.setSalary(2000) // 设置金额
+bon.setStrategy(new performanceS()) // 设置策略对象
+bon.getBonus() // 8000
+
+bon.setSalary(10000)
+bon.setStrategy(new performanceB())
+bon.getBonus() // 20000
+```
+
+上面的代码中，我们先创建一个bon对象，并且给他设置一些原始的数据，这里是设置了工资。接下来给他设置一个策略对象，让他内部保存着这个策略对象。当需要计算时，bon对象本身没有计算的能力，而是将计算委托给保存好的策略对象。
+
+策略模式的思想：定义一系列的算法，并将它们挨个封装起来，并且使它们之间可以互相替换。
+
+详细一点就是：定义一系列的算法，把它们各自封装成策略类，算法被封装在策略类内部的方法里。在客户对Context发起请求时，Context总是把请求委托给这些策略对象中间的某一个进行计算。
+
+## 5.2 JavaScript版本的策略模式
+
+上面的代码是模拟传统面向对象语言的实现，我们先创建了一组策略类，然后使用Context类来保存策略对象（strategy）的引用，策略对象是通过策略类创建的。最后把请求委托给策略对象来计算结果。
+
+JavaScript中，策略对象并不需要从各个策略类里面创建，我们直接将其定义成一个对象
+
+```javascript
+const strategy = {
+  S: function(salary) {
+    return salary * 4;
+  },
+  A: function(salary) {
+    return salary * 3;
+  },
+  B: function(salary) {
+    return salary * 2;
+  }
+}
+```
+
+Context类也并不需要通过new Bontus来创建，直接创建就可以了
+
+```javascript
+var calculateBontus = function(performanceLevel, salary) {
+  return strategy[performanceLevel](salary)
+}
+
+calculateBontus('S',2000) // 8000
+```
+
+这种方式比传统类型语言更好理解，也更加简洁。
