@@ -38,6 +38,8 @@
 
 ## JavaScript 设计模式
 
+[设计模式代码片段](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/设计模式代码片段.md)
+
 1.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
 
 2.[JavaScript 设计模式与开发实践读书笔记(设计模式篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(设计模式篇).md>)

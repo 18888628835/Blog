@@ -545,7 +545,7 @@ const strategy = {
 }
 ```
 
-Context类也并不需要通过new Bontus来创建，直接创建就可以了
+Context类也并不需要通过new Bontus来创建，直接用函数就可以了
 
 ```javascript
 var calculateBontus = function(performanceLevel, salary) {
@@ -556,3 +556,191 @@ calculateBontus('S',2000) // 8000
 ```
 
 这种方式比传统类型语言更好理解，也更加简洁。
+
+## 5.3 多态在策略模式中的体现
+
+通过使用策略模式重构代码，我们消除了原来大片的条件分支语句。所有跟奖金有关的计算我们都封装到各个策略对象中，Context没有直接计算奖金的能力，而是把职责交给某个策略对象。每个策略对象负责的算法都被封装在对象内部。
+
+当我们对这些策略对象发出计算奖金的请求时，它们会返回各自不同的计算结果，这是对象多态性的体现。
+
+替换Context中当前保存的策略对象，便能执行不同的算法来得到我们想要的结果。
+
+## 5.5 更广义的算法
+
+策略模式指的是定义一系列的算法，并且把它们封装起来。
+
+从定义上看，策略模式就是用来封装算法的。但如果仅仅把策略模式用来封装算法，未免有点大材小用。实际开发中，我们通常会把算法的含义扩展开来，使策略模式也可以封装一系列的业务规则。只要这些业务规则指向的目标一致，并且可以被替换使用，我们就可以用策略模式来封装它们。
+
+下面是一个用策略模式完成表单校验用户是否输入合法数据的例子。
+
+## 5.6 表单验证
+
+以下是表单验证的校验逻辑：
+
+* 用户名不能为空
+* 密码长度不能少于6位
+* 手机号码必须符合格式
+
+### 5.6.1 表单校验的第一个版本
+
+```html
+    <form action="" id="registerForm" method="post">
+      请输入用户名：<input type="text" name="userName"/ > 请输入密码：<input
+      type="text" name="password"/ > 请输入手机号码：<input type="text"
+      name="phoneNumber"/ >
+      <button>提交</button>
+```
+
+```javascript
+      var registerForm = document.getElementById("registerForm");
+      registerForm.onsubmit = function () {
+        if (registerForm.userName.value === "") {
+          alert("用户名不能为空");
+          return false;
+        }
+        if (registerForm.password.value.length < 6) {
+          alert("密码长度不能少于6位");
+          return false;
+        }
+        if (!/(^1[3|5|8][0-9]{9}$)/.test(registerForm.phoneNumber.value)) {
+          alert("手机号码格式不正确");
+          return false;
+        }
+      };
+```
+
+* registerForm.onsubmit函数包含了很多if-else的语句，这些语句需要覆盖所有校验规则
+* 这个函数缺乏弹性，如果想增加一种新的校验规则，或者想要将密码长度的校验从6位修改为8位。我们都需要进入到函数内部去修改内部，这违反了开发-封闭原则
+* 这个函数复用性差，无法给其他表单复用
+
+### 5.6.2 用策略模式重构表单校验
+
+- 第一步：将所有策略规则都封装进入策略对象
+
+  ```javascript
+  var strategies = {
+    isNonEmpty: function(value, errorMsg) { // 不为空
+      if (value === '') {
+        return errorMsg;
+      }
+    },
+    minLength: function(value, length, errorMsg) { // 限制最小长度
+      if (value.length < length) {
+        return errorMsg;
+      }
+    },
+    isMobile: function(value, errorMsg) { // 手机号码格式
+      if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) {
+        return errorMsg;
+      }
+    }
+  };
+  ```
+
+- 第二步：新建一个Context类，这里名叫Validator类。它负责接受用户的请求并委托给strategy对象。
+
+  要写Context类实现代码，最好先设定好用户如何向它发起请求，也就是这个类如何使用，这有助于我们编写Validator类，假定它是这样使用的：
+
+  ```javascript
+  var validataFunc = function() {
+    var validator = new Validator(); // 创建一个validator对象
+  
+    /***************添加一些校验规则****************/
+    validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空');
+    validator.add(registerForm.password, 'minLength:6', '密码长度不能少于6位');
+    validator.add(registerForm.phoneNumber, 'isMobile', '手机号码格式不正确');
+  
+    var errorMsg = validator.start(); // 获得校验结果
+    return errorMsg; // 返回校验结果
+  }
+  
+  var registerForm = document.getElementById('registerForm');
+  
+  registerForm.onsubmit = function() {
+    var errorMsg = validataFunc(); // 如果errorMsg有确切的返回值，说明未通过校验
+    if (errorMsg) {
+      alert(errorMsg);
+      return false; // 阻止表单提交
+    }
+  };
+  ```
+
+  我们通过Validator类来创建一个validator对象，用validator.add来添加校验规则
+
+  validator.add接受三个参数：
+
+  `validator.add(registerForm.password, 'minLength:6', '密码长度不能少于6位');`
+
+  1. 第一个参数为需要校验的内容
+  2. 第二个参数表示校验规则，`minLength:6`是一个以冒号隔开的字符串。冒号前面的minLength代表客户挑选的strategy对象，冒号后面的数字6表示在校验过程中所必需的一些参数。'minLength:6’的意思就是校验registerForm.password这个文本输入框的value最小长度为6。如果这个字符串中不包含冒号，说明校验过程中不需要额外的参数信息，比如’isNonEmpty'。
+  3. 第三个参数是当校验失败后返回的错误信息
+
+  当添加完校验规则后，我们通过validator.start方法启动校验，如果不成功则返回不成功的信息。
+
+  下面是Validator类的实现
+
+  ```javascript
+  class Validator {
+    #cache = []; //保存校验规则
+    add(dom, rule, errorMessage) {
+      // 把校验的步骤用空函数包装起来，并且放入cache
+      this.#cache.push(function () {
+        const [strategyProperty, ...args] = rule.split(":"); //分割出需要传递给验证函数的参数
+        //将验证逻辑委托给策略对象中的验证函数
+        return strategies[strategyProperty].apply(dom, [
+          dom.value,
+          ...args,
+          errorMessage
+        ]);
+      });
+    }
+    start() {
+      for (let validatorFunc of this.#cache) {
+        let message = validatorFunc();//调用保存在cache属性中的校验规则函数
+        if (message) {
+          return message;// 如果有message，则表示验证错误，直接返回
+        }
+      }
+    }
+  }
+  ```
+
+  在使用策略模式重构代码之后，我们可以通过配置的方式完成一个表单的验证，这些校验规则可以复用在程序的任何地方。
+
+  在修改某个校验规则时，只需要编写或者改写少量的代码。比如我希望将用户名的输入框校验规则改成用户名不少于4个字符，修改起来是毫不费力的。
+
+  ```javascript
+   validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空');
+   // 改成：
+   validator.add(registerForm.userName, 'minLength:4', '用户名最少4个字');
+  ```
+
+### 5.6.3 给某个文本输入框添加多个校验规则
+
+目前上面的代码中一个输入框一次只能验证一种规则，如果我们希望一个输入框能够验证多个规则呢？比如像这样
+
+```javascript
+  validator.add(registerForm.userName, [
+    ["isNonEmpty", "用户名不能为空"],
+    ["minLength:10", "用户名长度不能小于10位"]
+  ]);
+```
+
+只需要稍微改写一下add并添加一个新的addRules方法就可以了
+
+```javascript
+  add(dom, rule, errorMessage) {
+    if (rule instanceof Array) {
+      return this.addRules(dom, rule);
+    }
+...
+  }
+  addRules(dom, rules) {
+    for (let [rule, errorMessage] of rules) {
+      this.add(dom, rule, errorMessage);
+    }
+  }
+```
+
+> 这段代码并非Javascript设计模式与开发实践中的原代码，由于原代码的实现略麻烦，所以这里做一些修改。
+
