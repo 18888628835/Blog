@@ -781,3 +781,287 @@ JavaScript版本的策略模式往往被函数所取代，这时策略模式就�
   JavaScript下Strategy类也可以是一些函数。Context环境类也可以是一个函数，通过这个函数来将计算过程委托给Strategy。
 
 策略模式的目的就是将算法的使用和算法的实现隔离开来。这里的算法是一种广义的算法，可以替代其他业务逻辑，比如表单验证等。
+
+# 第六章 代理模式
+
+代理模式是为对象提供一个代用品或占用符，以便控制对它的访问。
+
+代理模式的关键是，当客户不方便直接访问一个对象或者不满足需要的时候，提供一个替身对象来控制对这个对象的访问，客户实际上访问的是替身对象。替身对象对请求做出一些处理后，再把请求转交给本体对象。					
+
+<img src="assets/image-20211103104718266.png" alt="image-20211103104718266" style="zoom:50%;" />
+
+​																					**不用代理模式**
+
+<img src="assets/image-20211103104857197.png" alt="image-20211103104857197" style="zoom:50%;" />
+
+  																					**使用代理模式**
+
+## 6.2 保护代理和虚拟代理
+
+保护代理：代理B可以帮助A过滤掉一些请求。保护代理用于控制不同权限的对象对目标对象的访问。但在JavaScript中不容易实现保护代理，因为我们无法判断谁访问了对象。
+
+虚拟代理：JavaScript中虚拟代理是常用的代理模式。虚拟代理可以把一些开销很大的操作，延迟到真正需要它的时候采取创建。
+
+## 6.3 虚拟代理实现图片预加载
+
+图片预加载是一种常用的技术：如果直接给某个img标签节点设置src属性，由于图片过大或者网络不佳，图片的位置往往有段时间是空白。常见的做法是先用一张loading图片站位，然后用异步的方式加载图片，等图片加载好了再填充到img节点内。这种场景很适合用虚拟代理。
+
+第一步是创建一个本体对象，这个对象可以往页面中创建img标签，并且提供一个对外的setSrc接口，外界调用这个接口，就可以给img标签设置src属性
+
+```javascript
+var myImage = (function() {
+  var imgNode = document.createElement('img');
+  document.body.appendChild(imgNode);
+
+  return {
+    setSrc: function(src) {
+      imgNode.src = src;
+    }
+  }
+})();
+
+myImage.setSrc('http://xxxx.jpg');
+```
+
+第二步是创建代理对象，通过这个代理对象，在图片被真正加载好之前，页面会出现一张loading的占位图，来提示用户正在加载中。
+
+```javascript
+var proxyImage = (function() {
+  const img = new Image()
+  img.onload = function() { // 3. 代理的src加载完成，会触发onload事件
+    myImage.setSrc(this.src) // 4. 此时再重新给被代理的节点设置src属性
+  }
+  return {
+    setSrc(src) {
+      myImage.setSrc('loading.png')//1.先让node节点预先加载loading图
+      img.src = src //2.设置代理的src属性
+    }
+  }
+})()
+
+proxyImage.setSrc('http://xxxx') // proxyImage代理了myImage的访问，并且加入额外的预加载操作
+```
+
+## 6.4 代理的意义
+
+上面的代码实际上不需要代理也可以完成，那么代理的意义在哪呢？
+
+单一职责原则
+
+单一职责原则指的是一个类（包括对象和函数），应该只有一个引起它变化的原因。如果一个对象承担了多项职责，这意味着它会变得巨大，引起它变化的原因有很多个。面向对象设计鼓励将行为分布到细粒度的对象之中，如果一个对象承担的职责过多，等于把这些职责耦合到一起，这种耦合会导致脆弱和低内聚的设计。当变化发生时，设计可能会遭到破坏。
+
+职责定义为引起变化的原因。上述代码中，myImage对象除了负责给展示的img节点设置src外，还需要预加载图片。我们在处理其中一个职责时，有可能因为其强耦合性而影响另外一个职责的实现。
+
+在面向对象的设计中，大部分情况下，如果违反其他任何原则，同时将违反开放-封闭原则。如果我们知识从网上获取一些体积很小的图片，或者5年后网速快到不需要预加载，我们可能希望把预加载的代码从myImage对象中删掉。这样就不得不改动myImage对象了。
+
+实际上，我们只是需要给img节点设置src，预加载图片只是一个锦上添花的功能。如果可以把这个操作放在另一个对象里，自然是非常好的方法。这样代理的作用就体现出来了，负责预加载图片，预加载的操作完成之后，把请求重新交给本体MyImage。
+
+纵观整个程序，我们并没有修改或者增加MyImage的接口，但是通过代理对象，实际上给系统添加了新的行为。这是符合开放-封闭原则的。给img节点设置src和图片预加载这两个功能，被隔离在两个对象里，它们可以各自变化而不影响对象。何况就算有一天我们不再需要预加载，只需要改成请求本体而不是请求代理对象即可。
+
+## 6.5 代理和本体接口的一致性
+
+如果有一天我们不再需要预加载，那么就不再需要代理对象，可以选择直接请求本体。其中关键是代理对象和本体都对外提供了setSrc方法，在客户看来，代理对象和本体是一致的，代理接手请求的过程对于用户来说是透明的，用户并不清楚代理和本体的区别，这样做有两个好处。
+
+1. 用户可以放心地请求代理，他只关心是否能得到想要的结果。
+
+2. 在任何使用本体的地方都可以替换成使用代理。
+
+## 6.6 虚拟代理合并HTTP请求
+
+假设现在有一排checkbox节点，每点击一个就会往服务器同步文件。
+
+这里是html
+
+```javascript
+    <input type="checkbox" id="1"></input>1
+    <input type="checkbox" id="2"></input>2
+    <input type="checkbox" id="3"></input>3
+    <input type="checkbox" id="4"></input>4
+    <input type="checkbox" id="5"></input>5
+    <input type="checkbox" id="6"></input>6
+    <input type="checkbox" id="7"></input>7
+    <input type="checkbox" id="8"></input>8
+    <input type="checkbox" id="9"></input>9
+```
+
+下面给他们绑定事件,每次选中后都会往服务器发送同步哪个文件的请求。
+
+```javascript
+const checkBoxNodes = document.querySelectorAll('input')
+
+var syncFile = function(id) {
+  console.log('开始同步文件，id为' + id)
+}
+for (let checkBoxNode of checkBoxNodes) {
+  checkBoxNode.onclick = function() {
+    if (this.checked === true) {
+      syncFile(this.id)
+    }
+  }
+}
+```
+
+每次我们选中checkbox，就会依次像服务器发送请求。如果用户在短时间内频繁点击(如一秒钟点四个checkbox),那么网络请求的开销就会非常大。
+
+解决方案是我们可以使用一个代理函数每次都收集要发送给服务器的请求，最后一次性发送给服务器。
+
+```javascript
+const checkBoxNodes = document.querySelectorAll('input')
+
+var syncFile = function(id) {
+  console.log('开始同步文件，id为' + id)
+}
+
+var proxySyncFile = (function() {
+  var cache = []
+  var timer
+  return function(id) {
+    cache.push(id)
+    clearTimeout(timer) //防抖
+    timer = setTimeout(function() {
+      syncFile(cache.join(',')) // 发送请求给服务器
+      cache.length = 0 //记得清空保存起来的cache
+      clearTimeout(timer)
+
+    }, 2000)
+  }
+})()
+
+for (let checkBoxNode of checkBoxNodes) {
+  checkBoxNode.onclick = function() {
+    if (this.checked === true) {
+      proxySyncFile(this.id)
+    }
+  }
+}
+```
+
+## 6.8 缓存代理
+
+缓存代理可以为一些开销大的运算结果提供暂时的存储，在下次运算时，如果传递进来的参数跟之前一致，则可以直接返回前面存储的运算结果。
+
+### 6.8.1 缓存代理的例子——计算乘积
+
+下面是一个用来计算乘积的懒加载函数
+
+```javascript
+var mult = function(...rest) {
+  let a = 1
+  mult = function(...rest) {
+    for (let i of rest) {
+      a *= i
+    }
+    return a
+  }
+  return mult(...rest)
+}
+
+console.log(mult(1, 2, 3))
+```
+
+如果给它加上缓存，那么就可以减少计算
+
+```javascript
+var mult = function(...rest) {
+  let a = 1
+  let cache = {}
+  mult = function(...rest) {
+    const property = rest.join(',')
+    if (!(property in cache)) { // 判断有没有传递过同样的参数
+      for (let i of rest) {
+        console.log('这里是复杂的计算')
+        a *= i
+      }
+      cache[property] = a // 计算后把计算参数和计算结果保存在缓存里
+    }
+    // 如果有就直接返回缓存的结果，不需要重复计算了
+    return cache[property]
+  }
+  return mult(...rest)
+}
+
+console.log(mult(1, 2, 3))
+// "这里是复杂的计算" * 3
+// 6
+console.log(mult(1, 2, 3)) // 6
+```
+
+上面的懒加载函数mult需要完成两个职责：计算乘积，缓存
+
+按照单一职责原则，我们应当用虚拟缓存代理模式来分离它的职责。
+
+```javascript
+var mult = function(...rest) {
+  let a = 1
+  mult = function(...rest) {
+    for (let i of rest) {
+      console.log("这里是复杂的计算")
+      a *= i
+    }
+    return a
+  }
+  return mult(...rest)
+}
+
+
+var proxyMult = (function() {
+  let cache = {}
+  return function(...rest) {
+    let property = rest.join(',')
+    if (property in cache) {
+      return cache[property]
+    }
+    return cache[property] = mult(...rest)
+  }
+})()
+
+console.log(proxyMult(1, 2, 3))
+console.log(proxyMult(1, 2, 3))
+```
+
+通过增加缓存代理的方式，mult函数可以继续专注于自身的职责，缓存的功能则是由代理对象实现的。
+
+## 6.9 用高阶函数动态创建代理
+
+> 这一章作者并没写什么内容，只是贴了大段代码，实际上这章就是在代理模式的基础上使用通用单例模式的思想，你会觉得这里的代码跟通用代理模式的代码很像
+
+```javascript
+var mult = function(...rest) {
+  let a = 1
+  mult = function(...rest) {
+    for (let i of rest) {
+      console.log("这里是复杂的计算")
+      a *= i
+    }
+    return a
+  }
+  return mult(...rest)
+}
+
+/* 创建缓存代理的工厂 */
+var createProxyFactory = function(fn) {
+  let cache = {}
+  return function(...rest) {
+    let property = rest.join(',')
+    // 这里跟通用单例模式的代码非常类似，单例模式返回cache的引用，这里是返回cache里的属性
+    if (property in cache) {
+      return cache[property]
+    }
+    return cache[property] = fn(...rest)
+  }
+}
+
+const proxyMult = createProxyFactory(mult)
+
+console.log(proxyMult(1, 2, 3))
+console.log(proxyMult(1, 2, 3))
+```
+
+createProxyFactory是高阶函数，现在我们把用来计算的函数当作参数传递给它，就可以给各种计算方法创建不同的缓存代理，这样一来整个程序会更加灵活。
+
+## 6.11 小结
+
+代理模式包含很多，在JavaScript中使用最多的是虚拟代理和缓存代理。
+
+我们在编写业务代码的时候，往往不需要去预先猜测是否需要使用代理模式。当真正发现不方便直接访问某个对象的时候，再编写代理也不迟。
+
