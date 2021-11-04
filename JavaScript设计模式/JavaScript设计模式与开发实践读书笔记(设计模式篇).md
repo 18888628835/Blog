@@ -181,10 +181,7 @@ var a ={}
    最简单的方式是采取对象字面量的方式：
 
    ```javascript
-   var namespace={
-     a:function(){},
-     b:function(){}
-   }
+   var namespace={  a:function(){},  b:function(){}}
    ```
 
    把需要的变量都定义为namespace的属性，这样可以减少变量和全局作用域打交道的机会。
@@ -245,17 +242,7 @@ var a ={}
 下面我们来写第一种解决方案：页面加载完成时创建好登录框，登录框是隐藏的，当用户点击登录按钮时，它才显示出来
 
 ```javascript
-var loginLayer = (function() {
-  var div = document.createElement('div');
-  div.innerHTML = ’我是登录浮窗’;
-  div.style.display = 'none';
-  document.body.appendChild(div);
-  return div;
-})();
-
-document.getElementById('loginBtn').onclick = function() {
-  loginLayer.style.display = 'block';
-};
+var loginLayer = (function() {  var div = document.createElement('div');  div.innerHTML = ’我是登录浮窗’;  div.style.display = 'none';  document.body.appendChild(div);  return div;})();document.getElementById('loginBtn').onclick = function() {  loginLayer.style.display = 'block';};
 ```
 
 这种方式的缺点在于该节点一开始就创建好了，如果用户没有点击登录按钮，那么创建该节点的操作就白白浪费了。
@@ -263,40 +250,13 @@ document.getElementById('loginBtn').onclick = function() {
 下面这种方式倒是可以在点击按钮时创建，但是每次都会创建多个div，也就违背了单例模式。
 
 ```javascript
-var createLoginLayer = function() {
-  var div = document.createElement('div');
-  div.innerHTML = '我是登录浮窗';
-  div.style.display = 'none';
-  document.body.appendChild(div);
-  return div;
-};
-
-document.getElementById('loginBtn').onclick = function() {
-  const LoginLayer = createLoginLayer()
-  LoginLayer.style.display = 'block';
-};
+var createLoginLayer = function() {  var div = document.createElement('div');  div.innerHTML = '我是登录浮窗';  div.style.display = 'none';  document.body.appendChild(div);  return div;};document.getElementById('loginBtn').onclick = function() {  const LoginLayer = createLoginLayer()  LoginLayer.style.display = 'block';};
 ```
 
 我们只需要在上面代码的基础上用一个div进行判断是否创建过浮窗就可以实现单例模式了。
 
 ```javascript
-var createLoginLayer = (function() {
-  let div
-  return function() {
-    if (!div) {
-      div = document.createElement('div');
-      div.innerHTML = '我是登录浮窗';
-      div.style.display = 'none';
-      document.body.appendChild(div);
-    }
-    return div;
-  }
-})();
-
-document.getElementById('loginBtn').onclick = function() {
-  const LoginLayer = createLoginLayer()
-  LoginLayer.style.display = 'block';
-};
+var createLoginLayer = (function() {  let div  return function() {    if (!div) {      div = document.createElement('div');      div.innerHTML = '我是登录浮窗';      div.style.display = 'none';      document.body.appendChild(div);    }    return div;  }})();document.getElementById('loginBtn').onclick = function() {  const LoginLayer = createLoginLayer()  LoginLayer.style.display = 'block';};
 ```
 
 ## 4.6 通用的单例模式
@@ -310,12 +270,7 @@ document.getElementById('loginBtn').onclick = function() {
 我们先把不变的逻辑抽离出来，返回单例的逻辑始终是不变的，可以封装成一个通用的单例函数：用一个变量来标识是否创建过对象，如果是，则在下次直接返回这个已经创建好的对象，然后把需要执行什么函数通过参数传递给这个单例函数：
 
 ```javascript
-var singleton = function(handler) {
-  let result
-  return function() {
-    return result || (result = handler.apply(this, arguments))
-  }
-}
+var singleton = function(handler) {  let result  return function() {    return result || (result = handler.apply(this, arguments))  }}
 ```
 
 > 由于result始终在闭包里，所以它始终不会被销毁
@@ -323,24 +278,13 @@ var singleton = function(handler) {
 然后修改创建登录浮窗的方法
 
 ```javascript
-var createLoginLayer = function() {
-  div = document.createElement('div');
-  div.innerHTML = '我是登录浮窗';
-  div.style.display = 'none';
-  document.body.appendChild(div);
-  return div;
-}
+var createLoginLayer = function() {  div = document.createElement('div');  div.innerHTML = '我是登录浮窗';  div.style.display = 'none';  document.body.appendChild(div);  return div;}
 ```
 
 使用：
 
 ```javascript
-const createSingletonLoginLayer =singleton(createLoginLayer);
-
-document.getElementById('loginBtn').onclick = function() {
-  const LoginLayer = createSingletonLoginLayer()
-  LoginLayer.style.display = 'block';
-};
+const createSingletonLoginLayer =singleton(createLoginLayer);document.getElementById('loginBtn').onclick = function() {  const LoginLayer = createSingletonLoginLayer()  LoginLayer.style.display = 'block';};
 ```
 
 我们将两个创建实例对象的职责和管理单例的职责分别放置在两个方法里，这两个方法可以独立变化而互不影响，当它们连接在一起时，就完成了创建唯一实例对象的功能。
@@ -350,26 +294,13 @@ document.getElementById('loginBtn').onclick = function() {
 jquey有一个one方法，它可以为元素添加处理函数。处理函数在每个元素上每种事件类型都只处理一次。
 
 ```javascript
-$("#foo").one("click", function() {
-  alert("This will be displayed only once.");
-});
+$("#foo").one("click", function() {  alert("This will be displayed only once.");});
 ```
 
 使用getSingleton也可以达到一样的效果
 
 ```javascript
-      var singleton = function (handler) {
-        var result;
-        return function () {
-          return result || (result = handler.apply(this, arguments));
-        };
-      };
-      var bindEvent = singleton(function () {
-        alert(123);
-        return true;
-      });
-
-      document.getElementById("loginBtn").onclick = bindEvent;
+      var singleton = function (handler) {        var result;        return function () {          return result || (result = handler.apply(this, arguments));        };      };      var bindEvent = singleton(function () {        alert(123);        return true;      });      document.getElementById("loginBtn").onclick = bindEvent;
 ```
 
 ## 4.7 小结
@@ -395,18 +326,7 @@ $("#foo").one("click", function() {
 我们可以写这样一段代码
 
 ```javascript
-var calculateBonus = function(performanceLevel, salary) {
-  switch (performanceLevel) {
-    case 'S':
-      return salary * 4;
-    case 'A':
-      return salary * 3;
-    case 'B':
-      return salary * 2;
-  }
-};
-calculateBonus('B', 20000); // 输出：40000
-calculateBonus('S', 6000); // 输出：24000
+var calculateBonus = function(performanceLevel, salary) {  switch (performanceLevel) {    case 'S':      return salary * 4;    case 'A':      return salary * 3;    case 'B':      return salary * 2;  }};calculateBonus('B', 20000); // 输出：40000calculateBonus('S', 6000); // 输出：24000
 ```
 
 calculateBonus函数接受两个参数，分别是绩效等级和工资水平。
@@ -420,35 +340,7 @@ calculateBonus函数接受两个参数，分别是绩效等级和工资水平。
 下面是使用组合函数来重构代码。组合函数就是将业务逻辑拆分成很多小函数，将其进行组合。这里是将计算的业务逻辑与判断等级的业务逻辑分开
 
 ```javascript
-        var performanceS = function( salary ){
-            return salary * 4;
-        };
-
-        var performanceA = function( salary ){
-            return salary * 3;
-        };
-
-        var performanceB = function( salary ){
-            return salary * 2;
-        };
-
-        var calculateBonus = function( performanceLevel, salary ){
-
-            if ( performanceLevel === 'S' ){
-              return performanceS( salary );
-            }
-
-            if ( performanceLevel === 'A' ){
-              return performanceA( salary );
-            }
-
-            if ( performanceLevel === 'B' ){
-              return performanceB( salary );
-            }
-
-        };
-
-        calculateBonus(  'A' , 10000 );    // 输出：30000
+        var performanceS = function( salary ){            return salary * 4;        };        var performanceA = function( salary ){            return salary * 3;        };        var performanceB = function( salary ){            return salary * 2;        };        var calculateBonus = function( performanceLevel, salary ){            if ( performanceLevel === 'S' ){              return performanceS( salary );            }            if ( performanceLevel === 'A' ){              return performanceA( salary );            }            if ( performanceLevel === 'B' ){              return performanceB( salary );            }        };        calculateBonus(  'A' , 10000 );    // 输出：30000
 ```
 
 虽然目前来看逻辑是分开了，但是依然很臃肿，系统变化时也缺乏弹性。
@@ -464,59 +356,19 @@ calculateBonus函数接受两个参数，分别是绩效等级和工资水平。
 我们先定义一组策略类，将每种绩效的计算规则都封装在对应的策略类中
 
 ```javascript
-var performanceS = function() {};
-
-performanceS.prototype.calculate = function(salary) {
-  return salary * 4;
-};
-
-var performanceA = function() {};
-
-performanceA.prototype.calculate = function(salary) {
-  return salary * 3;
-};
-
-var performanceB = function() {};
-
-performanceB.prototype.calculate = function(salary) {
-  return salary * 2;
-}
+var performanceS = function() {};performanceS.prototype.calculate = function(salary) {  return salary * 4;};var performanceA = function() {};performanceA.prototype.calculate = function(salary) {  return salary * 3;};var performanceB = function() {};performanceB.prototype.calculate = function(salary) {  return salary * 2;}
 ```
 
 然后创建一个Context环境类，它需要保存策略对象的引用。
 
 ```javascript
-// Bontus就是环境类，它用来保存策略对象的引用
-var Bontus = function() {
-  this.salary = null //保存金额 这里是额外属性
-  this.strategy = null //这个属性用来保存策略对象的引用
-}
-
-Bontus.prototype.setSalary = function(salary) {
-  this.salary = salary
-}
-
-Bontus.prototype.setStrategy = function(strategy) {
-  //设置策略对象
-  this.strategy = strategy
-}
-
-Bontus.prototype.getBonus = function() {
-  return this.strategy.calculate(this.strategy)
-}
+// Bontus就是环境类，它用来保存策略对象的引用var Bontus = function() {  this.salary = null //保存金额 这里是额外属性  this.strategy = null //这个属性用来保存策略对象的引用}Bontus.prototype.setSalary = function(salary) {  this.salary = salary}Bontus.prototype.setStrategy = function(strategy) {  //设置策略对象  this.strategy = strategy}Bontus.prototype.getBonus = function() {  return this.strategy.calculate(this.strategy)}
 ```
 
 使用时，先设置金额，再设置策略对象，最后获取结果
 
 ```javascript
-var bon = new Bontus()
-bon.setSalary(2000) // 设置金额
-bon.setStrategy(new performanceS()) // 设置策略对象
-bon.getBonus() // 8000
-
-bon.setSalary(10000)
-bon.setStrategy(new performanceB())
-bon.getBonus() // 20000
+var bon = new Bontus()bon.setSalary(2000) // 设置金额bon.setStrategy(new performanceS()) // 设置策略对象bon.getBonus() // 8000bon.setSalary(10000)bon.setStrategy(new performanceB())bon.getBonus() // 20000
 ```
 
 上面的代码中，我们先创建一个bon对象，并且给他设置一些原始的数据，这里是设置了工资。接下来给他设置一个策略对象，让他内部保存着这个策略对象。当需要计算时，bon对象本身没有计算的能力，而是将计算委托给保存好的策略对象。
@@ -532,27 +384,13 @@ bon.getBonus() // 20000
 JavaScript中，策略对象并不需要从各个策略类里面创建，我们直接将其定义成一个对象
 
 ```javascript
-const strategy = {
-  S: function(salary) {
-    return salary * 4;
-  },
-  A: function(salary) {
-    return salary * 3;
-  },
-  B: function(salary) {
-    return salary * 2;
-  }
-}
+const strategy = {  S: function(salary) {    return salary * 4;  },  A: function(salary) {    return salary * 3;  },  B: function(salary) {    return salary * 2;  }}
 ```
 
 Context类也并不需要通过new Bontus来创建，直接用函数就可以了
 
 ```javascript
-var calculateBontus = function(performanceLevel, salary) {
-  return strategy[performanceLevel](salary)
-}
-
-calculateBontus('S',2000) // 8000
+var calculateBontus = function(performanceLevel, salary) {  return strategy[performanceLevel](salary)}calculateBontus('S',2000) // 8000
 ```
 
 这种方式比传统类型语言更好理解，也更加简洁。
@@ -584,29 +422,11 @@ calculateBontus('S',2000) // 8000
 ### 5.6.1 表单校验的第一个版本
 
 ```html
-    <form action="" id="registerForm" method="post">
-      请输入用户名：<input type="text" name="userName"/ > 请输入密码：<input
-      type="text" name="password"/ > 请输入手机号码：<input type="text"
-      name="phoneNumber"/ >
-      <button>提交</button>
+    <form action="" id="registerForm" method="post">      请输入用户名：<input type="text" name="userName"/ > 请输入密码：<input      type="text" name="password"/ > 请输入手机号码：<input type="text"      name="phoneNumber"/ >      <button>提交</button>
 ```
 
 ```javascript
-      var registerForm = document.getElementById("registerForm");
-      registerForm.onsubmit = function () {
-        if (registerForm.userName.value === "") {
-          alert("用户名不能为空");
-          return false;
-        }
-        if (registerForm.password.value.length < 6) {
-          alert("密码长度不能少于6位");
-          return false;
-        }
-        if (!/(^1[3|5|8][0-9]{9}$)/.test(registerForm.phoneNumber.value)) {
-          alert("手机号码格式不正确");
-          return false;
-        }
-      };
+      var registerForm = document.getElementById("registerForm");      registerForm.onsubmit = function () {        if (registerForm.userName.value === "") {          alert("用户名不能为空");          return false;        }        if (registerForm.password.value.length < 6) {          alert("密码长度不能少于6位");          return false;        }        if (!/(^1[3|5|8][0-9]{9}$)/.test(registerForm.phoneNumber.value)) {          alert("手机号码格式不正确");          return false;        }      };
 ```
 
 * registerForm.onsubmit函数包含了很多if-else的语句，这些语句需要覆盖所有校验规则
@@ -618,23 +438,7 @@ calculateBontus('S',2000) // 8000
 - 第一步：将所有策略规则都封装进入策略对象
 
   ```javascript
-  var strategies = {
-    isNonEmpty: function(value, errorMsg) { // 不为空
-      if (value === '') {
-        return errorMsg;
-      }
-    },
-    minLength: function(value, length, errorMsg) { // 限制最小长度
-      if (value.length < length) {
-        return errorMsg;
-      }
-    },
-    isMobile: function(value, errorMsg) { // 手机号码格式
-      if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) {
-        return errorMsg;
-      }
-    }
-  };
+  var strategies = {  isNonEmpty: function(value, errorMsg) { // 不为空    if (value === '') {      return errorMsg;    }  },  minLength: function(value, length, errorMsg) { // 限制最小长度    if (value.length < length) {      return errorMsg;    }  },  isMobile: function(value, errorMsg) { // 手机号码格式    if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) {      return errorMsg;    }  }};
   ```
 
 - 第二步：新建一个Context类，这里名叫Validator类。它负责接受用户的请求并委托给strategy对象。
@@ -642,27 +446,7 @@ calculateBontus('S',2000) // 8000
   要写Context类实现代码，最好先设定好用户如何向它发起请求，也就是这个类如何使用，这有助于我们编写Validator类，假定它是这样使用的：
 
   ```javascript
-  var validataFunc = function() {
-    var validator = new Validator(); // 创建一个validator对象
-  
-    /***************添加一些校验规则****************/
-    validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空');
-    validator.add(registerForm.password, 'minLength:6', '密码长度不能少于6位');
-    validator.add(registerForm.phoneNumber, 'isMobile', '手机号码格式不正确');
-  
-    var errorMsg = validator.start(); // 获得校验结果
-    return errorMsg; // 返回校验结果
-  }
-  
-  var registerForm = document.getElementById('registerForm');
-  
-  registerForm.onsubmit = function() {
-    var errorMsg = validataFunc(); // 如果errorMsg有确切的返回值，说明未通过校验
-    if (errorMsg) {
-      alert(errorMsg);
-      return false; // 阻止表单提交
-    }
-  };
+  var validataFunc = function() {  var validator = new Validator(); // 创建一个validator对象  /***************添加一些校验规则****************/  validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空');  validator.add(registerForm.password, 'minLength:6', '密码长度不能少于6位');  validator.add(registerForm.phoneNumber, 'isMobile', '手机号码格式不正确');  var errorMsg = validator.start(); // 获得校验结果  return errorMsg; // 返回校验结果}var registerForm = document.getElementById('registerForm');registerForm.onsubmit = function() {  var errorMsg = validataFunc(); // 如果errorMsg有确切的返回值，说明未通过校验  if (errorMsg) {    alert(errorMsg);    return false; // 阻止表单提交  }};
   ```
 
   我们通过Validator类来创建一个validator对象，用validator.add来添加校验规则
@@ -680,29 +464,7 @@ calculateBontus('S',2000) // 8000
   下面是Validator类的实现
 
   ```javascript
-  class Validator {
-    #cache = []; //保存校验规则
-    add(dom, rule, errorMessage) {
-      // 把校验的步骤用空函数包装起来，并且放入cache
-      this.#cache.push(function () {
-        const [strategyProperty, ...args] = rule.split(":"); //分割出需要传递给验证函数的参数
-        //将验证逻辑委托给策略对象中的验证函数
-        return strategies[strategyProperty].apply(dom, [
-          dom.value,
-          ...args,
-          errorMessage
-        ]);
-      });
-    }
-    start() {
-      for (let validatorFunc of this.#cache) {
-        let message = validatorFunc();//调用保存在cache属性中的校验规则函数
-        if (message) {
-          return message;// 如果有message，则表示验证错误，直接返回
-        }
-      }
-    }
-  }
+  class Validator {  #cache = []; //保存校验规则  add(dom, rule, errorMessage) {    // 把校验的步骤用空函数包装起来，并且放入cache    this.#cache.push(function () {      const [strategyProperty, ...args] = rule.split(":"); //分割出需要传递给验证函数的参数      //将验证逻辑委托给策略对象中的验证函数      return strategies[strategyProperty].apply(dom, [        dom.value,        ...args,        errorMessage      ]);    });  }  start() {    for (let validatorFunc of this.#cache) {      let message = validatorFunc();//调用保存在cache属性中的校验规则函数      if (message) {        return message;// 如果有message，则表示验证错误，直接返回      }    }  }}
   ```
 
   在使用策略模式重构代码之后，我们可以通过配置的方式完成一个表单的验证，这些校验规则可以复用在程序的任何地方。
@@ -710,9 +472,7 @@ calculateBontus('S',2000) // 8000
   在修改某个校验规则时，只需要编写或者改写少量的代码。比如我希望将用户名的输入框校验规则改成用户名不少于4个字符，修改起来是毫不费力的。
 
   ```javascript
-   validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空');
-   // 改成：
-   validator.add(registerForm.userName, 'minLength:4', '用户名最少4个字');
+   validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空'); // 改成： validator.add(registerForm.userName, 'minLength:4', '用户名最少4个字');
   ```
 
 ### 5.6.3 给某个文本输入框添加多个校验规则
@@ -720,26 +480,13 @@ calculateBontus('S',2000) // 8000
 目前上面的代码中一个输入框一次只能验证一种规则，如果我们希望一个输入框能够验证多个规则呢？比如像这样
 
 ```javascript
-  validator.add(registerForm.userName, [
-    ["isNonEmpty", "用户名不能为空"],
-    ["minLength:10", "用户名长度不能小于10位"]
-  ]);
+  validator.add(registerForm.userName, [    ["isNonEmpty", "用户名不能为空"],    ["minLength:10", "用户名长度不能小于10位"]  ]);
 ```
 
 只需要稍微改写一下add并添加一个新的addRules方法就可以了
 
 ```javascript
-  add(dom, rule, errorMessage) {
-    if (rule instanceof Array) {
-      return this.addRules(dom, rule);
-    }
-...
-  }
-  addRules(dom, rules) {
-    for (let [rule, errorMessage] of rules) {
-      this.add(dom, rule, errorMessage);
-    }
-  }
+  add(dom, rule, errorMessage) {    if (rule instanceof Array) {      return this.addRules(dom, rule);    }...  }  addRules(dom, rules) {    for (let [rule, errorMessage] of rules) {      this.add(dom, rule, errorMessage);    }  }
 ```
 
 > 这段代码并非Javascript设计模式与开发实践中的原代码，由于原代码的实现略麻烦，所以这里做一些修改。
@@ -809,37 +556,13 @@ JavaScript版本的策略模式往往被函数所取代，这时策略模式就�
 第一步是创建一个本体对象，这个对象可以往页面中创建img标签，并且提供一个对外的setSrc接口，外界调用这个接口，就可以给img标签设置src属性
 
 ```javascript
-var myImage = (function() {
-  var imgNode = document.createElement('img');
-  document.body.appendChild(imgNode);
-
-  return {
-    setSrc: function(src) {
-      imgNode.src = src;
-    }
-  }
-})();
-
-myImage.setSrc('http://xxxx.jpg');
+var myImage = (function() {  var imgNode = document.createElement('img');  document.body.appendChild(imgNode);  return {    setSrc: function(src) {      imgNode.src = src;    }  }})();myImage.setSrc('http://xxxx.jpg');
 ```
 
 第二步是创建代理对象，通过这个代理对象，在图片被真正加载好之前，页面会出现一张loading的占位图，来提示用户正在加载中。
 
 ```javascript
-var proxyImage = (function() {
-  const img = new Image()
-  img.onload = function() { // 3. 代理的src加载完成，会触发onload事件
-    myImage.setSrc(this.src) // 4. 此时再重新给被代理的节点设置src属性
-  }
-  return {
-    setSrc(src) {
-      myImage.setSrc('loading.png')//1.先让node节点预先加载loading图
-      img.src = src //2.设置代理的src属性
-    }
-  }
-})()
-
-proxyImage.setSrc('http://xxxx') // proxyImage代理了myImage的访问，并且加入额外的预加载操作
+var proxyImage = (function() {  const img = new Image()  img.onload = function() { // 3. 代理的src加载完成，会触发onload事件    myImage.setSrc(this.src) // 4. 此时再重新给被代理的节点设置src属性  }  return {    setSrc(src) {      myImage.setSrc('loading.png')//1.先让node节点预先加载loading图      img.src = src //2.设置代理的src属性    }  }})()proxyImage.setSrc('http://xxxx') // proxyImage代理了myImage的访问，并且加入额外的预加载操作
 ```
 
 ## 6.4 代理的意义
@@ -873,32 +596,13 @@ proxyImage.setSrc('http://xxxx') // proxyImage代理了myImage的访问，并且
 这里是html
 
 ```javascript
-    <input type="checkbox" id="1"></input>1
-    <input type="checkbox" id="2"></input>2
-    <input type="checkbox" id="3"></input>3
-    <input type="checkbox" id="4"></input>4
-    <input type="checkbox" id="5"></input>5
-    <input type="checkbox" id="6"></input>6
-    <input type="checkbox" id="7"></input>7
-    <input type="checkbox" id="8"></input>8
-    <input type="checkbox" id="9"></input>9
+    <input type="checkbox" id="1"></input>1    <input type="checkbox" id="2"></input>2    <input type="checkbox" id="3"></input>3    <input type="checkbox" id="4"></input>4    <input type="checkbox" id="5"></input>5    <input type="checkbox" id="6"></input>6    <input type="checkbox" id="7"></input>7    <input type="checkbox" id="8"></input>8    <input type="checkbox" id="9"></input>9
 ```
 
 下面给他们绑定事件,每次选中后都会往服务器发送同步哪个文件的请求。
 
 ```javascript
-const checkBoxNodes = document.querySelectorAll('input')
-
-var syncFile = function(id) {
-  console.log('开始同步文件，id为' + id)
-}
-for (let checkBoxNode of checkBoxNodes) {
-  checkBoxNode.onclick = function() {
-    if (this.checked === true) {
-      syncFile(this.id)
-    }
-  }
-}
+const checkBoxNodes = document.querySelectorAll('input')var syncFile = function(id) {  console.log('开始同步文件，id为' + id)}for (let checkBoxNode of checkBoxNodes) {  checkBoxNode.onclick = function() {    if (this.checked === true) {      syncFile(this.id)    }  }}
 ```
 
 每次我们选中checkbox，就会依次像服务器发送请求。如果用户在短时间内频繁点击(如一秒钟点四个checkbox),那么网络请求的开销就会非常大。
@@ -906,34 +610,7 @@ for (let checkBoxNode of checkBoxNodes) {
 解决方案是我们可以使用一个代理函数每次都收集要发送给服务器的请求，最后一次性发送给服务器。
 
 ```javascript
-const checkBoxNodes = document.querySelectorAll('input')
-
-var syncFile = function(id) {
-  console.log('开始同步文件，id为' + id)
-}
-
-var proxySyncFile = (function() {
-  var cache = []
-  var timer
-  return function(id) {
-    cache.push(id)
-    clearTimeout(timer) //防抖
-    timer = setTimeout(function() {
-      syncFile(cache.join(',')) // 发送请求给服务器
-      cache.length = 0 //记得清空保存起来的cache
-      clearTimeout(timer)
-
-    }, 2000)
-  }
-})()
-
-for (let checkBoxNode of checkBoxNodes) {
-  checkBoxNode.onclick = function() {
-    if (this.checked === true) {
-      proxySyncFile(this.id)
-    }
-  }
-}
+const checkBoxNodes = document.querySelectorAll('input')var syncFile = function(id) {  console.log('开始同步文件，id为' + id)}var proxySyncFile = (function() {  var cache = []  var timer  return function(id) {    cache.push(id)    clearTimeout(timer) //防抖    timer = setTimeout(function() {      syncFile(cache.join(',')) // 发送请求给服务器      cache.length = 0 //记得清空保存起来的cache      clearTimeout(timer)    }, 2000)  }})()for (let checkBoxNode of checkBoxNodes) {  checkBoxNode.onclick = function() {    if (this.checked === true) {      proxySyncFile(this.id)    }  }}
 ```
 
 ## 6.8 缓存代理
@@ -945,45 +622,13 @@ for (let checkBoxNode of checkBoxNodes) {
 下面是一个用来计算乘积的懒加载函数
 
 ```javascript
-var mult = function(...rest) {
-  let a = 1
-  mult = function(...rest) {
-    for (let i of rest) {
-      a *= i
-    }
-    return a
-  }
-  return mult(...rest)
-}
-
-console.log(mult(1, 2, 3))
+var mult = function(...rest) {  let a = 1  mult = function(...rest) {    for (let i of rest) {      a *= i    }    return a  }  return mult(...rest)}console.log(mult(1, 2, 3))
 ```
 
 如果给它加上缓存，那么就可以减少计算
 
 ```javascript
-var mult = function(...rest) {
-  let a = 1
-  let cache = {}
-  mult = function(...rest) {
-    const property = rest.join(',')
-    if (!(property in cache)) { // 判断有没有传递过同样的参数
-      for (let i of rest) {
-        console.log('这里是复杂的计算')
-        a *= i
-      }
-      cache[property] = a // 计算后把计算参数和计算结果保存在缓存里
-    }
-    // 如果有就直接返回缓存的结果，不需要重复计算了
-    return cache[property]
-  }
-  return mult(...rest)
-}
-
-console.log(mult(1, 2, 3))
-// "这里是复杂的计算" * 3
-// 6
-console.log(mult(1, 2, 3)) // 6
+var mult = function(...rest) {  let a = 1  let cache = {}  mult = function(...rest) {    const property = rest.join(',')    if (!(property in cache)) { // 判断有没有传递过同样的参数      for (let i of rest) {        console.log('这里是复杂的计算')        a *= i      }      cache[property] = a // 计算后把计算参数和计算结果保存在缓存里    }    // 如果有就直接返回缓存的结果，不需要重复计算了    return cache[property]  }  return mult(...rest)}console.log(mult(1, 2, 3))// "这里是复杂的计算" * 3// 6console.log(mult(1, 2, 3)) // 6
 ```
 
 上面的懒加载函数mult需要完成两个职责：计算乘积，缓存
@@ -991,32 +636,7 @@ console.log(mult(1, 2, 3)) // 6
 按照单一职责原则，我们应当用虚拟缓存代理模式来分离它的职责。
 
 ```javascript
-var mult = function(...rest) {
-  let a = 1
-  mult = function(...rest) {
-    for (let i of rest) {
-      console.log("这里是复杂的计算")
-      a *= i
-    }
-    return a
-  }
-  return mult(...rest)
-}
-
-
-var proxyMult = (function() {
-  let cache = {}
-  return function(...rest) {
-    let property = rest.join(',')
-    if (property in cache) {
-      return cache[property]
-    }
-    return cache[property] = mult(...rest)
-  }
-})()
-
-console.log(proxyMult(1, 2, 3))
-console.log(proxyMult(1, 2, 3))
+var mult = function(...rest) {  let a = 1  mult = function(...rest) {    for (let i of rest) {      console.log("这里是复杂的计算")      a *= i    }    return a  }  return mult(...rest)}var proxyMult = (function() {  let cache = {}  return function(...rest) {    let property = rest.join(',')    if (property in cache) {      return cache[property]    }    return cache[property] = mult(...rest)  }})()console.log(proxyMult(1, 2, 3))console.log(proxyMult(1, 2, 3))
 ```
 
 通过增加缓存代理的方式，mult函数可以继续专注于自身的职责，缓存的功能则是由代理对象实现的。
@@ -1026,35 +646,7 @@ console.log(proxyMult(1, 2, 3))
 > 这一章作者并没写什么内容，只是贴了大段代码，实际上这章就是在代理模式的基础上使用通用单例模式的思想，你会觉得这里的代码跟通用代理模式的代码很像
 
 ```javascript
-var mult = function(...rest) {
-  let a = 1
-  mult = function(...rest) {
-    for (let i of rest) {
-      console.log("这里是复杂的计算")
-      a *= i
-    }
-    return a
-  }
-  return mult(...rest)
-}
-
-/* 创建缓存代理的工厂 */
-var createProxyFactory = function(fn) {
-  let cache = {}
-  return function(...rest) {
-    let property = rest.join(',')
-    // 这里跟通用单例模式的代码非常类似，单例模式返回cache的引用，这里是返回cache里的属性
-    if (property in cache) {
-      return cache[property]
-    }
-    return cache[property] = fn(...rest)
-  }
-}
-
-const proxyMult = createProxyFactory(mult)
-
-console.log(proxyMult(1, 2, 3))
-console.log(proxyMult(1, 2, 3))
+var mult = function(...rest) {  let a = 1  mult = function(...rest) {    for (let i of rest) {      console.log("这里是复杂的计算")      a *= i    }    return a  }  return mult(...rest)}/* 创建缓存代理的工厂 */var createProxyFactory = function(fn) {  let cache = {}  return function(...rest) {    let property = rest.join(',')    // 这里跟通用单例模式的代码非常类似，单例模式返回cache的引用，这里是返回cache里的属性    if (property in cache) {      return cache[property]    }    return cache[property] = fn(...rest)  }}const proxyMult = createProxyFactory(mult)console.log(proxyMult(1, 2, 3))console.log(proxyMult(1, 2, 3))
 ```
 
 createProxyFactory是高阶函数，现在我们把用来计算的函数当作参数传递给它，就可以给各种计算方法创建不同的缓存代理，这样一来整个程序会更加灵活。
@@ -1176,20 +768,22 @@ salesOffieces.trigger('小明', 20000)
 下面是通过类来创建发布者的事件中心，使用类可以创建不同的发布者，让发布者可以拥有发布-订阅功能
 
 ```javascript
-class eventhub {
-  #cache = [];
+class eventHub {
+  #cache = {};
+  //订阅事件
   listen(key, fn) {
     if (key in this.#cache === false) {
-      this.#cache[key] = []
+      this.#cache[key] = [];
     }
-    this.#cache[key].push(fn)
-  };
+    this.#cache[key].push(fn);
+  }
+  // 发布事件
   trigger(key, ...rest) {
-    if (this.#cache[key].length === 0 || !this.#cache[key]) {
-      return false
+    if (!this.#cache[key] || this.#cache[key].length === 0) {
+      return false;
     }
     for (let fn of this.#cache[key]) {
-      fn.call(this, ...rest)
+      fn.call(this, ...rest);
     }
   }
 }
@@ -1209,11 +803,11 @@ a.trigger('a',1,2,3) // [1,2,3]
 > 上述代码是我的改写。《JavaScript设计模式与开发实践》中并不是采用这种方式，而是直接用一个event对象，通过遍历event对象，给发布者添加event对象身上的listen、trigger等属性。
 >
 > ```JavaScript
->         var installEvent = function( obj ){
->             for ( var i in event ){
->               obj[ i ] = event[ i ];
->             }
->         };
+>      var installEvent = function( obj ){
+>          for ( var i in event ){
+>            obj[ i ] = event[ i ];
+>          }
+>      };
 > ```
 
 ## 8.6 取消订阅事件
@@ -1222,15 +816,17 @@ a.trigger('a',1,2,3) // [1,2,3]
 
 ```javascript
 class eventHub {
-  #cache = [];
+  #cache = {};
+  //订阅事件
   listen(key, fn) {
     if (key in this.#cache === false) {
       this.#cache[key] = [];
     }
     this.#cache[key].push(fn);
   }
+  // 发布事件
   trigger(key, ...rest) {
-    if (this.#cache[key].length === 0 || !this.#cache[key]) {
+    if (!this.#cache[key] || this.#cache[key].length === 0) {
       return false;
     }
     for (let fn of this.#cache[key]) {
@@ -1282,4 +878,141 @@ a.trigger('a') //取消了 无打印
 a.remove('b',fn2)//给b取消掉fn2函数的订阅
 a.trigger('b') // fn1
 ```
+
+## 8.7 在React应用内使用发布-订阅模式传递一个id
+
+我们经常遇到这样一个场景：进入列表页面，可以得到一个ID，然后通过这个ID进行详情页面。
+
+列表页面跟详情页面是兄弟页面，这里我们有几种方式传递ID
+
+* 我们自然可以用状态提升的方式将ID传递给两者的父组件，然后props或者Context传递（太麻烦）
+* Redux全局管理（太重了）
+* 通过url的queryString传递（常用方法）
+* 通过浏览器storage
+* 通过发布-订阅模式传递(不常用但很高级)
+
+下面是发布订阅的代码，采用TS编写，方法基本一样，但也略有不同
+
+```typescript
+// EventHub.ts
+class _EventHub {
+  private cache = {};
+  //订阅事件
+  listen(key, fn) {
+    if (key in this.cache === false) {
+      this.cache[key] = [];
+    }
+    this.cache[key].push(fn);
+  }
+  // 发布事件
+  trigger(key, ...rest) {
+    if (!this.cache[key] || this.cache[key].length === 0) {
+      return false;
+    }
+    const result: any[] = [];
+    for (let fn of this.cache[key]) {
+      result.push(fn.call(this, ...rest));
+    }
+    //触发后马上清空以免有缓存
+    this.remove(key);
+    return result;
+  }
+  //删除订阅事件
+  remove(key, fn?) {
+    if (!key) {
+      return false;
+    }
+    //如果没传递指定的函数，则删除全部订阅
+    if (!fn) {
+      this.cache[key] = [];
+    }
+    const len = this.cache[key].length;
+    // 遍历cache，删除指定的函数
+    for (let i = 0; i < len; i++) {
+      let _fn = this.cache[key][i];
+      if (fn === _fn) {
+        this.cache[key].splice(i, 1);
+        break;
+      }
+    }
+  }
+}
+//一个代理类，使用单例模式，可以返回同一个EventHub的实例
+const EventHub = (function () {
+  var cache;
+  return function () {
+    if (cache) {
+      return cache;
+    }
+    return (cache = new _EventHub());
+  };
+})();
+
+export default EventHub;
+```
+
+```tsx
+// App.tsx
+import "./styles.css";
+import Page1 from "./page1";
+import Page2 from "./page2";
+import { Routes, Route } from "react-router-dom";
+export default function App() {
+  return (
+    <div className="App">
+      <Routes>
+        <Route path="/page1" element={<Page1 />} />
+        <Route path="/page2" element={<Page2 />} />
+      </Routes>
+    </div>
+  );
+}
+```
+
+```tsx
+// Page1.tsx
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import Eventhub from "./eventHub";
+export default function Page1() {
+  const id = 2;
+  useEffect(() => {
+    Eventhub().listen("k", function () {
+      return id;
+    });
+  }, []);
+  return (
+    <div className="page1">
+      <h1>页面1</h1>
+      <Link to="/page2">to页面2</Link>
+    </div>
+  );
+}
+```
+
+```tsx
+// Page2.tsx
+import "./styles.css";
+import Eventhub from "./eventHub";
+import { Link } from "react-router-dom";
+import { useEffect } from "react";
+
+export default function Page2() {
+  useEffect(() => {
+    const id = Eventhub().trigger("k");
+    alert("id=" + id);
+  }, []);
+  return (
+    <div className="page2">
+      <h2>页面2</h2>
+      <Link to="/page1">to页面1</Link>
+    </div>
+  );
+}
+```
+
+* 当触发后，需要及时清空cache以免有缓存
+* 这里使用一个单例模式，让每次使用Eventhub时都返回同一个对象
+
+![React-eventhub](assets/React-eventhub.gif)
 
