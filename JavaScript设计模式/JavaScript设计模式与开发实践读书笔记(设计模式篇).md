@@ -1067,3 +1067,219 @@ createProxyFactory是高阶函数，现在我们把用来计算的函数当作�
 
 # 第八章 发布订阅模式
 
+发布-订阅模式又叫观察者模式，它定义对象之间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都将得到通知。在JavaScript中，我们一般用事件模型来替代传统的发布-订阅模式
+
+## 8.1 现实中的发布-订阅模式
+
+小明想买房，但是售楼处的房子早已售磬。于是小明将号码留在售楼处，让售楼MM有了房子之后给他打电话——订阅。
+
+售楼MM的手里有想买房客户的花名册，新楼盘推出后，售楼MM会翻开花名册，依次给客户发信息通知他们——发布。
+
+## 8.2 发布-订阅模式的作用
+
+订阅模式可以广泛应用于异步编程中，这是一种替代传递回调函数的方案。比如，我们可以订阅ajax请求的error、succ事件。
+
+订阅模式可以取代对象之间硬编码的通知机制，一个对象不用再显式地调用另外一个对象的某个接口。发布-订阅模式可以让两个对象松耦合地联系在一起，虽然不太清楚彼此的细节，但这不影响他们之间互相通信。
+
+## 8.3 DOM事件
+
+我们在DOM节点上面绑定过事件函数，这就是一种发布-订阅模式。
+
+```javascript
+document.body.addEventListener('click', function() {
+  alert(2);
+}, false);
+
+document.body.addEventListener('click', function() {
+  alert(3);
+}, false);
+
+document.body.addEventListener('click', function() {
+  alert(4);
+}, false);
+
+document.body.click(); // 模拟用户点击
+```
+
+在上面的代码中，我们需要监控用户点击document.body的动作，但是我们没有办法预知用户在什么时候点击。所以我们订阅document.body的click事件，当body节点被点击时，body节点就会向订阅者发布这个消息。
+
+## 8.4 自定义事件
+
+实现发布订阅模式的步骤
+
+* 指定谁充当发布者（售楼处）
+* 给发布者添加一个缓存列表，用来存放回调函数以便通知订阅者（花名册）
+* 当时机成熟，遍历缓存列表，触发里面存放的订阅者回调函数（通过花名册发短信通知买房）
+
+下面实现一个简单的发布订阅模式
+
+```javascript
+const salesOffieces = {} // 订阅对象
+salesOffieces.cache = [] //缓存列表用来放回调函数
+salesOffieces.listen = function(fn) { //订阅消息
+  this.cache.push(fn) //存入缓存列表
+}
+salesOffieces.trigger = function(...rest) {
+  // 需要的时候触发
+  for (let fn of this.cache) {
+    fn.call(this, ...rest)
+  }
+}
+
+// 测试
+salesOffieces.listen(function(e) {
+  console.log(e)
+})
+// 触发了
+salesOffieces.trigger()
+```
+
+上面的发布订阅比较简单，可惜功能不够，比如不能指定订阅者来发布消息。
+
+我们有必要增加一个标识key，根据key可以给指定的订阅对象发布消息。
+
+```javascript
+const salesOffieces = {} // 订阅对象
+
+salesOffieces.cache = {} //缓存列表用来放回调函数
+//订阅时指定key
+salesOffieces.listen = function(key, fn) { //订阅消息
+  if (key in this.cache === false) {
+    this.cache[key] = []
+  }
+  this.cache[key].push(fn) //存入对应key的缓存列表
+}
+
+// 需要的时候触发
+salesOffieces.trigger = function(key, ...rest) {
+  let fns = this.cache[key] //取出对应key的缓存列表
+  if (!fns || fns.length === 0) {
+    return false
+  }
+  for (let fn of fns) {
+    fn.call(this,key, ...rest)
+  }
+}
+
+salesOffieces.listen('小明', function(key,args) {
+  console.log('price' + key + args)
+})
+
+salesOffieces.trigger('小明', 20000)
+// "price小明20000"
+```
+
+现在订阅者可以只订阅自己感兴趣的事件了。
+
+## 8.5 发布-订阅模式的通用实现
+
+下面是通过类来创建发布者的事件中心，使用类可以创建不同的发布者，让发布者可以拥有发布-订阅功能
+
+```javascript
+class eventhub {
+  #cache = [];
+  listen(key, fn) {
+    if (key in this.#cache === false) {
+      this.#cache[key] = []
+    }
+    this.#cache[key].push(fn)
+  };
+  trigger(key, ...rest) {
+    if (this.#cache[key].length === 0 || !this.#cache[key]) {
+      return false
+    }
+    for (let fn of this.#cache[key]) {
+      fn.call(this, ...rest)
+    }
+  }
+}
+```
+
+测试一下
+
+```javascript
+const a = new eventhub()
+a.listen('a', function(...rest) {
+  console.log(rest)
+})
+
+a.trigger('a',1,2,3) // [1,2,3]
+```
+
+> 上述代码是我的改写。《JavaScript设计模式与开发实践》中并不是采用这种方式，而是直接用一个event对象，通过遍历event对象，给发布者添加event对象身上的listen、trigger等属性。
+>
+> ```JavaScript
+>         var installEvent = function( obj ){
+>             for ( var i in event ){
+>               obj[ i ] = event[ i ];
+>             }
+>         };
+> ```
+
+## 8.6 取消订阅事件
+
+下面来实现取消订阅事件
+
+```javascript
+class eventHub {
+  #cache = [];
+  listen(key, fn) {
+    if (key in this.#cache === false) {
+      this.#cache[key] = [];
+    }
+    this.#cache[key].push(fn);
+  }
+  trigger(key, ...rest) {
+    if (this.#cache[key].length === 0 || !this.#cache[key]) {
+      return false;
+    }
+    for (let fn of this.#cache[key]) {
+      fn.call(this, ...rest);
+    }
+  }
+  //删除订阅事件
+  remove(key, fn) {
+    if (!key) {
+      return false;
+    }
+    //如果没传递指定的函数，则删除全部订阅
+    if (!fn) {
+      this.#cache[key] = [];
+    }
+    const len = this.#cache[key].length;
+    // 遍历cache，删除指定的函数
+    for (let i = 0; i < len; i++) {
+      let _fn = this.#cache[key][i];
+      if (fn === _fn) {
+        this.#cache[key].splice(i, 1);
+        break;
+      }
+    }
+  }
+}
+```
+
+测试一下
+
+```javascript
+const a = new eventHub()
+
+const fn1 = function() {
+  console.log('fn1')
+}
+const fn2 = function() {
+  console.log('fn2')
+}
+a.listen('a', fn1)
+a.listen('a', fn2)
+a.listen('b', fn1)
+a.listen('b', fn2)
+
+a.trigger('a')// fn1 fn2
+a.trigger('b') // fn1 fn2
+a.remove('a') //把a的所有订阅都取消
+a.trigger('a') //取消了 无打印
+a.remove('b',fn2)//给b取消掉fn2函数的订阅
+a.trigger('b') // fn1
+```
+
