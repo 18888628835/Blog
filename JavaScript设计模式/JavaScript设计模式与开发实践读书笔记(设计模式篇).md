@@ -881,6 +881,8 @@ a.trigger('b') // fn1
 
 ## 8.7 在React应用内使用发布-订阅模式传递一个id
 
+> 由于书中的例子不是很好理解，我在React中试写了一个这个模式，并成功传递了数据，下面是我的代码，都很简单。
+
 我们经常遇到这样一个场景：进入列表页面，可以得到一个ID，然后通过这个ID进行详情页面。
 
 列表页面跟详情页面是兄弟页面，这里我们有几种方式传递ID
@@ -895,8 +897,11 @@ a.trigger('b') // fn1
 
 ```typescript
 // EventHub.ts
+type Cache = {
+  [key: string]: Array<(args?: unknown) => any>;
+};
 class _EventHub {
-  private cache = {};
+  private cache: Cache = {};
   //订阅事件
   listen(key, fn) {
     if (key in this.cache === false) {
@@ -1000,7 +1005,7 @@ import { useEffect } from "react";
 export default function Page2() {
   useEffect(() => {
     const id = Eventhub().trigger("k");
-    alert("id=" + id);
+    console.log("id=" + id);
   }, []);
   return (
     <div className="page2">
@@ -1012,7 +1017,369 @@ export default function Page2() {
 ```
 
 * 当触发后，需要及时清空cache以免有缓存
-* 这里使用一个单例模式，让每次使用Eventhub时都返回同一个对象
+* 这里使用单例模式，让每次使用Eventhub时都返回同一个对象,做到全局使用同一个发布者对象的效果
 
 ![React-eventhub](assets/React-eventhub.gif)
+
+## 8.8 全局的发布-订阅对象
+
+在实际开发中，我们不可能使用一次发布-订阅模式就新创建一个发布者对象，比较好的做法是只采用一个全局的Event对象来实现。
+
+订阅者不需要知道发布者是谁，而是直接订阅即可。发布者也不需要知道订阅者是谁，只需要按照key发布就行。
+
+所以上一节代码中，我使用了一个单例模式，每次执行`EventHub()`时，都会返回`_EventHub`的实例。`EventHub`是一个代理类，它有只返回一个`_EventHub`实例的职责。
+
+`_EventHub`是真正的全局的Event对象，它充当中介的作用，所有订阅都会通过它，所有发布也都必须经过它。我们不再关心用哪个发布者对象来订阅-发布了，`_EventHub`可以把订阅者和发布者都联系起来。
+
+## 8.9 模块间通信
+
+我们要留意另一个问题，模块之间如果用了太多的全局发布—订阅模式来通信，那么模块与模块之间的联系就被隐藏到了背后。我们最终会搞不清楚消息来自哪个模块，或者消息会流向哪些模块，这又会给我们的维护带来一些麻烦，也许某个模块的作用就是暴露一些接口给其他模块调用。
+
+## 8.10 必须先订阅再发布吗
+
+我们所了解到的发布—订阅模式，都是订阅者必须先订阅一个消息，随后才能接收到发布者发布的消息。如果把顺序反过来，发布者先发布一条消息，而在此之前并没有对象来订阅它，这条消息无疑将消失在宇宙中。
+
+在某些情况下，我们需要先将这条消息保存下来，等到有对象来订阅它的时候，再重新把消息发布给订阅者。就如同QQ中的离线消息一样，离线消息被保存在服务器中，接收人下次登录上线之后，可以重新收到这条消息。
+
+为了满足这个需求，我们要建立一个存放离线事件的堆栈，当事件发布的时候，如果此时还没有订阅者来订阅这个事件，我们暂时把发布事件的动作包裹在一个函数里，这些包装函数将被存入堆栈中，等到终于有对象来订阅此事件的时候，我们将遍历堆栈并且依次执行这些包装函数，也就是重新发布里面的事件。当然离线事件的生命周期只有一次，就像QQ的未读消息只会被重新阅读一次，所以刚才的操作我们只能进行一次。
+
+## 8.13 小结
+
+发布-订阅模式，也就是我们常说的观察者模式。
+
+优点：
+
+* 在时间上解耦
+* 为对象之间解耦
+
+缺点：
+
+* 创建订阅内容需要消耗一定时间和内存，且如果最后都未发生，消息会一直存在。
+* 发布-订阅模式可以弱化对象之间的关系，但如果过度使用，对象和对象之间的联系也被深埋在背后，导致程序难以跟踪维护和理解。
+
+# 第九章 命令模式
+
+命令对象：快餐店的所有外卖信息都会形成一个清单。有了这个清单，厨房可以按照订单顺序炒菜，客户也可以很方便地打电话撤销订单。这些记录订餐信息的清单，就是命令模式中的命令对象。
+
+## 9.1命令模式的用途
+
+命令模式是最简单和优雅的模式之一，命令模式中的命令（command）指的是一个执行某些特定事情的指令。
+
+命令模式最常见的应用场景是：**有时候需要向某些对象发送请求，但是并不知道请求的接收者是谁，也不知道被请求的操作是什么。此时希望用一种松耦合的方式来设计程序，使得请求发送者和请求接收者能够消除彼此之间的耦合关系。**
+
+## 9.2 命令模式的一个例子——菜单程序
+
+假设我们正在编写一个用户界面程序，该用户界面上至少有数十个Button按钮。因为项目比较复杂，所以我们决定让某个程序员负责绘制这些按钮，而另外一些程序员则负责编写点击按钮后的具体行为，这些行为都将被封装在对象里。
+
+设计模式的主题总是把不变的事物和变化的事物分离开来，命令模式也不例外。按下按钮之后会发生一些事情是不变的，而具体会发生什么事情是可变的。通过command对象的帮助，将来我们可以轻易地改变这种关联，因此也可以在将来再次改变按钮的行为。
+
+```html
+  <button id='button1'>点击按钮1</button>
+  <button id='button2'>点击按钮2</button>
+  <button id='button3'>点击按钮3</button>
+```
+
+命令模式的第一步，是定义一个setCommand函数，负责安装命令。
+
+```javascript
+var button1 = document.getElementById('button1')
+var button2 = document.getElementById('button2')
+var button3 = document.getElementById('button3')
+
+var setCommand = function(button, command) {
+  button.onclick = function() {
+    command.execute();// 这里执行命令的动作被约定为调用command对象的execute方法
+  }
+};
+```
+
+第二步，是将要做的行为都收集起来，这些用来收集行为的对象被称为命令接收者
+
+```javascript
+//所有要做的行为 receiver
+var MenuBar = {
+  refresh: function() {
+    console.log(’刷新菜单目录’);
+  }
+};
+
+var SubMenu = {
+  add: function() {
+    console.log(’增加子菜单’);
+  },
+  del: function() {
+    console.log(’删除子菜单’);
+  }
+};
+```
+
+第三步，把这些定位都封装到命令类中
+
+```javascript
+
+// 刷新类
+class RefreshMenuBarCommand {
+  constructor(receiver) {
+    this.receiver = receiver;
+  }
+  execute() {
+    this.receiver.refresh();
+  }
+}
+// 增加菜单类
+class AddSubMenuCommand {
+  constructor(receiver) {
+    this.receiver = receiver;
+  }
+  execute() {
+    this.receiver.add();
+  }
+}
+// 删除菜单类
+class DelSubMenuCommand {
+  constructor(receiver) {
+    this.receiver = receiver;
+  }
+  execute() {
+    this.receiver.del();
+  }
+}
+```
+
+最后是将命令接收者传递给setCommand方法来将命令安装到button上
+
+```javascript
+var refreshMenuBarCommand = new RefreshMenuBarCommand(MenuBar);
+var addSubMenuCommand = new AddSubMenuCommand(SubMenu);
+var delSubMenuCommand = new DelSubMenuCommand(SubMenu);
+
+setCommand(button1, refreshMenuBarCommand);
+setCommand(button2, addSubMenuCommand);
+setCommand(button3, delSubMenuCommand);
+```
+
+## 9.3 JavaScript中的命令模式
+
+上面的命令模式，是模拟传统面向对象语言的命令模式实现。命令模式将过程式的请求调用封装在command对象的execute方法里，通过封装方法调用，我们可以把运算块包装成形。command对象可以被四处传递，所以在调用命令的时候，客户（Client）不需要关心事情是如何进行的。
+
+看起来整个过程就是给一个对象起一个execute方法。引入command对象和receiver这两个角色对于JavaScript这种函数为一等对象的语言来说，实在是将简单的事情复杂化了，我们给他做一个改写：
+
+```javascript
+var setCommand = function(button, commandFunc) {
+  button.onclick = commandFunc
+};
+//所有要做的行为
+var MenuBar = {
+  refresh: function() {
+    console.log("刷新菜单目录");
+  }
+};
+
+var SubMenu = {
+  add: function() {
+    console.log("增加子菜单");
+  },
+  del: function() {
+    console.log("删除子菜单");
+  }
+};
+
+setCommand(button1,MenuBar.refresh)
+setCommand(button1,SubMenu.add)
+setCommand(button1,SubMenu.del)
+```
+
+跟策略模式一样，命令模式早已融入JavaScript语言当中。我们不需要再封装一个execute方法，而是封装在普通函数中，就可以传递起来。
+
+如果想要显式表示是命令模式，或者未来可能会添加撤销命令的那么可以继续使用execute方法。
+
+```javascript
+var setCommand = function(button, command) {
+  button.onclick = function() {
+    command.execute()
+  }
+};
+//所有要做的行为
+var MenuBar = {
+  refresh: function() {
+    console.log("刷新菜单目录");
+  }
+};
+
+var SubMenu = {
+  add: function() {
+    console.log("增加子菜单");
+  },
+  del: function() {
+    console.log("删除子菜单");
+  }
+};
+
+
+const refreshCommand = {
+  execute() {
+    MenuBar.refresh()
+  }
+}
+const addCommand = {
+  execute() {
+    SubMenu.add()
+  }
+}
+const delCommand = {
+  execute() {
+    SubMenu.del()
+  }
+}
+
+setCommand(button1, refreshCommand)
+setCommand(button1, addCommand)
+setCommand(button1, delCommand)
+```
+
+本质上就是将类换成对象，由于函数可以自由传递，所以receiver可以不用传递。
+
+## 9.4 撤销命令
+
+撤销操作的实现一般是给命令对象增加一个名为unexecude或者undo的方法，在该方法里执行execute的反向操作。
+
+比如下面定义设置命令的方法
+
+```javascript
+function setCommand(target, command) {
+  target.onclick = command.execute.bind(command)
+}
+
+function delCommand(target, command) {
+  target.onclick = command.undo.bind(command)
+}
+```
+
+定义一个命令类：接收一个receiver
+
+```javascript
+class Command {
+  constructor(receiver) {
+    this.receiver = receiver
+  }
+  execute() {
+    this.receiver.add()
+  }
+  undo() {
+    this.receiver.del()
+  }
+}
+```
+
+收集receiver的行为
+
+```javascript
+var SubMenu = {
+  add: function() {
+    console.log("增加子菜单");
+  },
+  del: function() {
+    console.log("删除子菜单");
+  }
+};
+```
+
+使用命令
+
+```javascript
+setCommand(button1, new Command(SubMenu))
+delCommand(button2, new Command(SubMenu))
+```
+
+## 9.7 宏命令
+
+宏命令是一组命令的集合，通过执行宏命令的方式，可以一次执行一批命令。想象一下，家里有一个万能遥控器，每天回家的时候，只要按一个特别的按钮，它就会帮我们关上房间门，顺便打开电脑并登录QQ。
+
+创建宏命令的第一步，就是制定好执行的指令：
+
+```javascript
+class closeDoorCommand {
+  execute() {
+    console.log('开门')
+  }
+}
+
+class OpenCompute {
+  execute() {
+    console.log('打开电脑')
+  }
+}
+
+class LoginQQ {
+  execute() {
+    console.log('登录QQ')
+  }
+}
+```
+
+第二步，是创建一个宏命令，宏命令有add方法，接收命令为参数，调用后会将命令添加到宏命令列表中。
+
+```javascript
+class MacroCommand {
+  macroList = []
+  add(commander) {
+    this.macroList.push(commander)
+  }
+  execute() {
+    for (let commander of this.macroList) {
+      commander.execute()
+    }
+  }
+}
+```
+
+第三步：添加设置命令的方法
+
+```javascript
+function setCommand(target, command) {
+  command.execute.call(command)
+}
+```
+
+最后一步，添加命令并使用
+
+```javascript
+const macroCommand = new MacroCommand()
+macroCommand.add(new closeDoorCommand())
+macroCommand.add(new OpenCompute())
+macroCommand.add(new LoginQQ())
+
+setCommand(button1, macroCommand)
+```
+
+当设置命令后，`macroCommand`会执行内部的`execute`方法，`execute`方法将遍历宏命令列表，并执行收集好的`commander.execute`方法。
+
+当然我们也可以为宏命令添加撤销功能，跟`macroCommand.execute类似，当调用macroCommand.undo`时, 宏命令里包含所有的字命令对象要依次执行各自的undo操作。
+
+## 9.8 智能命令和傻瓜命令
+
+```JavaScript
+        var closeDoorCommand = {
+            execute: function(){
+              console.log( ’关门’ );
+            }
+        };
+```
+
+closeDoorCommand中没有包含任何receiver的信息，它本身就包揽了执行请求的行为，这跟我们之前看到的命令对象都包含了一个receiver是矛盾的。
+
+一般来说，命令模式都会在command对象中保存一个接收者来负责真正执行客户的请求，这种情况下命令对象是“傻瓜式”的，它只负责把客户的请求转交给接收者来执行，这种模式的好处是请求发起者和请求接收者之间尽可能地得到了解耦。
+
+但是我们也可以定义一些更“聪明”的命令对象，“聪明”的命令对象可以直接实现请求，这样一来就不再需要接收者的存在，这种“聪明”的命令对象也叫作智能命令。
+
+没有接收者的智能命令，退化到和策略模式非常相近，从代码结构上已经无法分辨它们，能分辨的只有它们意图的不同。
+
+* 策略模式指向的问题域更小，所有策略对象的目标总是一致的，它们只是达到这个目标的不同手段，它们的内部实现是针对“算法”而言的。
+* 智能命令模式指向的问题域更广，command对象解决的目标更具发散性。命令模式还可以完成撤销、排队等功能。
+
+
+
+## 9.9 小结
+
+Javascript可以用高阶函数非常方便地实现命令模式。命令模式在JavaScript中是一种隐形的模式。
 
