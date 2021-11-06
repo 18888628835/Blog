@@ -1818,3 +1818,115 @@ macroCommand 表现得像一个命令，但它实际上只是这些命令的“�
 
 ## 10.3 请求在树中传递的过程
 
+在组合模式中，请求在树中传递的过程总是遵循一种逻辑。
+
+以宏命令为例，请求从树最顶端的对象往下传递，如果当前处理请求的对象是叶对象（普通子命令），叶对象自身会对请求作出相应的处理；如果当前处理请求的对象是组合对象（宏命令），组合对象则会遍历它属下的子节点，将请求继续传递给这些子节点。
+
+如果子节点是叶对象，叶对象自身会处理这个请求，而如果子节点还是组合对象，请求会继续往下传递。叶对象下面不会再有其他子节点，一个叶对象就是树的这条枝叶的尽头，组合对象下面可能还会有子节点。
+
+![img](assets/epub_27337473_28.jpeg)
+
+请求从上到下沿着树进行传递，直到树的尽头。作为客户，只需要关心树最顶层的组合对象，客户只需要请求这个组合对象，请求就会沿着树往下传递，依次到达所有的叶对象。
+
+## 10.4 更强大的宏命令
+
+假设我们现在需要一个超级万能遥控器，可以控制家里所有的电器，这个遥控器拥有一下功能：
+
+* 打开空调
+* 打开电视和音响
+* 关门、开电脑、登录QQ
+
+先设置一下超级万能遥控器的按钮
+
+```javascript
+  <button id='button'>按我</button>
+```
+
+下面是命令集
+
+```javascript
+class MacroCommand {
+  constructor() {
+    this.commandList = []
+  }
+  add(command) {
+    this.commandList.push(command)
+  }
+  execute() {
+    for (let command of this.commandList) {
+      command.execute()
+    }
+  }
+}
+
+class OpenAcCommand {
+  execute() {
+    console.log('开空调')
+  }
+}
+
+
+
+class OpenTvCommand {
+  execute() {
+    console.log('开电视')
+  }
+}
+
+class openSoundCommand {
+  execute() {
+    console.log('打开音响')
+  }
+}
+//超级遥控器
+const macroCommand1 = new MacroCommand()
+macroCommand1.add(new OpenAcCommand())
+macroCommand1.add(new OpenTvCommand())
+macroCommand1.add(new openSoundCommand())
+
+
+class closeDoorCommand {
+  execute() {
+    console.log('关门')
+  }
+}
+
+class openPcCommand {
+  execute() {
+    console.log('开电脑')
+  }
+}
+
+class openQQCommand {
+  execute() {
+    console.log('开QQ')
+  }
+}
+// 遥控器2号
+var macroCommand2 = new MacroCommand()
+macroCommand2.add(new closeDoorCommand())
+macroCommand2.add(new openPcCommand())
+macroCommand2.add(new openQQCommand())
+// 遥控器1号将2号也组合起来
+macroCommand1.add(macroCommand2)
+
+
+function setCommand(command) {
+  button.onclick = command.execute.bind(command)//这里记得绑定一下this指向
+}
+
+setCommand(macroCommand1)
+```
+
+点击按钮后，就会看到执行以下结果：
+
+```bash
+"开空调"
+"开电视"
+"打开音响"
+"关门"
+"开电脑"
+"开QQ"
+```
+
+从这个例子可以看出，基本对象可以被组合成更复杂的组合对象，组合对象又可以被组合，这样不断递归下去，这棵树的结构可以支持任意多的复杂度。在树最终被构造完成之后，让整颗树最终运转起来的步骤非常简单，只需要调用最上层对象的execute方法。每当对最上层的对象进行一次请求时，实际上是在对整个树进行深度优先的搜索，而创建组合对象的程序员并不关心这些内在的细节，往这棵树里面添加一些新的节点对象是非常容易的事情。
