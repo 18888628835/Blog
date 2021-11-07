@@ -42,7 +42,7 @@
 
 1.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
 
-2.[JavaScript 设计模式与开发实践读书笔记(设计模式篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(设计模式篇).md>)
+2.[单例模式、策略模式、代理模式、发布订阅模式、命令模式、组合模式](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/单例模式、策略模式、代理模式、发布订阅模式、命令模式、组合模式.md)
 
 ## 重学 JavaScript
 
