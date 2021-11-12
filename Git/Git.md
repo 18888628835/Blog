@@ -204,7 +204,7 @@ git checkout -b xxx  创建并切换到xxx分支
 git checkout xxx  切换到xxx分支
 git branch -v  查看所有分支
 git branch xx分支 创建xx分支
-git checkout -b xx分支 创建并切换到xx分支
+git checkout -b xx分支 origin/xx分支。从远程xx分支创建并切换到xx分支
 git branch -d xxx  删除xxx分支
 git branch -D xxx  强制删除xxx分支
 git reflog 查看所有切换过版本的情况以及切换过的操作情况用 也可看到commit后的版本号
