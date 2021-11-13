@@ -257,3 +257,67 @@ git merge x 合并当前线与分支x
 
 > 如果产生了冲突，会提示conflict，那么我们可以通过git status -sb 指令来查看哪些产生了冲突的简化信息。找到冲突的文件，会发现git已经帮助识别冲突的地方 对冲突的内容作出处理，处理结束后切记要add到备选状态。然后git status -sb找到下一个冲突的文件，改了继续add 全部修改完后 git commit 一下 这时候不需要-v 或者-m 
 
+
+
+# git远程仓库
+
+git文件可以放在云端进行管理，一般我们都会选择与github进行关联。
+
+在与github关联前，需要做一些配置工作。为了方便我们上传，可以通过ssh key来关联本地仓库与github仓库的关系。 
+
+这种方式实际上就是在自己的电脑上放私有钥匙，github上放公有钥匙进行配对。
+
+前提条件：需要电脑上已安装git
+
+配置步骤：
+
+ssh-keygen -t rsa -b 4096 -C 邮箱 一直回车 三次
+
+ cat ~/.ssh/id_rsa.pub              # 得到公钥内容 在users目录内会有.ssh目录 
+
+然后复制公钥的内容，粘贴到github的setting--ssh key中 
+
+测试是否已连接
+
+ssh -T git@github.com
+
+提示会问你yes or no 填yes即可。这个步骤是github给你返回了一个公钥来确认你是你 
+
+上传代码--两行代码
+
+首先在github上面创建一个代码仓库 然后点击ssh（这个步骤很重要，不要点https 因为我们用了ssh key！！）
+
+下面会提示两行代码
+
+git remote add origin git@xxxxxx //表示在本地添加远程地址 仓库的名字默认origin
+
+git push -u origin master //推送本地的分支到远程的master分支 写过一次这个代码 那么下次就不需要写全了
+
+下次如果要提交就用git push即可 
+
+如果遇到git pull 那就输入git pull一下 一般需要git pull的情况是远程仓库发生了变动 需要与本地做合并
+ 
+
+如何上传其他分支 
+
+git push origin x:x
+
+方法2:
+
+git checkout x
+
+git push -u origin x
+
+ 
+
+下载别人的代码
+
+git clone git@xxxxxxx 如果是自己的代码 可以用ssh 如果是别人的 可以用http的码
+
+如果是不同机器 需要另外安装ssh 一个机子一个key 
+
+ 
+
+ 
+
+GitHub Gist: 7bad0ac857fb1a92b886e1aa5cbbd2bb309a944c
