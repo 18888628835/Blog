@@ -138,7 +138,7 @@ mv a/b/c . 移动文件到当前目录 .代表当前目录
 
 # git基础
 
-设置邮箱跟姓名
+全局设置邮箱跟姓名
 
 ```bash
 /* 全局 */
@@ -153,6 +153,15 @@ git config –-local user.name 'your name'
 git config –-local user.email 'email@xxx.com'
 ```
 
+其他配置
+
+```bash
+git config --global push.default simple 
+git config --global core.quotepath false 
+git config --global core.editor "code --wait" 
+git config --global core.autocrlf input
+```
+
 查看 config的配置
 
 ```bash
@@ -160,11 +169,13 @@ git config --list --global
 git config --list --local
 ```
 
+其次就可以开启git在本地仓库的一些应用了，实际上git本地仓库就是在你需要版本管理的目录下增加一个.git目录，来帮助你版本管理 注意这个目录不要是桌面 以免将你的桌面设置一个git目录，会传入很多桌面文件到git上去
+
 提交
 
 ```bash
 cd git-demo-1
-git init
+git init /* git仓库初始化，增加xxx目录下.git目录 */
 git add . 
 git commit -m 'xxxxx'
 ```
@@ -175,7 +186,7 @@ git分三个区域：工作目录，暂存区，版本历史区
 
 版本历史区则需要git commit提交文件。
 
-查看文件在哪个状态
+查看文件在哪个状态（是否跟git关联，目前是否在备选区）
 
 ```bash
 git status
@@ -195,22 +206,22 @@ git log  查看当前版本历史
 git log --oneline  简略查看
 git log -n4 --oneline  简略查看最近4条
 git log --all --graph  图形化查看所有版本历史 包括分支
+git reflog 查看所有切换过版本的情况以及切换过的操作情况用 也可看到commit后的版本号
+/*区别*/
+git reflog会记录所有信息，包括你穿越reset后的操作信息，git log只显示你当前版本到原始版本的信息
 ```
 
 分支
 
 ```bash
-git checkout -b xxx  创建并切换到xxx分支
-git checkout xxx  切换到xxx分支
 git branch -v  查看所有分支
+git branch -vv  查看所有分支与远程分支的关联情况
 git branch xx分支 创建xx分支
-git checkout -b xx分支 origin/xx分支。从远程xx分支创建并切换到xx分支
 git branch -d xxx  删除xxx分支
 git branch -D xxx  强制删除xxx分支
-git reflog 查看所有切换过版本的情况以及切换过的操作情况用 也可看到commit后的版本号
-/*区别*/
-git reflog会记录所有信息，包括你穿越reset后的操作信息，git log只显示你当前版本到原始版本的信息
-
+git checkout -b xxx  创建并切换到xxx分支
+git checkout xxx  切换到xxx分支
+git checkout -b xx分支 origin/xx分支。从远程xx分支创建并切换到xx分支
 ```
 
 修改message
@@ -238,8 +249,8 @@ git stash list 查看贮藏列表
 
 ```bash
 git reset HEAD  取消被暂存的内容
-git reset --hard xxxcommit字符串 恢复到指定版本
-git reset --hard HEAD 恢复成上次提交的commit
+git reset --hard xxx版本号 切换版本 这个操作需要add过的文件都commit 否则会删除掉add过的文件
+git reset --hard HEAD 恢复成上次提交的commit 
 git reset HEAD^ 恢复到上一个版本
 ```
 
@@ -257,8 +268,6 @@ git merge x 合并当前线与分支x
 
 > 如果产生了冲突，会提示conflict，那么我们可以通过git status -sb 指令来查看哪些产生了冲突的简化信息。找到冲突的文件，会发现git已经帮助识别冲突的地方 对冲突的内容作出处理，处理结束后切记要add到备选状态。然后git status -sb找到下一个冲突的文件，改了继续add 全部修改完后 git commit 一下 这时候不需要-v 或者-m 
 
-
-
 # git远程仓库
 
 git文件可以放在云端进行管理，一般我们都会选择与github进行关联。
@@ -271,53 +280,58 @@ git文件可以放在云端进行管理，一般我们都会选择与github进�
 
 配置步骤：
 
+```bash
 ssh-keygen -t rsa -b 4096 -C 邮箱 一直回车 三次
 
- cat ~/.ssh/id_rsa.pub              # 得到公钥内容 在users目录内会有.ssh目录 
+cat ~/.ssh/id_rsa.pub              # 得到公钥内容 在users目录内会有.ssh目录 
+```
 
 然后复制公钥的内容，粘贴到github的setting--ssh key中 
 
 测试是否已连接
 
+```bash
 ssh -T git@github.com
+```
 
 提示会问你yes or no 填yes即可。这个步骤是github给你返回了一个公钥来确认你是你 
 
-上传代码--两行代码
+## 上传代码
 
 首先在github上面创建一个代码仓库 然后点击ssh（这个步骤很重要，不要点https 因为我们用了ssh key！！）
 
 下面会提示两行代码
 
+```bash
 git remote add origin git@xxxxxx //表示在本地添加远程地址 仓库的名字默认origin
 
-git push -u origin master //推送本地的分支到远程的master分支 写过一次这个代码 那么下次就不需要写全了
+git push -u origin main //推送本地的分支到远程的main分支 写过一次这个代码 那么下次就不需要写全了
+```
 
 下次如果要提交就用git push即可 
 
 如果遇到git pull 那就输入git pull一下 一般需要git pull的情况是远程仓库发生了变动 需要与本地做合并
- 
 
 如何上传其他分支 
 
+```bash
 git push origin x:x
+```
 
 方法2:
 
+```bash
 git checkout x
 
-git push -u origin x
-
- 
+git push -u origin x 
+```
 
 下载别人的代码
 
+```bash
 git clone git@xxxxxxx 如果是自己的代码 可以用ssh 如果是别人的 可以用http的码
+```
 
 如果是不同机器 需要另外安装ssh 一个机子一个key 
-
- 
-
- 
 
 GitHub Gist: 7bad0ac857fb1a92b886e1aa5cbbd2bb309a944c
