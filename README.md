@@ -192,7 +192,7 @@
 
 ## Git
 
-[Git](https://github.com/18888628835/Blog/Git/Git.md)
+[Git](https://github.com/18888628835/Blog/blob/main/Git/Git.md)
 
 ## 勘误及提问
 
