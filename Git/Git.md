@@ -156,7 +156,7 @@ git config –-local user.email 'email@xxx.com'
 其他配置
 
 ```bash
-git config --global push.default simple 
+git config --global push.default simple //发送单个分支到远程而不是默认的matching全部发送
 git config --global core.quotepath false 
 git config --global core.editor "code --wait" 
 git config --global core.autocrlf input
