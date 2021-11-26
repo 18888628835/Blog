@@ -46,6 +46,10 @@
 
 3.[模版方法模式、享元模式、职责链模式、中介者模式、装饰者模式、状态模式、适配器模式](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/模版方法模式、享元模式、职责链模式、中介者模式、装饰者模式、状态模式、适配器模式.md)
 
+4.[设计原则和编程技巧](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/设计原则和编程技巧.md)
+
+5.[代码重构](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/代码重构.md)
+
 ## 重学 JavaScript
 
 1.[页面加载生命周期](https://github.com/18888628835/Blog/blob/main/重学JavaScript/页面加载生命周期.md)
