@@ -38,8 +38,6 @@
 
 ## JavaScript 设计模式
 
-[设计模式代码片段](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/设计模式代码片段.md)
-
 1.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
 
 2.[单例模式、策略模式、代理模式、发布订阅模式、命令模式、组合模式](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/单例模式、策略模式、代理模式、发布订阅模式、命令模式、组合模式.md)
@@ -49,6 +47,8 @@
 4.[设计原则和编程技巧](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/设计原则和编程技巧.md)
 
 5.[代码重构](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/代码重构.md)
+
+6.[设计模式小册](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/设计模式小册.md)
 
 ## 重学 JavaScript
 
