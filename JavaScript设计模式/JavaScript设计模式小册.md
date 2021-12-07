@@ -204,7 +204,7 @@ console.log(dog.getName()===dog.speak()) // true
 
 原型模式是一种设计模式，它构成了JavaScript这门语言的根本。
 
-## 2.3 总结
+## 2.3 小结
 
 1. 原型模式的真正目的在于为创建对象提供了一种便捷的方式，克隆只是创建这个对象的过程和手段。
 2. JavaScript下大部分数据都是对象，我们可以使用便捷的语法糖通过克隆来创建对象而不是通过类。
@@ -560,11 +560,246 @@ func.call(null,1,2,3) // 1 2 3
 
 变量的搜索是由内到外的。
 
+### 4.1.1 闭包的生存周期
 
+全局变量的生存周期是永久的，除非我们主动销毁这个全局变量。
 
-# **判断类型**
+在函数内声明局部变量后，当退出函数时，这些局部变量就会随着函数的调用结束而被销毁。
 
+```javascript
+        var func = function(){
+            var a = 1;      // 退出函数后局部变量a将被销毁
+            alert ( a );
+        };
 
+        func();
+```
+
+但是如果稍做修改
+
+```javascript
+        var func = function(){
+            var a = 1;
+            return function(){
+              a++;
+              alert ( a );
+            }
+        };
+
+        var f = func();
+
+        f();    // 输出：2
+        f();    // 输出：3
+        f();    // 输出：4
+        f();    // 输出：5
+```
+
+我们可以发现变量`a`并没有被销毁掉，而是一直存在内存当中。
+
+这是因为当`var f = func()`时，外部变量f一直保存着匿名函数的引用，它可以访问到`func()`被调用时产生的环境，而局部变量a一直存在于这个环境中。如果局部环境中的变量依然能够被外界所访问，那么这个局部变量就有了不被销毁的理由。
+
+下面是一个经典的闭包问题
+
+```javascript
+<div>1</div>
+<div>2</div>
+<div>3</div>
+<div>4</div>
+<div>5</div>
+<div>6</div>
+```
+
+```javascript
+var nodes = document.querySelectorAll('div')
+for (var i = 0; i < nodes.length; i++) {
+  nodes[i].onclick = function() {
+    alert(i)
+  }
+}
+```
+
+上面的代码不管点击哪个div，都会打印6。
+
+这是因为onclick事件是异步的，当事件触发时，for循环早已结束，此时i为6。
+
+从作用域的角度看，for循环跟var享受了同一个作用域，当div被点击时，当前作用域下的`i`就是for循环结束后的那个6。
+
+解决的方法是使用闭包，用一个立即执行函数把每次循环的i值给包起来。这样当事件函数内的代码顺着作用域链从内到外查找变量`i`时，会找到闭包环境中的`i`，如果有6个`div`，那么就有6个`i`，这里分别是0，1，2，3，4，5
+
+```javascript
+var nodes = document.querySelectorAll('div')
+for (var i = 0; i < nodes.length; i++) {
+  (function(i) {
+    nodes[i].onclick = function() {
+      alert(i)
+    }
+  })(i)
+}
+```
+
+### 4.1.2 闭包的更多应用
+
+1. 封装变量
+
+   闭包可以将一些不需要暴露在全局的变量给封装成“私有变量”
+
+   比如 函数缓存
+
+   ```javascript
+   var mult = (function() {
+     var cache = {}
+     return function(arg) {
+       console.log(cache)
+       if (String(arg) in cache) {
+         return cache[arg]
+       }
+       return cache[arg] = arg * arg
+     }
+   })()
+   
+   console.log(mult(2))
+   ```
+
+   函数缓存的处理手段就是使用闭包变量cache来保存键值，键是传入的参数，值是第一次计算的结果。
+
+   对于相同的参数来说，每次计算都是性能的浪费，加入缓存机制可以减少这种浪费。
+
+   cache封闭在函数内部，可以减少代码中的全局变量，避免这个变量在其他地方被不小心修改而引发错误。
+
+2. 延续局部变量的寿命
+
+   ```javascript
+           var report = function( src ){
+               var img = new Image();
+               img.src = src;
+           };
+   
+           report( 'http://xxx.com/getUserInfo' );
+   ```
+
+   因为一些低版本浏览器的实现存在bug，在浏览器下使用report函数进行数据上报时会丢失30%左右的数据，也就是说，report函数并不是每一次都成功发起http请求。丢失数据的原因是img是report函数的局部变量，当report函数的调用结束后，img局部变量就被销毁了，此时或者还没来得及发送http请求，所以这次请求会丢失。
+
+   现在我们用闭包的原理将img变量给封闭起来，就可以解决请求丢失的问题。
+
+   ```javascript
+           var report = (function(){
+             var imgs = [];
+             return function( src ){
+                 var img = new Image();
+                 imgs.push( img );
+                 img.src = src;
+             }
+          })();
+   ```
+
+### 4.1.3 闭包和面向对象设计
+
+使用闭包可以实现通常面向对象才能完成的功能。
+
+比如
+
+```javascript
+ const obj = {
+  value: 1,
+  call: function() {
+    this.value += 1
+    console.log(this.value)
+  }
+}
+obj.call() // 2
+obj.call() // 3
+obj.call() // 4
+```
+
+使用闭包可以这样完成
+
+```javascript
+function func(){
+  let value=1
+  return function(){
+    value+=1
+    console.log(value)
+  }
+}
+let call =func()
+call() //2
+call() //3
+call() //4
+```
+
+### 4.1.4 闭包和内存管理
+
+人们对闭包有一种误解：闭包会造成内存泄漏，所以要减少闭包的使用。
+
+局部变量应该在函数退出时解除引用，如果局部变量在闭包形成的环境里，那么局部变量会一直生存下去，这些数据也无法被及时销毁。
+
+但使用闭包的原因是开发者在以后可能还要用到这些数据，把这些数据放到全局环境下对内存的影响是一致的，所以不能说是内存泄漏。
+
+唯一跟内存泄漏有关系的是，使用闭包时，比较容易形成循环引用。
+
+如果闭包的作用域链中保存着一些DOM节点，这时候可能造成内存泄漏。究其原因是早起IE浏览器中，由于DOM和BOM的对象是用C++以COM对象的方式实现的，而COM对象的垃圾收集机制采用引用计数策略。
+
+```javascript
+//假设这是一段基于计数策略的代码
+function fn(){
+  var a=1 //当变量a保存着数据1的引用时，计数+1
+  var b=a //当变量b保存变量a的引用时，a被记成2次引用
+}
+fn() 
+```
+
+在基于计数策略的垃圾回收机制中，如果两个对象形成了循环引用，那么两个对象都无法被回收。循环引用造成的内存泄漏本质上并非闭包造成的，也并不是JS造成的。
+
+如果我们想要解决循环引用带来的内存泄漏问题，只需要把循环引用中的变量设置为null即可，这意味着**切断变量与它引用的值之间的连接。当这些值不能被访问到时，垃圾回收器在运行时就会删除这些值并回收它们占用的内存**。
+
+## 4.2 高阶函数
+
+具备以下任一条件的就是高阶函数
+
+* 参数是函数
+* 返回值是函数
+
+### 4.2.1 高阶函数实现判断类型
+
+除了使用`instanceof`关键字、isArray方法判断类型外，比较好的方法是用`Object.prototype.toString.call`
+
+```javascript
+console.log(Object.prototype.toString.call([1,2,3])) // "[object Array]"
+console.log(Object.prototype.toString.call(1)) // "[object Number]"
+console.log(Object.prototype.toString.call('1')) // "[object String]"
+console.log(Object.prototype.toString.call(function(){})) // "[object Function]"
+console.log(Object.prototype.toString.call(null)) // "[object Null]"
+console.log(Object.prototype.toString.call(undefined)) // "[object Undefined]"
+```
+
+我们可以这样封装
+
+```javascript
+var isString = function(obj) {
+  return Object.prototype.toString.call(obj) === '[object String]';
+};
+
+var isArray = function(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
+};
+
+var isNumber = function(obj) {
+  return Object.prototype.toString.call(obj) === '[object Number]';
+};
+```
+
+这些函数大部分的逻辑都是一样的，区别只是`[object xxx]`的不同，我们可以封装一个isType函数，然后将这些字符传递给isType函数
+
+```javascript
+function isType(type){
+  return (obj)=>Object.prototype.toString.call(obj) === `[object ${type}]`
+}
+isType('String')('123')
+isType('Array')([1,2,3])
+isType('Number')(1)
+```
+
+仔细看，`isType`函数的调用也重复写了很多次，所以我们还可以封装一下来自动注册`isType`函数
 
 ```javascript
 const Type = {};
@@ -576,62 +811,434 @@ console.log(Type.isString('123'))
 console.log(Type.isArray([1,2,3]))
 console.log(Type.isNumber(123))
 ```
-# 动态单例模式
+
+### 4.2.2 高阶函数实现AOP
+
+AOP(面向切面编程)的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。把这些功能抽离出来后，再通过动态织入的方式掺入业务逻辑模块中。这样做的好处是保持业务逻辑模块的纯净和高内聚性，其次是可以方便复用。
+
+比如目前一个业务模块实现以下效果
 
 ```javascript
-const myApp = {
-  namespace(name) {
-    var current = this
-    var parts = name.split('.')
-    for (let p of parts) {
-      if (!current[p]) {
-        current[p] = {}
-      }
-      current = current[p]
-    }
+function func2() {
+  console.log(2)
+  return 888
+}
+
+const action=func2.before(() => {
+  console.log(1)
+}).after(() => {
+  console.log(3)
+})
+const result=action() // 1 2 3
+result // 888
+```
+
+在JavaScript中实现AOP，都是把一个函数动态织入另一个函数中，这里是通过`Function.prototype`来实现这一点。
+
+```javascript
+Function.prototype.before = function(beforeFunc) {
+  const _self = this
+  return function() {
+    beforeFunc.apply(this, arguments)
+      //返回主函数的结果
+    return _self.apply(this, arguments)
   }
 }
-myApp.namespace('dom.style.classname')
 
-//上面的代码相当于
-var myApp={
-  dom:{
-    style:{
-      classname:{}
-    }
+Function.prototype.after = function(afterFunc) {
+  const _self = this
+  return function() {
+    const result = _self.apply(this, arguments)
+    afterFunc.apply(this, arguments)
+      //返回主函数的结果
+    return result
   }
 }
 ```
 
-# 创建唯一登录框(单例模式)
+这种AOP的方式给函数添加职责，也是JavaScript语言中一种非常特别和巧妙的装饰者模式的实现，这种模式在实际开发中非常有用。
+
+### 4.2.3 高阶函数实现防抖和节流
+
+防抖和节流多用于函数被频繁调用的场景，比如用户频繁点击按钮触发事件绑定函数，`window.onresize`事件等。
+
+防抖可以理解为网络游戏中的打断CD，比如魔兽里每次法师的施法前都会做一套动作，可以看作是延迟施法，如果法师施法被打断了，想要继续使用技能就得重新读秒。
+
+以下是实现
 
 ```javascript
-// 通用单例模式函数
-var singleton = function(handler) {
-  let result
+      function debounce(handler, delay) {
+        var timer = null;
+        return function () {
+          const context = this;
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            handler.apply(context, arguments);
+            clearTimeout(timer);
+          }, delay);
+        };
+      }
+```
+
+防抖实际上就是每次触发函数时，都将上一次的定时器任务给取消掉，新开一个定时器。
+
+跟防抖刚好相反，节流是每次都是只触发第一次被调用的回调，不管从第二次开始手动触发多少次，请求都会被过滤掉。
+
+```javascript
+function throttle(handle, delay) {
+  var flag = false //开关
+  var timer //定时器id
   return function() {
-    return result || (result = handler.apply(this, arguments))
+    const _self = this //谁调用这个函数
+    if (flag) {
+      return
+    }
+    flag = true
+    timer = setTimeout(() => {
+      handle.apply(_self, arguments)
+      flag = false
+      clearTimeout(timer)
+    }, delay)
   }
 }
+```
 
+节流主要用于函数被触发的频率太高的问题。很多时候，我们并不需要频繁调用这些函数，这就需要我们按照时间来忽略掉某些函数处理的过程。我们可以借助`setTimeout`来完成这件事。
+
+throttle函数的原理是，将即将被执行的函数用setTimeout延迟一段时间执行。如果该次延迟执行还没有完成，则忽略接下来调用该函数的请求。
+
+### 4.2.4 高阶函数实现分时函数
+
+节流函数是采用限制频繁调用函数的方式来优化性能，下面有一种新的需求，我们不得不频繁调用函数。
+
+比如我需要创建用户列表，一次性创建10000个节点，浏览器很有可能就吃不消了。
+
+```javascript
+  let array = []
+  for (let i = 0; i < 1000; i++) {
+    array.push(i) //这里的i假设为用户数据
+  }
+
+  function renderList() {
+    for (let data of array) {
+      const div = document.createElement('div')
+      div.innerHTML = data
+      document.body.appendChild(div)
+    }
+  }
+  renderList()
+```
+
+这个问题的解决方案之一是封装一个`timeChunk`函数，每次都让创建节点的函数分批进行，而不是一次性渲染完成，比如每隔200毫秒来渲染8个节点。
+
+```javascript
+  let array = []
+  for (let i = 0; i < 1000; i++) {
+    array.push(i) //这里的i假设为用户数据
+  }
+
+  function renderItem(data) {
+    const div = document.createElement('div')
+    div.innerHTML = data
+    document.body.appendChild(div)
+  }
+
+  function timeChunk(array, handler, count) {
+    let data
+    let timer
+
+    function start() {
+      for (let i = 0; i < count; i++) {
+        data = array.shift()
+        handler(data)
+      }
+    }
+    timer = setInterval(function() {
+      if (array.length === 0) {
+        return clearInterval(timer)
+      }
+      start()
+    }, 200)
+  }
+  timeChunk(array, renderItem, 8)
+```
+
+上面的代码是将原来的renderList函数里面的循环逻辑提炼出来，只专注于渲染节点（renderItem），将渲染次数交给timechunk函数来处理，这个timechunk函数的特点是会间隔一段时间不断调用renderItem函数。
+
+可以看出分时函数跟节流函数的关注点大相径庭，分时函数注重的是将函数执行次数的单位周期拉长，而节流函数注重将函数的执行次数减短。
+
+### 4.2.5 高阶函数实现懒加载函数
+
+函数懒加载又称惰性加载函数，多用于单次条件判断，本质上就是对函数的重新赋值。
+
+比如为了兼容新老版本浏览器，下面是一段封装过的绑定事件的代码
+
+```javascript
+var addEvent = function(target, type, handler) {
+  if (window.addEventListener) {
+    return target.addEventListener(type, handler, false)
+  }
+  if (window.attachEvent) {
+    return target.attachEvent(`on${type}`, handler)
+  }
+}
+```
+
+这个函数有个缺点，我们每次绑定事件都需要判断一下，虽然对性能没多大影响，但能不能优化一下？
+
+我们可以用立即执行函数，将判断的逻辑提取出来，然后返回新的事件绑定函数，这样一来判断只需要一次即可完成。
+
+```javascript
+var addEvent = (function() {
+  if (window.addEventListener) {
+    return function(target, type, handler) {
+      target.addEventListener(type, handler, false)
+    }
+  }
+  if (window.attachEvent) {
+    return function(target, type, handler) {
+      target.attachEvent(`on${type}`, handler)
+    }
+  }
+})()
+```
+
+但是这个问题可能还有问题，假设我从来没绑定过事件，那么这个函数立即执行一次就没有任何意义。
+
+是不是能封装一个更高级的函数？
+
+答案是惰性加载函数。
+
+惰性加载函数的原理是，在函数内部重写这个函数，重写的方式就是将变量名的引用连接到一个新函数上。
+
+重写之后的函数就是我们期望的函数，而且还已经帮助我们做好了条件判断。
+
+```javascript
+var addEvent = function(target, type, handler) {
+  if (window.addEventListener) {
+    addEvent = function(target, type, handler) {
+      target.addEventListener(type, handler)
+    }
+
+  } else if (window.attachEvent) {
+    addEvent = function(target, type, handler) {
+      target.attachEvent(`on${type}`, handler)
+    }
+  }
+  // 第一次调用时需要执行一次
+  addEvent(target, type, handler)
+}
+console.log(addEvent) // 没执行前依然是原函数
+addEvent(window, 'click', function() {}) // 原函数依然执行了一次
+console.log(addEvent) // 执行一次后就重写了这个函数
+```
+
+## 4.3 小结
+
+由于JavaScript语言的特点，它的设计模式的实现跟传统面向对象语言差别非常大。
+
+在JavaScript中，很多设计模式都是借助闭包和高阶函数来完成的，闭包和高阶函数的应用非常多。
+
+相对于其实现过程，我们更应该关注设计模式可以帮助我们完成什么。
+
+# 五、单例模式
+
+单例模式的定义：保证一个类仅有一个实例，并提供一个访问它的全局访问点。
+
+单例模式是一种常用的模式，有一些对象我们往往只需要一个，比如全局缓存，浏览器中的window对象等。
+
+传统的单例模式并不适用于 JavaScript，在JavaScript中，创建对象非常简单，我们也不需要先创建一个类。
+
+单例模式的核心是确保只有唯一的一个实例并能够提供给全局访问。
+
+全局对象虽然不是单例模式，但是我们可以当成单例来使用
+
+```javascript
+var global = {}
+```
+
+全局对象既可以是唯一的，又可以提供给全局访问，这就满足了单例模式的两个条件。
+
+但是全局变量也有缺陷：造成全局命名空间污染。
+
+## 5.1 动态创建全局命名空间
+
+使用namespace可以降低全局变量带来的污染：
+
+最简单的方式就是采用对象字面量的方式：
+
+```javascript
+var namespace = { a: function () {}, b: function () {} };
+```
+
+把需要的变量都定义成namespace的属性，这样可以有效减少变量和全局作用域打交道的机会。
+
+除此之前，还可以动态创建全局命名空间。
+
+```javascript
+const myApp = {
+  namespace(name, value) {
+    let current = this;
+    let key = name.split(".");
+    key.forEach((k, index) => {
+      if (!current[k]) {
+        current[k] = {};
+      }
+      if (index === key.length - 1) {
+        current[k] = value;
+      }
+      current = current[k];
+    });
+  }
+};
+myApp.namespace("dom.style.classname", { data: 123 });
+
+//上面的代码会创建这样的对象
+const myApp = {
+  dom: {
+    style: {
+      classname: { data: 123 }
+    }
+  }
+};
+```
+
+## 5.2 单例模式创建登录框
+
+假设我们目前在QQ列表面板中，当点击登录按钮时，会弹出一个登录面板让用户登录。
+
+版本1:我们可以预先创建好登录框，但登录框是隐藏的，当用户点击登录按钮后，它才显示出来。
+
+```javascript
+var loginLayer = (function() {
+  var div = document.createElement('div');
+  div.innerHTML = ’我是登录浮窗’;
+  div.style.display = 'none';
+  document.body.appendChild(div);
+  return div;
+})();
+document.getElementById('loginBtn').onclick = function() {
+  loginLayer.style.display = 'block';
+};
+```
+
+这种方式的缺点在于该节点一开始就创建好了，如果用户没有点击登录按钮，那么创建该节点的操作就浪费了。
+
+下面的方式倒是可以在点击按钮时创建，但是并不是单例模式，而且每次都会创建多个登录框。
+
+```javascript
 var createLoginLayer = function() {
-  div = document.createElement('div');
+  var div = document.createElement('div');
   div.innerHTML = '我是登录浮窗';
   div.style.display = 'none';
   document.body.appendChild(div);
   return div;
-}
-//组合生成单例模式
-const createSingletonLoginLayer =singleton(createLoginLayer);
-
+};
 document.getElementById('loginBtn').onclick = function() {
-  const LoginLayer = createSingletonLoginLayer()
+  const LoginLayer = createLoginLayer() 
   LoginLayer.style.display = 'block';
 };
-
 ```
 
+下面我们用javascript版本的单例模式来完成这个需求。
 
+在JavaScript中，我们可以使用闭包来完成单例模式。
+
+要实现一个单例模式，只需要用一个变量来标识当前是否已为某个类创建过对象，如果是，则在下一次获取该类的实例时，直接返回之前创建的对象。
+
+```javascript
+var createLoginLayer = (function () {
+  var div;
+  return function () {
+    if (!div) {
+      div = document.createElement("div");
+      div.innerHTML = "我是登录浮窗";
+      div.style.display = "none";
+      document.body.appendChild(div);
+    }
+    return div;
+  };
+})();
+document.getElementById('loginBtn').onclick = function() {
+  const LoginLayer = createLoginLayer() 
+  LoginLayer.style.display = 'block';
+};
+```
+
+## 5.3 通用的单例模式
+
+上面的单例模式有明显的缺点：
+
+1. 代码违背了单一原则，所有代码逻辑都放在createLoginLayer上，它又完成单例模式，又创建div
+2. 立即执行函数使得代码读起来非常不舒服
+3. 无法给其他用得到单例模式的场景复用
+
+我们可以将处理单例模式的代码抽离出来，封装成singleton函数
+
+```javascript
+var singleton = function(handler) {
+  var result;
+  return function() {
+    if (!result) {
+      result = handler.apply(this, arguments)
+    }
+    return result;
+  };
+};
+```
+
+再改写一下创建登录框的函数
+
+```javascript
+var createLoginLayer = function() {
+  var div = document.createElement('div');
+  div.innerHTML = '我是登录浮窗';
+  div.style.display = 'none';
+  document.body.appendChild(div);
+  return div;
+};
+```
+
+最后直接使用即可
+
+```javascript
+const createSingletonLoginLayer = singleton(createLoginLayer);
+
+btn.onclick = function() {
+  const div = createSingletonLoginLayer();
+  div.style.display = "block";
+};
+```
+
+由于result始终在闭包中，所以它不会被销毁。
+
+我们将创建对象的职责和管理单例的职责分离开放在两个方法里，这两个方法可以独立变化不受影响，当它们连接在一起时，就完成了创建唯一单例对象的功能。
+
+单例模式的应用不止创建一个唯一的对象，也可以用在只处理一遍的业务场景上。
+
+jquey 有一个 one 方法，它可以为元素添加处理函数。处理函数在每个元素上每种事件类型都只处理一次。
+
+```javascript
+$('#foo').one('click', function () {
+  alert('This will be displayed only once.');
+});
+```
+
+使用 getSingleton 也可以达到一样的效果
+
+```javascript
+var singleton = function (handler) {
+  var result;
+  return function () {
+    return result || (result = handler.apply(this, arguments));
+  };
+};
+var bindEvent = singleton(function () {
+  alert(123);
+  return true;
+});
+document.getElementById('loginBtn').onclick = bindEvent;
+```
 
 # 校验器(策略模式)
 

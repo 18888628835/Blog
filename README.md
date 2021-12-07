@@ -30,7 +30,7 @@
 
 3.[原生实现图片懒加载](https://github.com/18888628835/Blog/issues/48)
 
-4.[如何处理后端传递过来的图片二进制流？](https://github.com/18888628835/Blog/issues/52)
+4.[前端根据后端返回实现下载或者预览的几种方式](https://github.com/18888628835/Blog/issues/52)
 
 5.[如何实现 JWT？](https://github.com/18888628835/Blog/issues/55)
 
@@ -48,7 +48,7 @@
 
 5.[代码重构](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/代码重构.md)
 
-6.[设计模式小册](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/设计模式小册.md)
+6.[JavaScript 设计模式小册](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式小册.md)
 
 ## 重学 JavaScript
 
