@@ -1165,6 +1165,8 @@ document.getElementById('loginBtn').onclick = function() {
 };
 ```
 
+上面的这种方式也叫**惰性单例**，即在有需要的时候才创建对象实例。惰性单例是单例模式的终点，在实际开发中尤其有用。
+
 ## 5.3 通用的单例模式
 
 上面的单例模式有明显的缺点：
@@ -1240,7 +1242,179 @@ var bindEvent = singleton(function () {
 document.getElementById('loginBtn').onclick = bindEvent;
 ```
 
-# 校验器(策略模式)
+## 5.4 小结
+
+JavaScript的单例模式跟传统单例模式的方法并不相同。
+
+在javasctipt中，更多的是以闭包和高阶函数来实现单例模式。
+
+单例模式的实现原理就是用一个变量来标识当前是否创建过对象，如果是，则直接返回该对象。
+
+单例模式中最重要的是惰性单例，惰性单例指的是在需要的时候才创建对象实例，并只创建唯一的对象。
+
+当我们写单例模式时，最好将创建对象和管理单例的职责分离，等到组合在一起时，就能够实现一个可复用、可读性高的单例模式。
+
+# 六、策略模式
+
+策略模式的定义：定义一系列算法，把他们一个个封装起来，并且使他们可以互相替换。将不变的部分和变化的部分隔开时每个设计模式的主题，**策略模式的目的就是将算法的使用和算法的实现隔离开来。**
+
+下面有一段根据绩效计算年终奖的场景：
+
+假设绩效 S 的年终奖有 4 倍工资，绩效 A 的年终奖有 3 倍工资，绩效 B 的则为 2 倍工资。
+
+我们可以写这样一段代码
+
+```javascript
+var performanceS = function (salary) {
+  return salary * 4;
+};
+var performanceA = function (salary) {
+  return salary * 3;
+};
+var performanceB = function (salary) {
+  return salary * 2;
+};
+var calculateBonus = function (performanceLevel, salary) {
+  if (performanceLevel === 'S') {
+    return performanceS(salary);
+  }
+  if (performanceLevel === 'A') {
+    return performanceA(salary);
+  }
+  if (performanceLevel === 'B') {
+    return performanceB(salary);
+  }
+};
+calculateBonus('A', 10000); // 输出：30000
+```
+
+这段代码将计算年终奖的业务逻辑与判断等级的函数分离开来。计算年终奖的函数又被分离成组合函数。
+
+> 组合函数就是将业务逻辑拆分成很多小函数，将其进行组合。
+
+虽然逻辑分开了，但是存在以下问题：
+
+* 代码缺乏弹性，如果此时多了C等级，那么我们还必须修改calculateBonus函数的源码，这违背了开发-封闭原则。
+* 条件判断太多
+* 复用性差
+
+下面我们用策略模式来重构这段代码
+
+## 6.1 传统语言的策略模式
+
+将不变的部分和变化的部分隔开时每个设计模式的主题，**策略模式的目的就是将算法的使用和算法的实现隔离开来。**
+
+策略模式由两部分组成：
+
+* 第一部分是一组策略类(strategy)，策略类里封装了具体的算法，并负责具体的计算过程。
+* 第二部分是一组环境类(Context)，环境类接收算法，随后把请求委托给某一个策略类，要做到这一点，环境类上要保存某个策略类的引用。
+
+在这个例子中，算法的使用方式是不变的，算法的实现是多种多样的，每种算法对应不同的绩效规则。
+
+我们先定义一组策略类，将每种绩效的计算规则都封装在对应的策略类中
+
+```javascript
+class performanceS {
+  calculate(salary) {
+    return salary * 4;
+  }
+}
+class performanceA {
+  calculate(salary) {
+    return salary * 3;
+  }
+}
+class performanceB {
+  calculate(salary) {
+    return salary * 2;
+  }
+}
+```
+
+接着定义环境类，环境类中保存策略对象的引用，以便将请求委托给它
+
+```javascript
+class Bontus {
+  constructor() {
+    this.strategy = null;
+  }
+  setStrategy(strategy) {
+    this.strategy = strategy; // 保存策略对象的引用
+  }
+  calculateBonus(salary) {
+    return this.strategy?.calculate(salary);
+  }
+}
+```
+
+使用时，先设置策略对象，再通过环境类将请求委托给策略类，以获取结果
+
+```javascript
+const bontus = new Bontus();
+
+bontus.setStrategy(new performanceA());
+bontus.calculateBonus(3000);// 9000
+
+bontus.setStrategy(new performanceB());
+bontus.calculateBonus(3000);// 6000
+```
+
+上面的代码中，我们通过环境类实例一个环境对象bontus，接下来给他设置一个策略对象，让他内部保存着这个策略对象的引用。
+
+bontus本身没有计算能力，它将计算的请求委托给内部保存的策略对象。
+
+策略对象的思想：定义一系列的算法，将他们封装起来，并且使他们之间可以互相替换。
+
+详细一点就是：定义一系列算法，将它们各自封装成策略类，算法被封装在策略类内部的方法里。在客户对Context发起请求时，Context总是把请求委托给这些策略对象中的某一个完成计算。
+
+## 6.2 JavaScript版本的策略模式
+
+上面的代码是模拟传统面向对象语言的实现，我们先创建了一组策略类，然后使用 Context 类来保存策略对象（strategy）的引用，策略对象是通过策略类创建的。最后把请求委托给策略对象来计算结果。
+
+在JavaScript中，我们没必要像传统语言上定义Context类和一组strategy类，类只是实例化的抽象，是为了实例化服务的。
+
+JavaScript中的对象不需要通过类创建，所以我们可以直接将strategy定义成一个对象。
+
+```javascript
+const strategy = {
+  S: function (salary) {
+    return salary * 4;
+  },
+  A: function (salary) {
+    return salary * 3;
+  },
+  B: function (salary) {
+    return salary * 2;
+  },
+};
+```
+
+Context类则可以直接用函数来创建
+
+```javascript
+var calculateBontus = function(performanceLevel, salary) {
+  return strategy[performanceLevel](salary)
+}
+calculateBontus('S', 2000) // 8000
+```
+
+通过使用策略模式，我们消除了大量的条件分支语句。所有跟奖金有关的计算都被我们封装到各个策略对象中，Context没有直接计算奖金的能力，而是把职责委托给策略对象。每个策略对象负责的算法都被封装在对象内部。
+
+当我们对这些策略对象发出计算奖金的请求时，它们会返回各自不同的计算结果，这是对象多态性的体现。
+
+> 多态：同一个操作作用于不同的对象时，会产生不同的结果。
+
+## 6.3 策略模式实现校验器
+
+策略模式指的是定义一系列的算法，并将它们封装起来。
+
+从定义上看，策略模式是封装算法的，实际开发中，我们通常会把算法扩展开来，使策略模式也可以封装一系列的业务规则。只要这些业务规则目标一致，并且可以被替换使用，我们就可以用策略模式来封装它们。
+
+以下是策略模式完成校验器的例子：
+
+* 要求输入不为空
+* 要求密码长度不能低于6位
+* 要求手机号码必须符合格式
 
 ```javascript
 // strategy策略对象
@@ -1297,14 +1471,31 @@ class Validator {
     }
   }
 }
-
-var validator = new Validator(); 
-validator.add(registerForm.phoneNumber, "isMobile", "手机号码格式不正确");
-validator.add(registerForm.userName, [
-    ["isNonEmpty", "用户名不能为空"],
-    ["minLength:10", "用户名长度不能小于10位"]
-  ]);
+/***************使用方式****************/
+var validataFunc = function() {
+  var validator = new Validator(); // 创建一个validator对象 
+  /***************添加一些校验规则****************/
+  validator.add(registerForm.userName, 'isNonEmpty', '用户名不能为空');
+  validator.add(registerForm.password, 'minLength:6', '密码长度不能少于6位');
+  validator.add(registerForm.phoneNumber, 'isMobile', '手机号码格式不正确');
+  validator.add(registerForm.userName, [
+  ['isNonEmpty', '用户名不能为空'],
+  ['minLength:10', '用户名长度不能小于10位'],
+]);
+  var errorMsg = validator.start(); // 获得校验结果  
+  return errorMsg; // 返回校验结果
+}
+var registerForm = document.getElementById('registerForm');
+registerForm.onsubmit = function() {
+  var errorMsg = validataFunc(); // 如果errorMsg有确切的返回值，说明未通过校验  
+  if (errorMsg) {
+    alert(errorMsg);
+    return false; // 阻止表单提交  
+  }
+};
 ```
+
+
 
 # 预加载图片(代理模式)
 
