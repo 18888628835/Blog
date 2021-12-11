@@ -122,7 +122,7 @@
 
 2.[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/事件循环.md)
 
-## 前端全栈之路
+## Node.js
 
 1.[MySQL 基础（DQL 单表查询）](https://github.com/18888628835/Blog/issues/58)
 
@@ -133,6 +133,8 @@
 4.[Sequelize 文档学习（基础篇）](https://github.com/18888628835/Blog/issues/56)
 
 5.[Sequelize 文档学习（CRUD 查询篇）](https://github.com/18888628835/Blog/issues/57)
+
+6.[Node.js 基础](https://github.com/18888628835/Blog/blob/main/Node.js/Node.js基础.md)
 
 ## 前端可视化
 
