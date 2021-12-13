@@ -21,7 +21,7 @@ Node是基于V8引擎开发的，V8引擎执行JavaScript程序的速度非常�
 
 模块化的开发可以提高代码的复用率，方便进行代码管理。通常一个文件就是一个模块，有自己的作用域，只向外暴露特定的变量和函数。
 
-CommonJS是JavaScript模块化的一种规范，该规范最初用在服务端的Node开发中，现在前段Weback打包工具也支持原生CommonJS。
+CommonJS是JavaScript模块化的一种规范，该规范最初用在服务端的Node开发中，现在Weback打包工具也支持原生CommonJS。
 
 根据这个规范，每一个文件都是一个模块，其内部定义的变量是属于这个模块的，不会对外暴露，也就是说不会污染全局变量。
 
@@ -239,7 +239,7 @@ API返回的数据格式不推荐使用纯文本，应该返回标准化的结�
 
 客户端请求时也要明确告诉服务器可以接受JSON数据的格式，即在请求的HTTP头上将ACCEPT属性设置为application/json。
 
-API的调用者未必直到URL是如何设计的，一个解决方法是在响应中添加相关的链接，以便下一步操作。这样用户只需要记住一个URL，就可以发现其他URL，这种方法叫HATEOAS。
+API的调用者未必知道URL是如何设计的，一个解决方法是在响应中添加相关的链接，以便下一步操作。这样用户只需要记住一个URL，就可以发现其他URL，这种方法叫HATEOAS。
 
 以GitHub的API为例，当访问https://api.github.com/时，就可以得到其他相关的URL，如下：
 
@@ -495,8 +495,6 @@ fs.appendFile('./test.txt', '一些内容', err => {
 
 使用 `fs.access()` 检查文件夹是否存在以及 Node.js 是否具有访问权限。
 
-
-
 **创建新的文件夹**
 
 使用 `fs.mkdir()` 或 `fs.mkdirSync()` 可以创建新的文件夹。
@@ -678,7 +676,7 @@ server.listen(3000);
 
 如上面的图片所示，我们把文件比作装水的桶，而水就是文件里的内容，我们用一根管子(pipe)连接两个桶使得水从一个桶流入另一个桶，这样就慢慢的实现了大文件的复制过程。
 
-### 4.5.1 pipe()
+### 4.5.2 pipe()
 
 `pipe()`方法用于管道操作
 
@@ -721,7 +719,7 @@ dest1.pipe(dest2)
 
 它使得stream对象可以链接多个 `pipe()` 调用
 
-### 4.5.2 流的类型
+### 4.5.3 流的类型
 
 流分为四类：
 
@@ -730,7 +728,31 @@ dest1.pipe(dest2)
 - `Duplex`: 可以通过管道写入和读取的流，基本上相对于是可读流和可写流的组合。
 - `Transform`: 类似于双工流、但其输出是其输入的转换的转换流。
 
-### 4.5.4 事件
+Duplex的读和写是双轨道的，读取的数据来源于source（源头），写入的数据注入sink（水池）。通俗点说就是别人的数据你来读，读完你来写入一个地方。
+
+```bash
+                             Duplex Stream
+                          ------------------|
+                    Read  <-----               External Source
+            You           ------------------|   
+                    Write ----->               External Sink
+                          ------------------|
+            You don't get what you write. It is sent to another source.
+```
+
+Transform的读和写的单轨道的，通俗点说就是你写的你自己读。
+
+```bash
+                                 Transform Stream
+                           --------------|--------------
+            You     Write  ---->                   ---->  Read  You
+                           --------------|--------------
+            You write something, it is transformed, then you read something.
+```
+
+
+
+### 4.5.4 核心事件
 
 **Readable Stream**
 
@@ -756,7 +778,7 @@ server.listen(3000);
 
 **Writeable Stream**
 
-**drain事件**：高速写入流的时候，有可能造成堵塞现象，类似水流在管道中由于流入太快，导致管道堵水，一时之间水无法全部流出管道。这时候就可以监听被流入的地方的drain事件，只要触发了就可以继续写入
+**drain事件**：高速写入流的时候，有可能造成堵塞现象，类似水流在管道中由于流入太快，导致管道堵水，一时之间水无法全部流出管道。这时候就可以停止写入，再监听被流入的地方的drain事件，只要触发了就可以继续写入
 
 ```javascript
 import http from 'http';
@@ -783,9 +805,95 @@ server.listen(3000);
 
 上面的代码创建了可读流stream1和可写流stream2，我们会从stream1中读出内容写到stream2中，如果此时流入过快导致管道堵塞，flag会变成false，此时不再进行写入。
 
-当流入stream2的内容干涸之后再继续写的逻辑，所以此时只需要监听stream2的drain事件。
+当流入stream2的内容干涸之后再继续写的逻辑，所以此时需要监听stream2的drain事件。
 
-# 五 TypeScript
+> 可以理解成水池出水太快会造成管道无法快速排出，那么需要先塞住管道，等下方的水流干了之后再打开管道让水继续流
+
+**finish事件**：整个写入流的动作完成了触发的事件。
+
+### 4.5.5 Readable Stream
+
+可读流分两种状态：静止态paused和流动态flowing
+
+默认处于静止态。下面的代码会创建可读流，此时流的状态是静止的paused
+
+```
+const stream = fs.createReadStream('./index.txt')
+```
+
+当添加data事件后，它的状态就变成流动态flowing
+
+```javascript
+stream.on('data',(chunk)=>{
+	/* 此时变成流动态 */
+})
+```
+
+`pipe()`方法是data事件+写入流的语法糖，当调用pipe事件时，也会变成流动态
+
+`pause()`方法可以让流暂停-进入paused状态
+
+`resume`方法可以让流恢复-进入flowing状态
+
+下面的代码会先创建`name.txt`文件,然后暂停流入，直到3秒钟后再开始往`name.txt`中写入数据
+
+```javascript
+import fs from 'fs';
+
+const readStream = fs.createReadStream('./index.txt');
+const writeStream = fs.createWriteStream('./name.txt');
+readStream.pipe(writeStream);
+readStream.pause();
+setTimeout(() => {
+  readStream.resume();
+}, 3000);
+```
+
+### 4.5.6 Writale Stream
+
+这里结合Readable再谈谈可写流的drain事件，这个事件触发时机是finish事件还未触发，但是数据积压了的情况。
+
+当调用`stream.write(chunk)`时,可能会得到`false`,造成的原因可能是读取快写入慢导致数据积压，此时我们不能再write了，需要先暂停流入`readStream.pause()`,再监听drain事件，当数据流干了，就触发drain事件，此时恢复流入`readStream.resume()`
+
+```javascript
+import fs from 'fs';
+const writeStream = fs.createWriteStream('./name.txt');
+const readStream = fs.createReadStream('./index.txt');
+
+function write() {
+  let flag;
+  readStream.on('data', chunk => {
+    flag = writeStream.write(chunk);
+    if (!flag) {
+      console.log('数据积压了...');
+      readStream.pause(); //暂停流入
+    }
+    writeStream.once('drain', () => {
+      console.log('水流干了,继续写入...');
+      readStream.resume(); // 恢复流入
+    });
+  });
+  readStream.on('end', () => {
+    writeStream.end();
+  });
+}
+write();
+```
+
+上面代码中的`index.txt`文件中拥有10000行数据，我们运行上面代码时，由于写入太快，会在log台上打印如下内容
+
+```bash
+数据积压了...
+水流干了,继续写入...
+数据积压了...
+水流干了,继续写入...
+数据积压了...
+水流干了,继续写入...
+```
+
+当数据积压时，可以调用`readStream.pause()`停止数据流入。当`writeStream`监听的drain事件触发了（表示writeStream积压的数据写完了），此时恢复数据流动`readStream.resume()`。
+
+# 五、使用TypeScript运行Node
 
 ## 5.1 初始化项目
 
