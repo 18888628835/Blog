@@ -573,7 +573,7 @@ try {
 
 主要的区别在于，同步API会阻塞脚本执行，直到文件操作成功。
 
-# 五 流-stream
+# 五、流-stream
 
 流是一种以高效的方式处理读/写文件、网络通信、或者任何类型的端到端的信息交换。
 
@@ -1228,7 +1228,250 @@ process.stdin
 
 我们接着把 `commaSplitter` 输出的数组传递给了 `arrayToObject` 流。我们需要设置 `writableObjectModel` 以便让该流可以接收一个对象。它还会往下游推送一个对象（输入的数据被转换成对象），这就是为什么我们还需要配置 `readableObjectMode` 标志位。最后的 `objectToString` 流接收一个对象但却输出一个字符串，因此我们只需配置 `writableObjectMode` 即可。传递给下游的只是一个普通字符串。
 
-# 六、使用TypeScript运行Node
+# 六、child_process
+
+## 6.1 进程
+
+当应用程序被打开时，会开启一个进程。比如打开chrome.exe，这时候就会开启chrome的进程。
+
+通过任务管理器查看的进程信息
+
+<img src="assets/image-20211216214036962.png" alt="image-20211216214036962" style="zoom:50%;" />
+
+进程的定义：
+
+* 进程是程序的执行实例。
+* 程序在cpu的活动也可以叫进程。
+
+一个进程可以创建另一个进程。（父进程和子进程）
+
+## 6.2 进程的状态
+
+一个单核CPU，在一个时刻，只能做一件事情。但是随着它不断地快速切换进程，就可以同时让用户看电影、听音乐、写代码等。
+
+**多程序并发执行**
+
+指多个程序在宏观并行，微观上串行。
+
+每个进程都会出现执行-暂停-执行的规律。
+
+多个进程之间可能会出现抢资源的现象
+
+进程的状态
+
+当我们进入某个应用程序时，进程就是非运行状态，当cpu运行进程时，进程会变成运行状态，这个过程叫分派（cpu资源）。当cpu转移调度资源时（可能要执行其他程序），那么此时进程就会暂停，从运行状态变回到运行状态。直到运行结束后，进程退出。
+
+<img src="assets/image-20211216220753119.png" alt="image-20211216220753119" style="zoom:50%;" />
+
+以下是进程在cpu中的队列，遵循先进先出的规则，当cpu运行一段时间进程后，经过资源调度，有可能进程会退出，也可能会暂停并回到队尾，此时后面的进程往前走让cpu执行。
+
+<img src="assets/image-20211216221002350.png" alt="image-20211216221002350" style="zoom:50%;" />
+
+## 6.2 阻塞进程
+
+当进程在进程队列中等待时，它们都处于非运行态。一些资源在等待cpu给资源，还有一些资源在等待I/O完成。（比如读取文件）
+
+cpu会执行最前面的进程。如果最前面的进程并不急于让cpu执行，比如这个进程正在等待I/O操作并不需要cpu的资源，此时这个进程就被称之为阻塞进程。那么分派资源的程序会将cpu的资源分配给非阻塞进程。这就类似于进程的资源调度。
+
+## 6.3 进程的三个状态
+
+由于阻塞进程的出现，我们发现，进程又可以被分成三个状态：
+
+<img src="assets/image-20211216221949754.png" alt="image-20211216221949754" style="zoom:50%;" />
+
+从创建开始，进程处于就绪状态，当cpu分派资源的时候，就会变成运行状态，此时cpu发现进程正在做其他操作，于是进程就会变成阻塞状态，此时调度资源的程序将资源分配给其他非阻塞的程序，等到阻塞进程的事件执行完毕，就会重新进入就绪状态等待cpu资源。
+
+cpu运行进程的时候也可能发生超时，于是进程从运行状态又回到就绪状态。
+
+以上是cpu与进程的大概关系。
+
+## 6.4 线程
+
+在软件行业早期，操作系统是面向进程设计，进程是程序的基本执行实体，也就是资源分配的基本实体。随着后期的发展，产生了面向线程的设计，进程就不再是基本的运行单位了，而是线程的容器。
+
+原因是进程在同一时间只能干一件事，进程在执行的过程中如果阻塞，整个进程就会挂起，于是引入了线程，线程作为执行的基本实体，而进程只是作为资源分配的基本实体。
+
+将进程的执行和资源分配的两项任务分离开的好处就是运行效率提高了。
+
+线程的基本概念
+
+* 线程是cpu调度和执行的最小单位。
+* 一个进程中至少有一个线程，可以有多个线程
+* 一个进程中的线程共享进程的所有资源
+* 进程的第一个线程叫初始化线程
+* 线程的调度可以由操作系统负责，也可以用户自己负责
+
+举例：
+
+chrome浏览器的进程就有渲染引擎、V8引擎、存储模块、网络模块、用户界面模块等，每一个模块都由一个或多个线程负责执行。
+
+## 6.5 Nodejs操作子进程
+
+使用子进程的目的在于能够执行命令行程序。
+
+下面介绍运行命令行程序的一些API
+
+### 6.5.1 exec
+
+```javascript
+import { exec } from 'child_process';
+
+//执行一个命令
+exec('ls -al', (error, stdout, stderr) => {
+  console.log('error', error);
+  console.log('stdout:\n', stdout);
+  console.log('stderr', stderr);
+});
+```
+
+我们通过child_process来引进一个子进程。上面代码中子进程所做的事情是打印当前文件夹下的文件列表。
+
+也可以用stream的形式
+
+```javascript
+import { exec } from 'child_process';
+
+//执行一个命令
+const stream = exec('ls -al');
+stream.stdout!.on('data', chunk => {
+  console.log(chunk);
+});
+```
+
+使用`util.promisify`可以将子进程promise化
+
+```javascript
+import util from 'util';
+import { exec } from 'child_process';
+
+//执行一个命令
+const exec2 = util.promisify(exec);
+exec2('ls -al').then(data => {
+  console.log(data.stdout);
+});
+```
+
+### 6.5.2 execFile
+
+exec有漏洞，如果cmd被注入了，就会运行一些危险的命令。比如
+
+```javascript
+import { exec } from 'child_process';
+
+//执行一个命令
+const exec2 = util.promisify(exec);
+exec2('ls -al && pwd').then(data => {
+  console.log(data.stdout);
+});
+//当加入&&后，exec会再次运行pwd这个命令，所以说有注入风险
+```
+
+execFile这个APi能够解决这个问题。它每次都只能运行一条命令，不会有注入风险。
+
+```javascript
+import { execFile } from 'child_process';
+
+//执行一个命令
+execFile('ls', ['-al'], (error, stdout) => {
+  console.log(error);
+  console.log(stdout);
+});
+```
+
+execFile的第二个参数是命令行的参数，所以不会有注入危险。
+
+execFile也是支持流的。
+
+```javascript
+import { execFile } from 'child_process';
+
+//执行一个命令
+const stream = execFile('ls', ['-al']);
+stream.stdout!.on('data', chunk => console.log(chunk));
+```
+
+同时execFile的第三个参数如果是对象，那么就会被当成程序运行的选项，比如：
+
+```javascript
+const stream = execFile('ls', ['-al'], {
+  cwd: './.vscode', //将当前目录下的.vscode目录作为脚本运行的工作目录
+  env: { NODE_ENV: 'development' }, //环境变量
+  shell: 'bash', //用什么shell
+  maxBuffer: 1024 * 1024, //使用回调形式读取出来的结果的最大缓存量
+});
+```
+
+### 6.5.3 spawn
+
+这个api是用流的形式来运行脚本，相当于语法糖。用法与execFile类似，但是没有回调函数。
+
+```javascript
+import { spawn } from 'child_process';
+
+//执行一个命令
+const stream = spawn('ls', ['-al'], {
+  cwd: './.vscode', //将当前目录下的.vscode目录作为脚本运行的工作目录
+  env: { NODE_ENV: 'development' }, //环境变量
+  shell: 'bash', //用什么shell
+});
+stream.stdout!.on('data', chunk => console.log(chunk.toString()));
+```
+
+一般情况下使用spawn会比execFile的形式更好
+
+### 6.5.4 fork
+
+fork直接创建一个子进程。执行Nodejs程序。它是专用于执行nodejs的子进程的API。
+
+fork(‘./child.js’)相当于spawn(‘node’,[‘./child.js’])
+
+我们可以通过fork来进行进程通信。
+
+```javascript
+// index.ts
+import { fork } from 'child_process';
+
+const n = fork('./child.js');
+n.on('message', m => {
+  console.log('我是父进程，我得到值', m);
+});
+```
+
+```javascript
+// child.js
+setTimeout(() => {
+  process.send({ name: 'qiuyanxi' });
+}, 1000);
+```
+
+上面代码会通过`fork(‘./child.js’)`来运行`child.js`的node代码。
+
+此时child.js通过process来发送信息，而index.ts则监听message事件来获取child.js的发送信息，最终打出来的m为
+
+```javascript
+我是父进程，我得到值 { name: 'qiuyanxi' }
+```
+
+同时也可以在index.ts中发送信息给child.js
+
+```javascript
+// child.js
+process.on('message', n => {
+  console.log(n);
+});
+// { hello: 'world' }
+```
+
+```javascript
+// index.ts
+n.send({
+  hello: 'world',
+});
+```
+
+
+
+# 七、使用TypeScript运行Node
 
 ## 5.1 初始化项目
 
