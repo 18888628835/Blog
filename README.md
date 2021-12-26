@@ -66,6 +66,8 @@
 
 7.[异步迭代和 generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/异步迭代和generator.md)
 
+8.[二进制数据和文件](https://github.com/18888628835/Blog/blob/main/重学JavaScript/二进制数据和文件.md)
+
 ## ES6 系列
 
 1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
