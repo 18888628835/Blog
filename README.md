@@ -68,7 +68,7 @@
 
 8.[二进制数据和文件](https://github.com/18888628835/Blog/blob/main/重学JavaScript/二进制数据和文件.md)
 
-9.[Document]](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Document.md)
+9.[Document](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Document.md)
 
 ## ES6 系列
 
