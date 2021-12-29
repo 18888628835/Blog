@@ -77,8 +77,6 @@ JavaScript的主机环境如果是浏览器，则会有一个全局对象window�
 * CSSOM规范 —— 描述css样式表和样式规则，对它们的操作、以及它们与文档的绑定等规范
 * 其他规范
 
-
-
 # 二、DOM树
 
 HTML文档的主干是标签（tag）。
@@ -105,7 +103,7 @@ HTML文档的主干是标签（tag）。
 
 以上的HTML被DOM表示为标签的树形结构，就类似这样：
 
-<svg width="690" height="320"><g transform="translate(20,30)"><path class="link" d="M7,0L7,30L57,30" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><path class="link" d="M7,0L7,150L57,150" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><path class="link" d="M7,0L7,180L57,180" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><path class="link" d="M57,30L57,60L107,60" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><path class="link" d="M57,30L57,90L107,90" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><path class="link" d="M57,30L57,120L107,120" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><path class="link" d="M57,180L57,210L107,210" style="fill: none; stroke: rgb(190, 195, 199); stroke-width: 1px;"></path><g class="node" transform="translate(0,0)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(206, 224, 244); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;">▾ </text><text dy="4.5" dx="16.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">HTML</text></g><g class="node" transform="translate(50,30)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(206, 224, 244); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;">▾ </text><text dy="4.5" dx="16.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">HEAD</text></g><g class="node" transform="translate(50,150)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(255, 222, 153); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;"></text><text dy="4.5" dx="5.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">#text ↵␣␣</text></g><g class="node" transform="translate(50,180)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(206, 224, 244); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;">▾ </text><text dy="4.5" dx="16.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">BODY</text></g><g class="node" transform="translate(100,60)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(255, 222, 153); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;"></text><text dy="4.5" dx="5.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">#text ↵␣␣␣␣</text></g><g class="node" transform="translate(100,90)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(206, 224, 244); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;">▸ </text><text dy="4.5" dx="16.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">TITLE</text></g><g class="node" transform="translate(100,120)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(255, 222, 153); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;"></text><text dy="4.5" dx="5.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">#text ↵␣␣</text></g><g class="node" transform="translate(100,210)" style="opacity: 1;"><rect y="-12.5" x="-5" rx="4" ry="4" height="25" width="280" style="fill: rgb(255, 222, 153); cursor: pointer;"></rect><text dy="4.5" dx="3.5" style="fill: black; pointer-events: none;"></text><text dy="4.5" dx="5.5" style="font: 14px Consolas, &quot;Lucida Console&quot;, Menlo, Monaco, monospace; fill: rgb(51, 51, 51); pointer-events: none;">#text ↵␣␣The truth about elk.</text></g></g></svg>
+<img src="assets/image-20211229145603478.png" alt="image-20211229145603478" style="zoom:50%;" />
 
 每棵树的节点都是一个对象。
 
@@ -174,3 +172,233 @@ HTML/XML文档在浏览器内均被表示为DOM树
 * ...HTML中所有东西都能在DOM树中有所映射，注释也可以。
 
 一般我们直接使用F12开发者工具来手动检查或者修改它们。
+
+
+
+# 三、遍历DOM
+
+对DOM的所有操作都是以`document`对象开始的。从它我们可以访问任何节点。
+
+下图是描述对象间关系的图片，通过这些关系我们可以在DOM节点之间切换
+
+<img src="assets/image-20211228212806935.png" alt="image-20211228212806935" style="zoom:50%;" />
+
+## 3.1 document.documentElement和Body
+
+最顶层的树节点可以直接作为document对象的属性来使用：
+
+* `<html>`=document.documentElement  顶层DOM节点
+* `<body>`=document.body 
+* `<head>`=document.head
+
+document.body可以是个null。
+
+如果我们没写body标签，DOM会自动创建，但是在以下情况下body可能是个null
+
+```html
+<html>
+
+<head>
+  <script>
+    alert( "From HEAD: " + document.body ); // null，这里目前还没有 <body>
+  </script>
+</head>
+
+<body>
+
+  <script>
+    alert( "From BODY: " + document.body ); // HTMLBodyElement，现在存在了
+  </script>
+
+</body>
+</html>
+```
+
+因为DOM节点是从上到下解析并形成的，如果脚本在head就开始运行了，浏览器还没读到body，所以就不存在document.body。
+
+
+
+## 3.2 子节点：childNodes，firstChild，lastChild
+
+* 子节点含义：对应的直系子元素。它们被完全被嵌套在给定的元素中。例如`head`和`body`标签就是`html`元素的子元素。
+* 子孙元素含义：嵌套在给定元素的所有元素，包括子元素以及子元素的子元素等。
+
+如以下代码
+
+```html
+<html>
+<body>
+  <div>Begin</div>
+
+  <ul>
+    <li>
+      <b>Information</b>
+    </li>
+  </ul>
+</body>
+</html>
+```
+
+body节点的子节点是div节点跟ul节点（包括一些空白空格的文本节点）
+
+body的子孙元素是包含div、ul、li、b等子孙元素。
+
+**查子节点**
+
+我们可以用`childNodes`来列出所有子节点，包括文本节点。
+
+```html
+<html>
+<body>
+  <div>Begin</div>
+
+  <ul>
+    <li>Information</li>
+  </ul>
+
+  <div>End</div>
+
+  <script>
+    for (let i = 0; i < document.body.childNodes.length; i++) {
+      alert( document.body.childNodes[i] ); // Text, DIV, Text, UL, ..., SCRIPT
+    }
+  </script>
+  ...more stuff...
+</body>
+</html>
+```
+
+上面的代码会将body的所有子节点都打出来。
+
+但不会打出`...more stuff ... `因为脚本运行时这个内容还没解析出来，所以浏览器读不到。
+
+查第一个子节点：firstChild
+
+查最后一个子节点：lastChild
+
+查是否有子节点：node.hasChildNodes()
+
+## 3.3 DOM集合
+
+childNodes是一个伪数组，是部署了iterator接口的可迭代伪数组。
+
+我们可以用for..of迭代它，但无法使用数组的方法。
+
+不过我们可以用一些方法来让它使用数组的方法：
+
+* `Array.from`、`[...childNodes]`变成真数组
+* 用call、apply等方法
+
+有几个注意点：
+
+* DOM集合是只读的，我们不能用childNodes[i]=...的操作来替换一个子节点
+* DOM集合是实时的，它反映DOM的当前状态
+* 不要用for...in对集合进行迭代，原因是for..in会遍历所有可枚举（enumerable）属性。DOM集合中就有一些我们并不需要的这些属性会被for..in迭代到
+
+## 3.4 兄弟节点和父节点
+
+兄弟(Sibling)节点指的是有同一个父节点的节点。
+
+```html
+<html>
+  <head>...</head><body>...</body>
+</html>
+```
+
+* body是head的下一个兄弟节点
+
+* head是body的前一个兄弟节点
+
+父节点：parentNode
+
+上一个兄弟节点：previousSibling
+
+下一个兄弟节点：nextSibling
+
+```javascript
+console.log(document.body.parentNode.tagName) // HTML
+console.log(document.head.nextSibling.tagName) // BODY
+console.log(document.body.previousSibling.tagName) // HEAD
+```
+
+## 3.5 纯元素导航
+
+childNodes中有很多节点，包括文本节点、元素节点、注释节点等。
+
+但是有时候我们只想要元素节点。
+
+以下就是纯元素节点的导航
+
+<img src="assets/image-20211229153355775.png" alt="image-20211229153355775" style="zoom:50%;" />
+
+这些纯元素节点跟上面的节点访问类似，区别在于需要添加`Element`
+
+* Children —— 纯元素节点的子节点
+* firstElementChild —— 第一个子元素节点
+* lastElementChild —— 最后一个子元素节点
+* previousElementSibling —— 上一个兄弟元素节点
+* nextElementSibling —— 下一个兄弟元素节点
+* parentElement —— 父元素节点
+
+
+
+**parentElement和parentNode的区别**
+
+从语义上来说parentElement是找父元素节点而parentNode是找父节点。
+
+一般来说这两个是一样的，都是用于获取父节点。
+
+不过出现这个API可能是由于`document.documentElement`的`parentElement`和`parentNode`不一致导致的
+
+```javascript
+document.documentElement.parentNode  // document
+document.documentElement.parentElement  // null
+```
+
+因为html的父节点就是document对象
+
+但是document并不是元素节点。
+
+当我们希望从下到上遍历到html时，可能这个细节有用
+
+```javascript
+while(elem === elem.parentElement){ //向上遍历，直到html顶层
+	...
+}
+```
+
+## 3.6 特定的DOM属性
+
+某些类型的DOM元素可能会提供特定于类型的其他属性。
+
+比如表格（Table）
+
+`<Table>`除了支持上面的基本属性，还额外支持以下属性：
+
+* table.rows - `<tr>`元素的集合
+* `table.caption/tHead/tFoot` - 引用表格的`<caption>``<thead>``<tfoot>`
+* table.tBodies - `<tbody>`元素的集合
+
+**`<thead>`，`<tfoot>`，`<tbody>`** 元素提供了 `rows` 属性：
+
+* `tbody.rows` — 表格内部 `<tr>` 元素的集合。
+
+**`<tr>`**：
+
+- `tr.cells` — 在给定 `<tr>` 中的 `<td>` 和 `<th>` 单元格的集合。
+- `tr.sectionRowIndex` — 给定的 `<tr>` 在封闭的 `<thead>/<tbody>/<tfoot>` 中的位置（索引）。
+- `tr.rowIndex` — 在整个表格中 `<tr>` 的编号（包括表格的所有行）。
+
+**`<td>` 和 `<th>`：**
+
+* `td.cellIndex` — 在封闭的 `<tr>` 中单元格的编号。
+
+
+
+## 3.7 小结
+
+给定一个DOM节点，我们可以使用导航（navigation）属性 访问其直接的邻居
+
+* 对于所有节点：parentNode、childNodes、firstChild、lastChild、nextSibling、previousSibling
+* 对于所有元素节点：parentElement、children、firstElementChild、lastElementChild、nextElementSibling、previousElementSibling
+* 有一些特定的元素还能有额外的属性
