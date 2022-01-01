@@ -402,3 +402,235 @@ while(elem === elem.parentElement){ //向上遍历，直到html顶层
 * 对于所有节点：parentNode、childNodes、firstChild、lastChild、nextSibling、previousSibling
 * 对于所有元素节点：parentElement、children、firstElementChild、lastElementChild、nextElementSibling、previousElementSibling
 * 有一些特定的元素还能有额外的属性
+
+
+
+# 四、搜索DOM
+
+## 4.1 搜索具有id的元素
+
+`document.getElementById`或者只使用`id`
+
+```javascript
+document.getElementById('elem').style.background='red' // 通过getElementById搜索对应元素
+// elem 是对带有 id="elem" 的 DOM 元素的引用
+elem.style.background='red' // 也可以直接通过id访问
+// id="elem-content" 内有连字符，所以它不能成为一个变量
+// ...但是我们可以通过使用方括号 window['elem-content'] 来访问它
+```
+
+使用id方式直接访问dom是一种兼容性的支持，并不推荐在项目开发中使用。可以用于在元素来源非常明显且不会跟变量名重复的情况。（可用于写demo）
+
+如果有具有相同名称的变量，那么则以变量名为优先。
+
+> 保持id的唯一性，全局不要有重复的id，否则使用搜索API搜索某一个元素时，可能会随机返回另一个元素。
+>
+> document.getElementById只能被在document上调用，没有elem.getElementById
+
+## 4.2 querySelectorAll
+
+`querySelectorAll(css_selector)`方法可以搜索跟CSS选择器相匹配的**所有**元素。
+
+ ` querySelector(css_selector)`方法可以搜索跟CSS选择器相匹配的第一个元素，相当于 `querySelectorAll(css_selector)[0]`
+
+```html
+  <ul>
+    <li>The</li>
+    <li>test</li>
+  </ul>
+  <ul>
+    <li>has</li>
+    <li>passed</li>
+  </ul>
+  <script>
+    let elements = document.querySelectorAll('ul > li:last-child');
+  
+    for (let elem of elements) {
+      alert(elem.innerHTML); // "test", "passed"
+    }
+    let element =document.querySelector('ul > li:last-child')
+    alert(element.innerHTML) // "test"
+  </script>
+```
+
+querySelector方法可以供elem调用
+
+```html
+    <div class="container">
+      <div>123</div>
+    </div>
+
+    <script>
+      let containerElem = document.querySelector(".container");
+      let div = containerElem.querySelector("div");
+      console.log(div.innerHTML); // 123
+    </script>
+```
+
+
+
+## 4.3 getElementsBy*
+
+旧的API中还有类似通过标签、类等查找节点的方法。`querySelector` 功能更强大，写起来更短，所以这些旧API通常在老代码中存在
+
+* elem.getElementsByTagName(tag) 查询标签名的集合
+
+  ```html
+      <h1>
+        This is a static template
+      </h1>
+      <script>
+        const elem = document.getElementsByTagName("h1");
+        console.log(elem[0].innerText);// This is a static template
+      </script>
+  ```
+
+* elem.getElementsByClassName(className) 返回具有给定css类的元素
+
+  ```html
+      <h1 class="template">
+        This is a static template
+      </h1>
+      <script>
+        const elem = document.getElementsByClassName("template");
+        console.log(elem[0].innerText);
+      </script>
+  ```
+
+* document.getElementsByName(name) 返回在文档范围内具有给定name特性的元素。(很少用)
+
+  ```html
+      <form action="" name="form">
+        <input type="text" />
+      </form>
+      <script>
+        const elem = document.getElementsByName("form");
+        console.log(elem[0].children);
+      </script>
+  ```
+
+注意点：
+
+* 不要忘记字母s
+* 返回的是一个集合（伪数组）
+
+## 4.4 实时的集合
+
+所有的“getElementsBy*”返回的都是**实时**的集合。这样的集合始终反映的是文档的当前状态，并且在文档发生更改时会自动更新。
+
+```html
+    <div>First div</div>
+
+    <script>
+      let divByGetElements = document.getElementsByTagName("div");
+      let divBySelector = document.querySelectorAll("div");
+      console.log(divByGetElements.length); // 1
+      console.log(divBySelector.length); // 1
+    </script>
+
+    <div>Second div</div>
+
+    <script>
+      console.log(divByGetElements.length); // 2
+      console.log(divBySelector.length); // 1
+    </script>
+```
+
+上面的例子中，通过两种方式搜索出来的div，在文档发生改变后，通过`getElementsBy*`获取的元素集合更新了，而通过`querySelector`获取的元素集合是**静态**的，不会实时更新。
+
+## 4.5 matches
+
+matches可以检查`elem`是否和css选择器相匹配。它返回布尔值。
+
+当我们遍历元素时，可以用这个API过滤我们需要的元素
+
+```javascript
+<a href="http://example.com/file.zip">...</a>
+<a href="http://ya.ru">...</a>
+
+<script>
+  // 不一定是 document.body.children，还可以是任何集合
+  for (let elem of document.body.children) {
+    if (elem.matches('a[href$="zip"]')) {
+      alert("The archive reference: " + elem.href );
+    }
+  }
+</script>
+```
+
+
+
+## 4.6 closest
+
+`elem.closest(css_selector)`这个API可以返回最靠近的并且与css选择器相匹配的祖先。elem自己也会被搜索。
+
+换句话说，方法`closest`在元素中得到了提升，并检查每个父级和自己。如果与css选择器相匹配，则会返回对应的祖先元素（包括自己）
+
+```html
+   <h1>这是外层元素</h1>
+    <div>
+      <ul>
+        <li>li1</li>
+        <li>li2</li>
+        <li>li3</li>
+      </ul>
+    </div>
+    <script>
+      let elem = document.body.querySelector("li");
+      console.log(elem.closest("li").innerHTML); // li1
+      console.log(elem.closest("ul").tagName); // UL
+      console.log(elem.closest("div").tagName); // DIV
+      console.log(elem.closest("h1").tagName); // 找不到
+    </script>
+```
+
+## 4.7 contains
+
+`elemA.contains(elemB)`这个API可以用来检查元素A是否是另一个元素B的祖先（元素B是否在元素A内），它返回boolean值。
+
+如果elemA===elemB，那么会返回true
+
+```html
+    <h1>这是外层元素</h1>
+    <div>
+      <ul>
+        <li>li1</li>
+        <li>li2</li>
+        <li>li3</li>
+      </ul>
+    </div>
+    <script>
+      let divElem = document.body.querySelector("div");
+      let h1Elem = document.body.querySelector("h1");
+      let ulElem = divElem.querySelector("ul");
+      let liElem = ulElem.querySelector("li");
+      console.log(divElem.contains(ulElem)); // true
+      console.log(divElem.contains(liElem)); // true
+      console.log(ulElem.contains(liElem)); // true
+      console.log(divElem.contains(h1Elem)); // false
+    </script>
+```
+
+## 4.8 小结
+
+在DOM中搜索节点，可以用以下方式：
+
+| 方法名                 | 搜索方式     | 能够给元素调用 | 实时性 |
+| ---------------------- | ------------ | -------------- | ------ |
+| querySelector          | CSS-selector | ✅              | ❌      |
+| querySelectorAll       | CSS-selector | ✅              | ❌      |
+| getElementById         | id           | ❌              | ❌      |
+| getElementsByTagName   | tag或者 *    | ✅              | ✅      |
+| getElementsByClassName | class        | ✅              | ✅      |
+| getElementsByName      | Name         | ❌              | ✅      |
+
+最常用的是querySelector和querySelectorAll
+
+此外：
+
+`elem.matches(css_selector)`这个API用于检查elem与css选择器是否匹配
+
+`elem.closest(css_selector)`这个API用于检查elem与css选择器相匹配的祖先（包括自己）
+
+`elemA.contains(elemB)`这个API用于检查子级与父级的关系 —— 如果elemA包含elemB（或者相等），则返回true
+
