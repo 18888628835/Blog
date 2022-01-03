@@ -936,3 +936,270 @@ div.setAttribute('order-state','new')
 5. `elem.attributes`  —— 读取所有特性：属于内建Attr类的对象的集合，具有name和value属性。
 
 在大多数情况下 ，最好使用DOM属性，当DOM属性无法满足需求时，可以考虑使用特性。
+
+
+
+# 六、document文档的CRUD
+
+## 6.1 创建元素
+
+创建元素节点：`document.createElement(tag)`
+
+创建文本节点：`document.createTextNode(text)`
+
+例子：
+
+```javascript
+      const div = document.createElement("div"); //创建div元素节点
+      div.className = "alert"; //给div节点赋值上class
+      div.innerHTML = "<strong>this is a alert div</strong>"; //添加内容
+```
+
+## 6.2 向页面增加元素
+
+- `node.append(...nodes or strings)` —— 在 `node` **里面的末尾** 插入节点或字符串，
+- `node.prepend(...nodes or strings)` —— 在 `node` **里面的开头** 插入节点或字符串，
+- `node.before(...nodes or strings)` —— 在 `node` **前面** 插入节点或字符串，
+- `node.after(...nodes or strings)` —— 在 `node` **后面** 插入节点或字符串，
+- `node.replaceWith(...nodes or strings)` —— 将 `node` 替换为给定的节点或字符串。
+
+这些方法的参数可以是一个要插入的任意的 DOM 节点列表，或者文本字符串（会被自动转换成文本节点）。
+
+<img src="assets/image-20220102174655854.png" alt="image-20220102174655854" style="zoom:50%;" />
+
+这些方法可以在单个调用中插入多个节点列表和文本片段。
+
+例如，在这里插入了一个字符串和一个元素：
+
+```html
+<div id="div"></div>
+<script>
+  div.before('<p>Hello</p>', document.createElement('hr'));
+</script>
+```
+
+请注意：这里的文字都被“作为文本”插入，而不是“作为 HTML 代码”。因此像 `<`、`>` 这样的符号都会被作转义处理来保证正确显示。
+
+所以最终插入的其实是这样的：
+
+```html
+&lt;p&gt;Hello&lt;/p&gt;
+<hr>
+<div id="div"></div>
+```
+
+`&lt;p&gt;Hello&lt;/p&gt;`最终会被浏览器解析成以下**字符串**内容
+
+```html
+<p>Hello</p>
+```
+
+换句话说，字符串被以一种安全的方式插入到页面中，就像 `elem.textContent` 所做的一样。
+
+所以，这些方法只能用来插入 DOM 节点或文本片段。
+
+## 6.3 insertAdjacentHTML/Text/Element
+
+如果我们希望有一种方法类似于innerHTML能够插入HTML代码，我们可以使用通用方法：`elem.insertAdjacentHTML(where, html)`
+
+这个方法的第一个参数是代码字，指定相对于elem的插入位置。必须为以下之一：
+
+* beforebegin —— 将html插入到elem前
+* afterbegin —— 将html插入到elem里面的开头
+* beforeend —— 将html插入到elem里面的末尾
+* afterend  —— 将html插入到elem后
+
+第二个参数是html字符串，这些字符串会被作为html插入。
+
+![image-20220102213259457](assets/image-20220102213259457.png)
+
+这个方法还有两个兄弟：
+
+* `elem.insertAdjacentText(where, text)` — 语法一样，但是将 `text` 字符串“作为文本”插入而不是作为 HTML
+* `elem.insertAdjacentElement(where, elem)` — 语法一样，但是插入的是一个元素
+
+这两兄弟的存在仅仅只是让语法看起来统一，实际上用的最多的是插入HTML，而这两个兄弟的功能我们可以使用before、after等代替。
+
+## 6.4 删除节点
+
+想要移除一个节点，可以使用`elem.remove()`
+
+这个方法很简单，有一点细节需要注意，如果我们想要将节点移动到另一个地方，则无需将其从原来的位置删除。
+
+**所有插入方法都会自动从旧位置删除节点。**
+
+比如
+
+```html
+    <div id="elem">i am elem</div>
+    <script>
+      const div = document.createElement("div");
+      div.innerHTML = "i am div ";
+      elem.before(div);//将div插入到elem的前面
+      setTimeout(() => {
+        elem.after(div);// 1秒后div会移到elem的后面
+      }, 1000);
+    </script>
+```
+
+## 6.5 克隆节点cloneNode
+
+如果我们想插入一个类似的元素，我们可以创建一个函数来复用代码。还有一种方法是克隆现有的节点，并修改其中的一些内容。
+
+当我们有一个很大的节点，使用克隆的方式更加简单。
+
+`Elem.cloneNode(boolean)`可以传入参数来控制是否需要深克隆：
+
+* true —— 包含所有attribute和子元素
+* false —— 不包含子元素
+
+这是一个深克隆的例子
+
+```html
+    <div id="elem">
+      i am elem
+      <span>i am span in elem</span>
+    </div>
+    <script>
+      const cloneDiv = elem.cloneNode(true);
+      cloneDiv.querySelector("span").textContent = "i am span in cloneElem";
+      elem.after(cloneDiv);
+    </script>
+```
+
+## 6.6 DocumentFragment
+
+`DocumentFragment`是一个特殊的DOM节点，用来作为传递节点列表用的包装器。
+
+我们可以向其插入内容，当我们将其插入到某个位置时，则相当于插入它里面的内容。
+
+```html
+    <ul id="ul"></ul>
+    <script>
+      function getList() {
+        const fragment = new DocumentFragment();
+        for (let i = 0; i < 3; i++) {
+          const li = document.createElement("li");
+          li.textContent = i;
+          fragment.append(li);
+        }
+        return fragment;
+      }
+      ul.append(getList());// (*)
+    </script>
+```
+
+第*行我们将fragment插入到ul内部，现在它里面的内容已经跟ul融合到一起了，最终形成的结构是这样的
+
+```html
+    <ul id="ul">
+      <li>0</li>
+      <li>1</li>
+      <li>2</li>
+    </ul>
+```
+
+这个API很少被使用，如果可以改为返回一个节点数组，那为什么还要附加到特殊类型的节点上呢？
+
+重写如下：
+
+```html
+    <ul id="ul"></ul>
+    <script>
+      function getList() {
+        const result = [];
+        for (let i = 0; i < 3; i++) {
+          const li = document.createElement("li");
+          li.textContent = i;
+          result.push(li);
+        }
+        return result;
+      }
+      ul.append(...getList()); // append + "..." operator
+    </script>
+```
+
+## 6.7 旧的增删API
+
+由于历史原因，目前还有一些老式的DOM操作方法，列举如下：
+
+* **parentElem.appendChild(node)：**将 `node` 附加为 `parentElem` 的最后一个子元素。
+* **parentElem.insertBefore(node, nextSibling)：**在 `parentElem` 的 `nextSibling` 前插入 `node`
+* **parentElem.replaceChild(node, oldChild)：**将 `parentElem` 的后代中的 `oldChild` 替换为 `node`。
+* **parentElem.removeChild(node)：**从 `parentElem` 中删除 `node`（假设 `node` 为 `parentElem` 的后代）。
+
+这些方法都会返回插入/删除的节点。由于这些API很怪异，想要做操作都要通过父元素节点才能办到，所以现代JavaScript下是不用这些API了。
+
+## 6.8 document.write
+
+`document.write`方法是非常古老的、来自于没有DOM、没有标准的web上古时期的给页面添加内容的方法。
+
+语法是这样的：
+
+```html
+<p>Somewhere in the page...</p>
+<script>
+  document.write('<b>Hello from JS</b>');
+</script>
+<p>The end</p>
+```
+
+调用这个方法后，html会马上写入到页面中。html字符串是动态生成的，所以这个方法很灵活。
+
+`document.write`调用只在页面加载时工作。如果我们稍后调用它，那现有文档内容会被擦除。
+
+```html
+<p>After one second the contents of this page will be replaced...</p>
+<script>
+  // 1 秒后调用 document.write
+  // 这时页面已经加载完成，所以它会擦除现有内容
+  setTimeout(() => document.write('<b>...By this.</b>'), 1000);
+</script>
+```
+
+上面的方法会将p标签内的内容全部擦除。
+
+换句话说，它在加载完成阶段是不可用的。
+
+这是它的坏处。
+
+它的好处是运行奇快，它不涉及DOM修改，可以直接写入到页面文本中，而此时DOM尚未构建。
+
+如果我们需要向 HTML 动态地添加大量文本，并且我们正处于页面加载阶段，并且速度很重要，那么它可能会有帮助。
+
+## 6.9 小结
+
+创建新节点的方法：
+
+* `document.createElement(tag)` —— 用给定的标签创建一个元素节点
+* `document.createTextNode(value)` —— 创建一个文本节点
+* `elem.cloneNode(deep)` —— 克隆元素
+
+插入和移除节点的方法：
+
+* `node.append(...nodes or strings)` —— 在node内部的末尾插入
+* `node.prepend(...nodes or strings)`—— 在node内部的开头插入
+* `node.before(...nodes or strings)`—— 在node前面插入
+* `node.after(...nodes or strings)`—— 在node后面插入
+* `node.replaceWith(...nodes or strings)` ——替换node
+* `node.remove()` ——删除node节点
+
+文本字符串被作为文本输入
+
+老式方法：
+
+* **parentElem.appendChild(node)：**将 `node` 附加为 `parentElem` 的最后一个子元素。
+* **parentElem.insertBefore(node, nextSibling)：**在 `parentElem` 的 `nextSibling` 前插入 `node`
+* **parentElem.replaceChild(node, oldChild)：**将 `parentElem` 的后代中的 `oldChild` 替换为 `node`。
+* **parentElem.removeChild(node)：**从 `parentElem` 中删除 `node`（假设 `node` 为 `parentElem` 的后代）。
+
+在指定位置插入HTML，`elem.insertAdjacentHTML(where, html)` 会根据 `where` 的值来插入它：
+
+- `"beforebegin"` — 将 `html` 插入到 `elem` 前面，
+- `"afterbegin"` — 将 `html` 插入到 `elem` 的开头，
+- `"beforeend"` — 将 `html` 插入到 `elem` 的末尾，
+- `"afterend"` — 将 `html` 插入到 `elem` 后面。
+
+还有类似的方法，`elem.insertAdjacentText` 和 `elem.insertAdjacentElement`，它们会插入文本字符串和元素，但很少使用。
+
+在页面加载完成之前可以使用`document.write(html)`将HTML写到页面上,如果在页面加载完成后使用，会擦除页面内容。
