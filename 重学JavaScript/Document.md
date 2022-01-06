@@ -1383,3 +1383,267 @@ getComputedStyle(element, [pseudo])
 
 `getComputedStyle(elem,[pseudo])`返回与`style`对象类似的，且包含所有类的对象。这是只读的属性。
 
+
+
+# 八、元素大小和滚动
+
+本节介绍JavaScript中有关元素的宽度、高度和其他信息。
+
+示例元素：
+
+```html
+    <style>
+      #example {
+        width: 300px;
+        height: 200px;
+        border: 25px solid #e8c48f;
+        padding: 20px;
+        overflow: auto;
+      }
+    </style>
+    <div id="example">
+      <h3>Introduction</h3>
+      <p>
+        This Ecma Standard is based on several originating technologies, the
+        most well known being JavaScript (Netscape) and JScript (Microsoft). The
+        language was invented by Brendan Eich at Netscape and first appeared in
+        that company's Navigator 2.0 browser. It has appeared in all subsequent
+        browsers from Netscape and in all browsers from Microsoft starting with
+        Internet Explorer 3.0. The development of this Standard started in
+        November 1996. The first edition of this Ecma Standard was adopted by
+        the Ecma General Assembly of June 1997.
+      </p>
+
+      <p>
+        That Ecma Standard was submitted to ISO/IEC JTC 1 for adoption under the
+        fast-track procedure, and approved as international standard ISO/IEC
+        16262, in April 1998. The Ecma General Assembly of June 1998 approved
+        the second edition of ECMA-262 to keep it fully aligned with ISO/IEC
+        16262. Changes between the first and the second edition are editorial in
+        nature.
+      </p>
+
+      <p>
+        The third edition of the Standard introduced powerful regular
+        expressions, better string handling, new control statements, try/catch
+        exception handling, tighter definition of errors, formatting for numeric
+        output and minor changes in anticipation of forthcoming
+        internationalisation facilities and future language growth. The third
+        edition of the ECMAScript standard was adopted by the Ecma General
+        Assembly of December 1999 and published as ISO/IEC 16262:2002 in June
+        2002.
+      </p>
+    </div>
+```
+
+这个示例元素包含border、padding、scrolling等属性，但是不包含margin，因为它并不是元素的一部分。
+
+这个元素的示例图是这样的：
+
+![image-20220106101702337](assets/image-20220106101702337.png)
+
+这个元素是具有滚动条的。一些浏览器通过从内容（content-width）中获取空间来给滚动条保留空间。
+
+因此，如果没有滚动条，内容宽度将是300px，但如果滚动条为16px，那么还剩下284px。我们应该考虑滚动条的因素。
+
+## 8.1 几何
+
+对应于上面的标记css属性的图片，以下是一个带有元素几何属性的图片![image-20220106102100857](assets/image-20220106102100857.png)
+
+这些属性的值是数字类型，它们是像素测量值。
+
+下面我们介绍这些元素的几何属性
+
+## 8.2 offsetParent，offsetLeft/offsetTop
+
+这些属性时最外层的属性：
+
+offsetParent是最接近的祖先，在浏览器渲染时，它们被用于计算坐标。
+
+最近的祖先是下列之一：
+
+* css定位的祖先（position为absolute、relative或者fixed）
+* `<td>`,`<th>`,`<table>`
+* `<body>`
+
+offsetLeft/offsetTop则提供相对于offsetParent左上角的x/y坐标。
+
+比如下面例子中，div有main作为offsetParent，并且`offsetLeft/offsetTop`是它距离左上角的位移。
+
+```
+    <main style="position: relative;" id="main">
+      <article>
+        <div id="example" style="position: absolute; left: 180px; top: 150px;">
+          ...
+        </div>
+      </article>
+    </main>
+    <script>
+      console.log(example.offsetParent); // main节点
+      console.log(example.offsetTop); // 150 注意：这是一个数字，不是字符串 "180px"
+      console.log(example.offsetLeft); // 180
+    </script>
+```
+
+有几种情况下，offsetParent可能是null
+
+* 未显示的元素（display为none或者不在文档中）
+* body和html
+* `position:fixed`的元素
+
+## 8.2  offsetWidth/Height
+
+这两个属性是最简单的，它们提供元素的“外部”宽高。也就是说，它提供了元素的完整大小。
+
+offsetWidth = 元素的width + paddingLeft/Right + borderLeft/Right
+
+offsetHeight = 元素的height + paddingTop/Bottom + boderTop/Bottom
+
+以下是示例元素的解析图
+
+![image-20220106104745765](assets/image-20220106104745765.png)
+
+仅针对显示的元素计算几何属性，对于未显示的元素，几何属性为0/null。
+
+如果一个元素（或者其祖先）具有`display:none`或者不在文档中，则所有几何属性为0。（或`offsetParent`为`null`）
+
+## 8.3 clientTop/Left
+
+在元素内部，我们有边框（border）。
+
+为了测量它们，可以使用clientTop/Left。
+
+在例子中，我们的元素的border为25px。那么clientTop/Left均为25px
+
+* `clientTop` —— 上边框高度
+* `clientLeft` —— 左边框宽度
+
+准确的说，这些属性不是边框的width/height,而是元素内侧和元素外侧的相对坐标。
+
+当操作系统为阿拉伯语或希伯来语时，此时浏览器将滚动条设置在右边，而不是在左边，此时`clientLeft`就包含了滚动条的宽度。
+
+在这种情况下，clientLeft就是`25+16 = 41`
+
+## 8.4 clientWidth/Height
+
+这两个属性提供元素边框区域内的大小。
+
+它们包括了`content width`和`padding`，但不包括滚动条宽度。
+
+在示例元素中，我们的元素的边框区域内大小是这样的：
+
+* `clientHeight`:`content height`+`paddingTop`+`paddingBottom`=200+20+20
+* `clientWidth`:`content width`+`paddingLeft`+`paddingRight`=284+20+20
+
+这里的`content width`并不是`300px`,而是去除滚动条16px后的284
+
+![image-20220106111803050](assets/image-20220106111803050.png)
+
+如果这里没有padding，**那么 `clientWidth/Height` 代表的就是内容区域，即 border 和 scrollbar（如果有）内的区域。**
+
+![image-20220106112007152](assets/image-20220106112007152.png)
+
+因此，当没有padding时，我们可以直接使用`clientWidth/Height`来获取内容区域的大小。
+
+## 8.5 scrollWidth/Height
+
+这个属性跟`clientWidth/Height`差不多，区别是它们还包括滚动超出的部分。
+
+![image-20220106113707631](assets/image-20220106113707631.png)
+
+在上图中，包含padding的元素clientWidth跟scrollWidth是一样的。
+
+但clientHeight跟是scrollHeight不一样，scrollHeight是内容区域的完整内部高度，包括滚出的部分。
+
+因此：
+
+- `scrollHeight = 723` — 是内容区域的完整内部高度，包括滚动出的部分。
+- `scrollWidth = 324` — 是完整的内部宽度，这里我们没有水平滚动，因此它等于 `clientWidth`。
+
+我们可以使用这个特点来讲元素展开（expand）到整个width/height。
+
+```javascript
+// 将元素展开（expand）到完整的内容高度
+element.style.height = `${element.scrollHeight}px`;
+```
+
+## 8.6 scrollLeft/scrollTop
+
+属性`scrollLeft/scrollTop`是元素隐藏的、滚动部分的`width/height`
+
+在下图中，我们可以看到带有垂直滚动块的`scrollHeight`和`scrollTop`
+
+![image-20220106134758404](assets/image-20220106134758404.png)
+
+也就是说，`scrollTop`就是已经滚动了多少的意思。
+
+> 大多数的几何属性是可读的，但是scrollTop/Left是可修改的，浏览器会滚动该元素。
+>
+> 将scrollTop设置成0或者一个大的值，将会使元素滚动到顶部/底部
+
+## 8.7 不要从css中获取width/height
+
+DOM的几何元素用于获取宽度、高度和计算距离。
+
+为什么我们不用`getComputedstyle`来读取css的width和height呢？
+
+这里有三个原因：
+
+* css的width/height受`box-sizing`影响，同样拥有300px的width的元素，在不同的box-sizing下在浏览器的渲染效果是不同的。如果用css修改了`box-sizing`则会影响JavaScript代码。
+
+  ```html
+      <style>
+        .div {
+          width: 300px;
+          height: 200px;
+          border: 25px solid #e8c48f;
+          padding: 20px;
+        }
+        .div2 {
+          box-sizing: border-box;
+        }
+      </style>
+      <div class="div"></div>
+      <div class="div div2"></div>
+  
+      <script>
+        const div1 = document.body.querySelector(".div");
+        const div2 = document.body.querySelector(".div2");
+        console.log(getComputedStyle(div1).width);// 300px
+        console.log(getComputedStyle(div2).width);// 300px
+        console.log(div1.offsetWidth); // 390
+        console.log(div2.offsetWidth); // 300
+      </script>
+  ```
+
+  上面的代码中，div1和div2只有`box-sizing`不同，但是用`getComputedStyle`取到的是一样的，只有用几何属性才能取到正确的值。
+
+* 其次，CSS 的 `width/height` 可能是 `auto`，例如内联（inline）元素
+
+  ```html
+  <span id="elem">Hello!</span>
+  
+  <script>
+    alert( getComputedStyle(elem).width ); // auto
+  </script>
+  ```
+
+* 滚动条，如果一个元素有滚动条，那它就会占用内容的空间。因此，可用于内容的实际宽度小于css宽度。
+
+  使用`getComputedStyle(elem).width`时，某些浏览器返回的是实际内部宽度减去滚动条宽度，而有些浏览器是返回css宽度，忽略了滚动条。在这样的差异下，我们不能使用`getComputedStyle`来获取元素的宽高。
+
+## 8.8 小结
+
+元素具有以下几何属性：
+
+* `offsetParent`是离元素最接近的css定位的祖先，或者是 `td`，`th`，`table`，`body`。
+
+* `offsetLeft/Top`是相对于`offsetParent`的左上角的坐标
+* `offsetWidht/Height`是元素外部的宽和高，包括了边框。
+* `clientTop/Left`是元素左上角外角到左上角内角的距离。对于从左到右显示内容的操作系统来说，它们始终是左侧/顶部 border 的宽度。而对于从右到左显示内容的操作系统来说，垂直滚动条在左边，所以 `clientLeft` 也包括滚动条的宽度。
+* `clientWidth/Height`是元素内部的宽高，不包括边框，不包括滚动条，包括content width和padding。
+* `scrollWidth/Height`是元素内部的宽高，跟`clientWidth/Height`是一样的，但是它还包括元素滚动出的不可见的部分。
+* `scrollLeft/Top`是从元素左上角开始，滚动出元素上半部分的宽高。简单来说就是滚动了多少。
+
+除了`scrollLeft/scrollTop`外，其他几何属性都是只读的。
+
