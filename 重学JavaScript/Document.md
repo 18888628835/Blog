@@ -1203,3 +1203,183 @@ div.setAttribute('order-state','new')
 还有类似的方法，`elem.insertAdjacentText` 和 `elem.insertAdjacentElement`，它们会插入文本字符串和元素，但很少使用。
 
 在页面加载完成之前可以使用`document.write(html)`将HTML写到页面上,如果在页面加载完成后使用，会擦除页面内容。
+
+# 七、样式和类
+
+我们有两种常用的设置元素样式的方法：
+
+* 通过class类
+* 通过内联样式style
+
+JavaScript可以修改类和style属性。我们首选应该通过类来添加样式，仅当类无法处理的时候，才使用style属性。
+
+比如我们需要给用JavaScript给元素添加一个坐标，那么用`style`是可以接受的。
+
+```javascript
+let top = /* 复杂的计算 */;
+let left = /* 复杂的计算 */;
+
+elem.style.left = left; // 例如 '123px'，在运行时计算出的
+elem.style.top = top; // 例如 '456px'
+```
+
+对于其他情况，如果能跟在class样式中实现，那么就选择添加类，这样做到了样式与功能分离，代码更加灵活。
+
+## 7.1 className和classList
+
+`elem.className`对应于`class`特性。例如：
+
+```html
+<body class="main page">
+  <script>
+    alert(document.body.className); // main page
+  </script>
+</body>
+```
+
+如果我们希望对`elem.className`进行赋值，它会替换掉类中的所有字符串。但有时候我们希望能够单独添加/删除类，这就需要用到`classList`。
+
+`elem.classList`是一个特殊的对象，它具有`add/remove/toggle`单个类的方法。
+
+```html
+  <body class="main page">
+    <script>
+      // 添加一个 class
+      document.body.classList.add("article");
+
+      console.log(document.body.className); // main page article
+    </script>
+  </body>
+```
+
+因此，我们既可以使用`className`对完整的类字符串进行操作，也可以用`classList`对单个类进行操作。
+
+以下是`classList`的方法：
+
+* `elem.classList.add/remove(class)` —— 添加/移除类
+* `elem.classList.toggle(class)` —— 如果类不存在就添加类，存在就移除它
+* `elem.classList.contains(class)` —— 检查给定类，返回`true/false`
+
+`classList`是可以迭代的。
+
+## 7.2 元素样式
+
+`elem.style`属性是一个对象，它对应于`style`特性中所写的内容。`elem.style.width="100px"`的效果等价于我们在style特性中有一个`width:100px`字符串。
+
+对于多词属性，则用驼峰式`camelCase`访问：
+
+```javascript
+background-color => elem.style.backgroundColor
+```
+
+> 像 `-moz-border-radius` 和 `-webkit-border-radius` 这样的浏览器前缀属性，也遵循同样的规则：连字符 `-` 表示大写。
+>
+> ```javascript
+> button.style.MozBorderRadius = '5px';
+> button.style.WebkitBorderRadius = '5px';
+> ```
+
+
+
+## 7.3 重置样式属性
+
+有时候我们会设置`elem.style.display=‘none’`来隐藏元素。
+
+过段时间我们希望移除这个效果，这时候我们不应该使用`delete elem.style.display`，而是应该使用`style.display=''`来将属性赋值为空。
+
+通常我们使用`style.*`来对各样式属性进行赋值，如果我们想用字符串的形式新建或者重置整个style，可以用两种简便方法：
+
+* `elem.style.cssText ='width:10px' `
+* `elem.setAttribute('style','width:10px')`
+
+## 7.4 记得添加单位
+
+当我们使用`style.*`时，千万不要忘记添加单位，否则添加无效。
+
+```javascript
+    // 无效！
+    document.body.style.margin = 20;
+    alert(document.body.style.margin); // ''（空字符串，赋值被忽略了）
+
+    // 现在添加了 CSS 单位（px）— 生效了
+    document.body.style.margin = '20px';
+```
+
+## 7.5 读取类的样式
+
+`elem.stlye`属性只针对html的`style`特性,而不能读取到任何css类有关的内容，比如以下代码：
+
+```html
+    <style>
+      #div {
+        width: 100px;
+      }
+    </style>
+    <div id="div"></div>
+    <script>
+      console.log(div.style.width);//读到的是'' 而不是'100px'
+    </script>
+```
+
+我们需要用这个方法来获取：`getComputedStyle`
+
+语法如下：
+
+```javascript
+getComputedStyle(element, [pseudo])
+```
+
+**element：**需要被读取样式值的元素。
+
+**pseudo：**伪元素（如果需要），例如 `::before`。空字符串或无参数则意味着元素本身。
+
+结果是一个具有样式属性的对象，像 `elem.style`，但现在对于所有的 CSS 类来说都是如此。
+
+```html
+    <style>
+      #div {
+        width: 100px;
+      }
+    </style>
+    <div id="div"></div>
+    <script>
+      console.log(getComputedStyle(div).width);//'100px'
+    </script>
+```
+
+> **计算值和解析值**
+>
+> 在 [CSS](https://drafts.csswg.org/cssom/#resolved-values) 中有两个概念：
+>
+> 1. **计算 (computed)** 样式值是所有 CSS 规则和 CSS 继承都应用后的值，这是 CSS 级联（cascade）的结果。它看起来像 `height:1em` 或 `font-size:125%`。
+> 2. **解析 (resolved)** 样式值是最终应用于元素的样式值值。诸如 `1em` 或 `125%` 这样的值是相对的。浏览器将使用计算（computed）值，并使所有单位均为固定的，且为绝对单位，例如：`height:20px` 或 `font-size:16px`。对于几何属性，解析（resolved）值可能具有浮点，例如：`width:50.5px`。
+>
+> 很久以前，创建了 `getComputedStyle` 来获取计算（computed）值，但事实证明，解析（resolved）值要方便得多，标准也因此发生了变化。
+>
+> 所以，现在 `getComputedStyle` 实际上返回的是属性的解析值（resolved）。
+
+> **应用于 `:visited` 链接的样式被隐藏了！**
+>
+> 可以使用 CSS 伪类 `:visited` 对被访问过的链接进行着色。
+>
+> 但 `getComputedStyle` 没有给出访问该颜色的方式，因为否则，任意页面都可以通过在页面上创建它，并通过检查样式来确定用户是否访问了某链接。
+>
+> JavaScript 看不到 `:visited` 所应用的样式。此外，CSS 中也有一个限制，即禁止在 `:visited` 中应用更改几何形状的样式。这是为了确保一个不好的页面无法测试链接是否被访问，进而窥探隐私。
+
+## 7.6 小结
+
+**要管理class,可以用两个dom属性：**
+
+* className —— 字符串值
+* classList —— 具有add/remove/toggle/contains方法的对象，可以被迭代
+
+**要改变样式：**
+
+`style.*`可以访问内联样式的各个属性。对其进行读取和修改跟直接修改`style`特性中的各个属性有相同的效果
+
+`style.cssText`属性对应整个style特性，即完整的样式字符串
+
+**要读取类样式：**
+
+`getComputedStyle(elem,[pseudo])`返回与`style`对象类似的，且包含所有类的对象。这是只读的属性。
+
