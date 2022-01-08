@@ -1647,3 +1647,414 @@ DOM的几何元素用于获取宽度、高度和计算距离。
 
 除了`scrollLeft/scrollTop`外，其他几何属性都是只读的。
 
+# 九、window大小和滚动控制
+
+## 9.1 窗口的width/height
+
+我们要如何获取整个浏览器的宽高呢？我们可以使用`html`标签对应的`document.documentElement`中`clientWidth`和`clientHeight`
+
+`window.innerWidth/Height`也能够获取，它们的区别是`clientWidth/Height`是一定不包含滚动条的。
+
+我们一般需要的是可用的内容空间以放置元素，而`inner*`属性有可能会返回包含滚动条的空间，所以我们应该使用`client*`属性更加准确一些。
+
+## 9.2 文档的完整宽高
+
+从理论上来说，我们可以通过`documentElement.scrollWidth/Height`来获取文档的完整宽高。
+
+但由于历史原因，我们必须采用以下方式来可靠地获取文档的完整宽高。
+
+```javascript
+let scrollHeight = Math.max(
+  document.body.scrollHeight, document.documentElement.scrollHeight,
+  document.body.offsetHeight, document.documentElement.offsetHeight,
+  document.body.clientHeight, document.documentElement.clientHeight
+);
+let scrollWidth = Math.max(
+  document.body.scrollWidth, document.documentElement.scrollWidth,
+  document.body.offsetWidth, document.documentElement.offsetWidth,
+  document.body.clientWidth, document.documentElement.clientWidth
+);
+```
+
+## 9.3 文档当前滚动状态
+
+我们能够通过`scrollTop`和`scrollLeft`来得知DOM元素当前的滚动状态。
+
+文档滚动我们大多数情况也可以通过`document.documentElement.scrollTop/Left`来获取。
+
+但由于浏览器的兼容性原因，我们最好使用以下属性获取当前文档的滚动状态。
+
+```javascript
+alert('Current scroll from the top: ' + window.pageYOffset);
+alert('Current scroll from the left: ' + window.pageXOffset);
+```
+
+不过这个属性是只读的。
+
+## 9.4 控制滚动
+
+* 元素滚动：设置 `scrollTop/scrollLeft` 
+
+* 文档滚动：设置`document.documentElement.scrollTop/Left`，Safari浏览器需要用`document.body.scrollTop/Left`，不建议用 
+
+* 通用滚动（根据当前位置的（x,y）坐标偏移）：`window.scrollBy(x,y)`。例如，`scrollBy(0,10)` 会将页面向下滚动 `10px`。
+
+* 通用滚动（根据页面的绝对坐标（x,y））：`window.scrollTo(pageX,pageY)`。例如，`scrollTo(0,0)`会让文档滚动到最顶上。
+
+* 通用滚动（滚动到某个元素上）：`elem.scrollIntoView(top)`
+
+  当`top=true`时，页面滚动，使`elem`出现在窗口顶部。默认值
+
+  当`top=false`时，页面滚动，使`elem`出现在窗口底部。
+
+## 9.5 禁止滚动
+
+* 禁止页面滚动：`document.body.style.overflow = "hidden"`
+* 取消禁止页面滚动：`document.body.style.overflow = ""`
+* 禁止元素滚动：把`document.body`换成`elem`元素即可
+
+这个方法的缺点是会使滚动条消失。如果滚动条占用了一些空间，它原本占用的空间就会空出来，那么内容就会“跳”进去以填充它。
+
+我们可以对比冻结前后的 `clientWidth`。如果它增加了（滚动条消失后），那么我们可以在 `document.body` 中滚动条原来的位置处通过添加 `padding`，来替代滚动条，这样这个问题就解决了。
+
+## 9.6 小结
+
+1. 窗口的宽高：`document.documentElement.clientWidth/Height`
+2. 文档的完整宽高最好不要直接使用`document.documentElement.scrollWidth/Height`
+3. 读取当前的滚动：`window.pageYOffset/pageXOffset`。
+4. 更改当前的滚动：
+   - `window.scrollTo(pageX,pageY)` — 绝对坐标，
+   - `window.scrollBy(x,y)` — 相对当前位置进行滚动，
+   - `elem.scrollIntoView(top)` — 滚动以使 `elem` 可见（`elem` 与窗口的顶部/底部对齐）。
+
+
+
+# 十、坐标
+
+两种坐标系(通过event获取)：
+
+* 相对于窗口的`clientX/clientY` —— 类似于`position:fixed`，从窗口的顶部/左侧边缘计算而出
+* 相对于文档的`pageX/pageY` —— 从文档的顶部/左侧边缘计算得出
+
+当页面在最开始时，窗口的左上角与文档的左上角对齐，它们的坐标彼此相等。
+
+<img src="assets/image-20220107223937227.png" alt="image-20220107223937227" style="zoom:50%;" />
+
+当文档移动之后，元素的窗口相对坐标会发生变化，因为元素在窗口中移动，而元素在文档中的相对坐标是保持不变的。
+
+<img src="assets/image-20220107224052234.png" alt="image-20220107224052234" style="zoom:50%;" />
+
+上两张图中表示，当元素滚动了：
+
+pageY —— 元素在文档中的相对坐标是不变的，从文档顶部开始计算
+
+clientY —— 元素在窗口中的相对坐标变化了，因为元素被滚上去了，它越来越靠近窗口顶部
+
+
+
+## 10.1 元素坐标 getBoundingClientRect
+
+`elem.getBoundingClientRect()`返回最小矩形的窗口坐标、返回元素的大小及其相对于视口的位置。
+
+如果是标准盒子模型，元素的尺寸等于`width/height` + `padding` + `border-width`的总和。如果`box-sizing: border-box`，元素的的尺寸等于 `width/height`。
+
+这个矩形将`elem`作为DOMRect类的对象。
+
+主要的`DOMRect`的属性如下：
+
+* x/y —— 矩形原点相对于窗口的x/y坐标
+* width/height —— 矩形的width/height （可以为负）
+* top/bottom —— 顶部/底部矩形边缘的坐标
+* left/right —— 左/右矩形边缘的X坐标
+
+<img src="assets/image-20220107225539273.png" alt="image-20220107225539273" style="zoom:50%;" />
+
+* `left = x`
+* `top = y`
+* `right = x + width`
+* `bottom = y + height`
+
+当我们使用`getBoundingClientRect`获取元素的各坐标时，很有可能我们会获取到：
+
+* 小数
+* 负数，例如元素被滚上去之后，y就是top，相对于窗口来说就是负的
+
+> `top/left`与`x/y`从矩形的角度来说很有可能是不一致的，而且width/height属性也不一定是正数（虽然一直都会返回正数）。
+>
+> 原因是矩形有定向这么一说，如果是左上角开始往下伸展算是正向，那么从右下角往上伸展就是负向。所以矩形的height/width就是负数的。
+>
+> 以下就是一个由右下角往上伸展的矩形，它的width/height就应该是负数的（矩形角度分析）。那么此时，它的x/y就应该在右下角的起点位置，因为那才是矩形的原点。
+>
+> <img src="assets/image-20220107231453410.png" alt="image-20220107231453410" style="zoom:50%;" />
+
+**坐标的right/bottom与css position属性不同**
+我们用`css position:fixed`让元素根据文档定位后的`left/top`与`getBoundingClientRect`获取的`left/top`是类似的逻辑（如果不滚动的话，抛开单位，值可能相同），但是`right/bottom`是完全不一样的逻辑。
+
+因为css定位中的right属性是距右边缘的距离，bottom是距下边缘的距离。
+
+而坐标的`right/bottom`永远是按照窗口的左上角开始计算的。
+
+
+
+## 10.2  elementFromPoint(x, y)
+
+对 `document.elementFromPoint(x, y)` 的调用会返回在窗口坐标 `(x, y)` 处嵌套最多（the most nested）的元素。
+
+因为它使用的是窗口坐标，所以元素可能会因当前滚动位置而有所不同。
+
+**注意：**
+
+方法 `document.elementFromPoint(x,y)` 只对在可见区域内的坐标 `(x,y)` 起作用。
+
+**对于在窗口之外的坐标，**`elementFromPoint` **返回** `null`
+
+
+
+## 10.3 用于“fixed”的定位
+
+如果我们希望创建一个独立存在于窗口上的元素（即使滚动后也依然存在），那么就可以用fixed定位后，再设置元素的left或者top即可。
+
+下面是一个在`button`附近创建一个文字提示的例子
+
+```html
+    <style>
+      body {
+        min-height: 2000px;
+      }
+      button {
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+    <button id="btn">在我下面创建一个提示信息</button>
+    <script>
+      const rect = btn.getBoundingClientRect();
+      const [left, bottom] = [rect.left, rect.bottom];
+      btn.onclick = createMessage;
+      function createMessage() {
+        const span = document.createElement("span");
+        span.style.cssText = "color:red;position:fixed";
+        span.innerHTML = "我是提示信息";
+        span.left = left + "px";
+        span.bottom = bottom + "px";
+        document.body.append(span);
+      }
+    </script>
+```
+
+在最小高度为2000px的页面高度下，提示信息会始终出现在窗口的同一位置上，即使滚动了也是如此。
+
+如果不想要这种效果，可以将`fixed`改成`absolute`。
+
+## 10.4 文档坐标
+
+文档坐标是从文档的左上角开始计算而不是窗口。
+
+在css中，窗口坐标对应`position:fixed`，文档坐标则对应顶部元素的`position:absolute`
+
+我们可以结合`absolute`来将元素放到文档的某个位置。
+
+目前我们没有标准的方法可以获取元素的文档坐标。我们可以通过计算：
+
+* 元素的文档坐标x = 文档水平滚出的部分的宽度 + 元素的窗口水平坐标x
+* 元素的文档坐标y = 文档垂直滚出的部分的宽度 + 元素的窗口垂直坐标y
+
+下面的函数是获取元素的文档坐标的函数
+
+```javascript
+      function getCoords(elem) {
+        const rect = elem.getBoundingClientRect();
+        let left = window.pageXOffset + rect.left;
+        let right = window.pageXOffset + rect.right;
+        let top = window.pageYOffset + rect.top;
+        let bottom = window.pageYOffset + rect.bottom;
+        return {
+          left,
+          right,
+          top,
+          bottom
+        };
+      }
+```
+
+## 10.5 小结
+
+页面的任何点都有坐标：
+
+1. 元素相对于窗口的坐标可以通过`getBoundingClientRect`获取
+2. 元素相对于文档的坐标可以通过`window.pageXoffset/pageYoffset` + `getBoundingClientReact`获取
+
+如果我们想要让元素相对于窗口调整位置，可以设置css属性`position:fixed`
+
+如果我们想要让元素相对于文档调整位置，可以设置css属性`position:absolute`
+
+
+
+# 十一、节点属性type，tag和content
+
+## 11.1 DOM节点类
+
+不同的DOM节点可能有不同的属性，但是这些DOM之间存在共有的属性和方法，所有类型的DOM节点都形成一个单一层次的结构。
+
+每个DOM节点都属于相应的内置类。
+
+* EventTarget —— 根的抽象类。该类的对象从未被创建，它是一个基础，以便让所有节点都能够支持事件。
+* Node —— 抽象类，是DOM节点的基础，它提供了DOM节点的一些属性：`nextSibling`,`parentNode`等。
+* Element —— DOM元素的基本类，它提供元素的导航，即：`nextElementSibling`和`children`等属性。
+* HTMLElement —— 所有HTML元素的基本类。各种HTML元素继承于它：
+  * HTMLInputElement —— input元素的类
+  * HTMLBodyElement —— body元素的类
+  * 每个标签都可以有自己的类，这些类都有指定属性和方法
+
+<img src="assets/image-20220108231040580.png" alt="image-20220108231040580" style="zoom:50%;" />
+
+因此，节点的全部属性和方法都是继承的结果。
+
+DOM节点是常规的JavaScript对象，它们使用基于原型的类进行继承。
+
+> 我们可以通过`console.dir`来探究DOM节点的属性
+
+ ## 11.2 nodeType属性
+
+这是一种过时的获取节点类型的方法。
+
+* 元素节点`elem.nodeType===1`
+* 文本节点`elem.nodeType===3`
+* document对象 `elem.nodeType===9`
+
+现在，我们可以通过`instanceof`或者其他基于类的方法来判断节点类型。
+
+```javascript
+instanceof HTMLBodyElement
+instanceof HTMLInputElement
+```
+
+## 11.3 nodeName和tagName
+
+nodeName和tagName都可以返回元素的标签名。
+
+它们的区别在于`nodeName`是任意Node定义的，而`tagName`仅属于`Element`节点
+
+## 11.4 InnerHTML 内容
+
+`innerHTML`属性允许将元素内的HTML用字符串的形式返回出来。
+
+同时，我们也可以用它以字符串的形式来设置节点内的HTML。
+
+```javascript
+document.body.innerHTML='<button>我被设置了</button>'
+```
+
+如果我们用innerHTML在页面上设置一个script标签，它并不会运行。
+
+当我们用`innerHTML+=‘...’`添加内容时，它实际的工作是这样的：
+
+* 移除旧的内容
+* 写入新的innerHTML（新旧结合）
+
+**因为内容已“归零”并从头开始重写，因此所有的图片和其他资源都将重写加载。**
+
+并且还会有其他副作用。例如，如果现有的文本被用鼠标选中了，那么大多数浏览器都会在重写 `innerHTML` 时删除选定状态。如果这里有一个带有用户输入的文本的 `<input>`，那么这个被输入的文本将会被移除。诸如此类。
+
+## 11.5 outerHTML 元素的完整HTML
+
+outerHTML包含元素的完整HTML。就像innerHTML加上元素自身一样。
+
+```html
+<div id="elem">Hello <b>World</b></div>
+
+<script>
+  alert(elem.outerHTML); // <div id="elem">Hello <b>World</b></div>
+</script>
+```
+
+**注意：与 `innerHTML` 不同，写入 `outerHTML` 不会改变元素。而是在 DOM 中替换它。**
+
+```html
+<div>Hello, world!</div>
+
+<script>
+  let div = document.querySelector('div');
+
+  // 使用 <p>...</p> 替换 div.outerHTML
+  div.outerHTML = '<p>A new element</p>'; // (*)
+
+  // 蛤！'div' 还是原来那样！
+  alert(div.outerHTML); // <div>Hello, world!</div> (**)
+</script>
+
+```
+
+在 `(*)` 行，我们使用 `<p>A new element</p>` 替换 `div`。在外部文档（DOM）中我们可以看到的是新内容而不是 `<div>`。但是正如我们在 `(**)` 行所看到的，旧的 `div` 变量并没有被改变。
+
+`outerHTML` 赋值不会修改 DOM 元素（在这个例子中是被 ‘div’ 引用的对象），而是将其从 DOM 中删除并在其位置插入新的 HTML。
+
+所以，在 `div.outerHTML=...` 中发生的事情是：
+
+- `div` 被从文档（document）中移除。
+- 另一个 HTML 片段 `<p>A new element</p>` 被插入到其位置上。
+- `div` 仍拥有其旧的值。新的 HTML 没有被赋值给任何变量。
+
+在这儿很容易出错，我们可以向 `elem.outerHTML` 写入内容，但是要记住，它不会改变我们所写的元素（‘elem’）。而是将新的 HTML 放在其位置上。我们可以通过查询 DOM 来获取对新元素的引用。
+
+## 11.6 nodeValue/data:文本节点内容
+
+innerHTML仅对元素节点有用，如果我们想获取其他节点的内容，可以使用nodeValue/data。这两个几乎没有差别。一般我们用data，因为它更短。
+
+```html
+<body>
+  Hello
+  <!-- Comment -->
+  <script>
+    let text = document.body.firstChild;
+    alert(text.data); // Hello
+
+    let comment = text.nextSibling;
+    alert(comment.data); // Comment
+  </script>
+</body>
+```
+
+## 11.7 textContent :纯文本
+
+我们能够使用`textContent`读写元素内的纯文本，而不包含`<tags>`
+
+```html
+<div id="news">
+  <h1>Headline!</h1>
+  <p>Martians attack people!</p>
+</div>
+
+<script>
+  // Headline! Martians attack people!
+  alert(news.textContent);
+</script>
+```
+
+如果我们希望写入的类似这样的字符串`<a>123</a>`被当做文本插入元素中，而不是被当做HTML插入，那么对`elem.textContent`进行赋值可以完成这样的需求。
+
+## 11.8 hidden属性
+
+hidden是DOM属性，也是HTML的特性。它指定元素是否可见。
+
+它的作用类似`display:hidden`，但是它更简短。
+
+```javascript
+element.setAttribute('hidden','')//设置hidden特性
+element.hidden=true //设置hidden属性
+```
+
+## 11.9 小结
+
+每个DOM节点都属于特定的类，这些类形成一个层次结构。完整的属性和方法是继承后的结果。
+
+主要的DOM节点属性：
+
+* nodeType 节点类型
+* nodeName/tagName 节点名/标签名
+* innerHTML 元素的HTML内容，可读写
+* outerHTML 元素包括自己的HTML内容，可读写。但写入只是替换新的HTML。
+* nodeValue/data 非元素节点获取内容，可以读写
+* textContent 元素的纯文本内容，可读写
+* hidden 相当于`display:none`,但更简洁。
+* ...其他
