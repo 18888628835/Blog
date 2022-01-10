@@ -20,7 +20,7 @@
 
 最近公司要做一个政务大屏项目，由于在员工竞优大会上表（jing）现（chui）良（niu）好（b）的我说希望未来能做一个大屏项目，于是这个任务自然交到我头上（需求来得真快），当我拿到图的时候发现地图上有定制化的元素，就是下面图中的三条河流
 
-<img src="assets/image-20210918153055962.png" alt="image-20210918153055962" style="zoom:20%;" />
+<img src="../assets/image-20210918153055962.png" alt="image-20210918153055962" style="zoom:20%;" />
 
 如果想要使用 GeoJSON 的方式，那就必须知道三条河流的坐标系才行，可是 UI 小姐姐说需求方给的河流就是个图层，她只贴到地图上而已，并没有坐标方面的数据。
 
@@ -64,7 +64,7 @@
 
 视觉上的不同自然就是散点了，散点长这样
 
-<img src="assets/image-20210918160041195.png" alt="image-20210918160041195" style="zoom:30%;" />
+<img src="../assets/image-20210918160041195.png" alt="image-20210918160041195" style="zoom:30%;" />
 
 由于我们的项目需要加很多散点，所以我们自然要选择 geo 组件。
 
@@ -88,7 +88,7 @@
 </svg>
 ```
 
-![Sep-18-2021 16-22-55](assets/Sep-18-2021 16-22-55.gif)
+![Sep-18-2021 16-22-55](../assets/Sep-18-2021 16-22-55.gif)
 
 左边的矩形由于加了 name，就自动拥有 hover 时高亮的效果，而右边的则没有。
 
@@ -125,7 +125,7 @@ option = {
 
 我们在浏览器中打开 F12 开发者工具，并且选择小箭头对准渲染出来的图片，就可以看到某块区域的 path
 
-<img src="assets/image-20210918170632253.png" alt="image-20210918170632253" style="zoom:30%;" />
+<img src="../assets/image-20210918170632253.png" alt="image-20210918170632253" style="zoom:30%;" />
 
 现在已经很清楚了，整块底图都是用大量的 path 进行描绘的，而 path 的形状是通过属性 d 来定义的。
 
@@ -178,7 +178,7 @@ export const Middle = () => {
 
 现在打开浏览看可以查看到效果了，不出意外的话，你可以看到这样的效果
 
-<img src="assets/Sep-18-2021 17-54-21.gif" alt="Sep-18-2021 17-54-21" style="zoom:50%;" />
+<img src="../assets/Sep-18-2021 17-54-21.gif" alt="Sep-18-2021 17-54-21" style="zoom:50%;" />
 
 由于我只给一个 path 添加 name，所以只有这一个元素会移动时高亮。
 
@@ -247,7 +247,7 @@ SVG 源文件中加就比较基础了，需要我们写 xml 标签，比如这�
 
 现在的效果是这样的
 
-<img src="assets/Sep-19-2021 12-00-25.gif" alt="Sep-19-2021 12-00-25" style="zoom:50%;" />
+<img src="../assets/Sep-19-2021 12-00-25.gif" alt="Sep-19-2021 12-00-25" style="zoom:50%;" />
 
 ### 地域分块 regions 自定义样式
 
@@ -313,7 +313,7 @@ SVG 源文件中加就比较基础了，需要我们写 xml 标签，比如这�
 
 目前我们分别有 geo.regions.itemStyle、geo.itemStyle、geo.emphasis.itemStyle，他们分别可以定制化地区的样式、全局统一样式和高亮时的样式，API 颗粒度的划分非常精细，只需要到对应的父级配置项查询即可。
 
-<img src="assets/image-20210919121750115.png" alt="image-20210919121750115" style="zoom:50%;" />
+<img src="../assets/image-20210919121750115.png" alt="image-20210919121750115" style="zoom:50%;" />
 
 ### layout 布局
 
@@ -419,7 +419,7 @@ const mapData = [
 
 这样效果就大概有了
 
-<img src="assets/Sep-19-2021 23-43-38-2066285.gif" alt="Sep-19-2021 23-43-38" style="zoom:50%;" />
+<img src="../assets/Sep-19-2021 23-43-38-2066285.gif" alt="Sep-19-2021 23-43-38" style="zoom:50%;" />
 
 ### 获取坐标轴
 

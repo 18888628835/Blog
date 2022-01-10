@@ -1,31 +1,31 @@
-# 一、Node.js的特性
+# 一、Node.js 的特性
 
 常见的后端开发语言和技术有多种:
 
-* 基于Java的Spring
-* 基于Python的Django
+- 基于 Java 的 Spring
+- 基于 Python 的 Django
 
 ...
 
-相比其他后端技术，JavaScript这门脚本语言需要一个解析器才能运行。在HTML页面的JavaScript程序，浏览器就是解析器。
+相比其他后端技术，JavaScript 这门脚本语言需要一个解析器才能运行。在 HTML 页面的 JavaScript 程序，浏览器就是解析器。
 
-而对于独立运行的JavaScript程序，Node就是它的解析器。
+而对于独立运行的 JavaScript 程序，Node 就是它的解析器。
 
-Node是一个让JavaScript运行在服务器端的开发平台。它让JavaScript脱离脚本语言，在后端能够与其他语言一样操控数据库、服务器等等。
+Node 是一个让 JavaScript 运行在服务器端的开发平台。它让 JavaScript 脱离脚本语言，在后端能够与其他语言一样操控数据库、服务器等等。
 
-Node是基于V8引擎开发的，V8引擎执行JavaScript程序的速度非常快，性能也非常好。
+Node 是基于 V8 引擎开发的，V8 引擎执行 JavaScript 程序的速度非常快，性能也非常好。
 
-> Chrome V8是一个由Google开发的开源JavaScript引擎，用于GoogleChrome及Chromium中。Chrome V8在运行之前会将JavaScript代码编译成机器代码而非字节码，以此提升程序性能。更进一步，Chrome V8使用了如内联缓存（Inline Caching）等方法来提高性能。有了这些功能，JavaScript程序与ChromeV8引擎的运行速度可媲美二进制编译的程序。
+> Chrome V8 是一个由 Google 开发的开源 JavaScript 引擎，用于 GoogleChrome 及 Chromium 中。Chrome V8 在运行之前会将 JavaScript 代码编译成机器代码而非字节码，以此提升程序性能。更进一步，Chrome V8 使用了如内联缓存（Inline Caching）等方法来提高性能。有了这些功能，JavaScript 程序与 ChromeV8 引擎的运行速度可媲美二进制编译的程序。
 
 ## 1.1 模块化规范
 
 模块化的开发可以提高代码的复用率，方便进行代码管理。通常一个文件就是一个模块，有自己的作用域，只向外暴露特定的变量和函数。
 
-CommonJS是JavaScript模块化的一种规范，该规范最初用在服务端的Node开发中，现在Weback打包工具也支持原生CommonJS。
+CommonJS 是 JavaScript 模块化的一种规范，该规范最初用在服务端的 Node 开发中，现在 Weback 打包工具也支持原生 CommonJS。
 
 根据这个规范，每一个文件都是一个模块，其内部定义的变量是属于这个模块的，不会对外暴露，也就是说不会污染全局变量。
 
-CommonJS的核心思想就是通过require()方法同步加载所要依赖的其他模块，然后通过exports或者module.exports来导出需要暴露的接口。 
+CommonJS 的核心思想就是通过 require()方法同步加载所要依赖的其他模块，然后通过 exports 或者 module.exports 来导出需要暴露的接口。
 
 示例代码
 
@@ -37,7 +37,7 @@ CommonJS的核心思想就是通过require()方法同步加载所要依赖的其
 └── package.json
 ```
 
-其中index.js代码引入
+其中 index.js 代码引入
 
 ```JavaScript
 var math = require('./math.js');
@@ -45,7 +45,7 @@ var math = require('./math.js');
 console.log(math.add(10, 20)); // 30
 ```
 
-math.js代码导出
+math.js 代码导出
 
 ```JavaScript
 var add = function (a, b) {
@@ -55,7 +55,7 @@ var add = function (a, b) {
 module.exports.add = add;
 ```
 
-在package.json上配置`scripts`和`type`属性
+在 package.json 上配置`scripts`和`type`属性
 
 ```
 {
@@ -74,7 +74,7 @@ module.exports.add = add;
 }
 ```
 
-type属性中的node index.js表示从命令行运行Node脚本
+type 属性中的 node index.js 表示从命令行运行 Node 脚本
 
 运行
 
@@ -82,15 +82,15 @@ type属性中的node index.js表示从命令行运行Node脚本
 npm start
 ```
 
-但common.js属于社区规范并非真正意义上的标准规范。
+但 common.js 属于社区规范并非真正意义上的标准规范。
 
-ES6在语言标准层面上实现了模块功能。它成为浏览器和服务器通用的模块化解决方案。但是ES6目前无法在所有浏览器中执行，需要通过Babel将不被支持的import语法编译成当前受到广泛支持的require语法。
+ES6 在语言标准层面上实现了模块功能。它成为浏览器和服务器通用的模块化解决方案。但是 ES6 目前无法在所有浏览器中执行，需要通过 Babel 将不被支持的 import 语法编译成当前受到广泛支持的 require 语法。
 
-但在Nodejs中，则不需要这么做。
+但在 Nodejs 中，则不需要这么做。
 
- ES 6模块的设计思想是尽量静态化，使得编译而非运行时就能确定模块的依赖关系，以及输入和输出的变量。
+ES 6 模块的设计思想是尽量静态化，使得编译而非运行时就能确定模块的依赖关系，以及输入和输出的变量。
 
-使用ES6模块化的示例项目结构如下
+使用 ES6 模块化的示例项目结构如下
 
 ```JavaScript
 .
@@ -100,13 +100,13 @@ ES6在语言标准层面上实现了模块功能。它成为浏览器和服务�
 └── package.json
 ```
 
-首先需要修改package.json文件的type属性
+首先需要修改 package.json 文件的 type 属性
 
 ```JavaScript
 "type": "module",
 ```
 
-其中，index.js代码如下
+其中，index.js 代码如下
 
 ```JavaScript
 import add from './math.js';
@@ -114,7 +114,7 @@ import add from './math.js';
 console.log(add(10, 20)); // 30
 ```
 
-math.js代码如下
+math.js 代码如下
 
 ```JavaScript
 var add = function (a, b) {
@@ -124,45 +124,45 @@ var add = function (a, b) {
 export default add;
 ```
 
-执行index.js脚本
+执行 index.js 脚本
 
 ```JavaScript
 npm start
 ```
 
-## 1.2 异步I/O和事件驱动
+## 1.2 异步 I/O 和事件驱动
 
 1. 单线程
 
-   Node的Runtime是基于V8引擎的。V8引擎是chrome浏览器中的JavaScript代码解析引擎，其最大的特点是单线程，因此Node也是单线程。
+   Node 的 Runtime 是基于 V8 引擎的。V8 引擎是 chrome 浏览器中的 JavaScript 代码解析引擎，其最大的特点是单线程，因此 Node 也是单线程。
 
    简单来说单线程就是进行中只有一个线程，程序按照顺序执行，前面的程序执行完才会执行后面的程序。
 
    > 进程和线程的关系：进程是资源分配的最小单位，而线程是程序执行的最小单位（资源调度的最小单位）。线程可以看做是特殊的进程，某个进程下的多个线程共享部分资源，如地址空间。
 
-   Node的单线程指的是主线程是单线程。主线程按照代码顺序一步一步执行，如果遇到同步代码阻塞，主线程就被占用，则后续的程序代码执行就会被卡住。
+   Node 的单线程指的是主线程是单线程。主线程按照代码顺序一步一步执行，如果遇到同步代码阻塞，主线程就被占用，则后续的程序代码执行就会被卡住。
 
-   因为单线程具有这个特性，所以Node程序不能有耗时很长的同步处理程序阻塞程序的后续执行，对于耗时过长的程序，应该采用异步执行的方式。这就需要说到异步I/O。
+   因为单线程具有这个特性，所以 Node 程序不能有耗时很长的同步处理程序阻塞程序的后续执行，对于耗时过长的程序，应该采用异步执行的方式。这就需要说到异步 I/O。
 
-2. 异步I/O
+2. 异步 I/O
 
-   I/O分为以下情况：
+   I/O 分为以下情况：
 
-   * 阻塞I/O与非阻塞I/O
+   - 阻塞 I/O 与非阻塞 I/O
 
-   * 同步I/O与异步I/O
+   - 同步 I/O 与异步 I/O
 
-   对于阻塞I/O，当需要执行I/O操作读取硬盘或者网络等数据时，线程就会被阻塞，直到要读取的数据全部准备好返回给用户，这时线程就会解除阻塞状态。
+   对于阻塞 I/O，当需要执行 I/O 操作读取硬盘或者网络等数据时，线程就会被阻塞，直到要读取的数据全部准备好返回给用户，这时线程就会解除阻塞状态。
 
-   对于非阻塞I/O，当需要执行I/O操作时，线程可以在发起I/O处理请求后，不用等请求完成，继续做其他事情。但是程序如何知道要读取的数据已经准备好了呢？除了存在效率问题的轮询方法外，现在通常的做法是I/O多路复用的方式，即用一个阻塞函数同时监听多个文件描述符，当其中有一个文件描述符准备好了，就立刻返回。Linux系统提供了select、poll和epoll等实现I/O多路复用的功能。
+   对于非阻塞 I/O，当需要执行 I/O 操作时，线程可以在发起 I/O 处理请求后，不用等请求完成，继续做其他事情。但是程序如何知道要读取的数据已经准备好了呢？除了存在效率问题的轮询方法外，现在通常的做法是 I/O 多路复用的方式，即用一个阻塞函数同时监听多个文件描述符，当其中有一个文件描述符准备好了，就立刻返回。Linux 系统提供了 select、poll 和 epoll 等实现 I/O 多路复用的功能。
 
-   因此，阻塞I/O和非阻塞I/O是基于线程是否会阻塞来区分的。
+   因此，阻塞 I/O 和非阻塞 I/O 是基于线程是否会阻塞来区分的。
 
-   同步I/O做操作的时候会阻塞线程，而异步I/O则不会造成任何阻塞。
+   同步 I/O 做操作的时候会阻塞线程，而异步 I/O 则不会造成任何阻塞。
 
-   阻塞I/O和非阻塞I/O以及I/O多路复用都是同步I/O。
+   阻塞 I/O 和非阻塞 I/O 以及 I/O 多路复用都是同步 I/O。
 
-   非阻塞I/O虽然在操作时不会阻塞线程，但是当其准备好数据以后还是要阻塞线程去内核读取数据的，因此不算异步I/O。
+   非阻塞 I/O 虽然在操作时不会阻塞线程，但是当其准备好数据以后还是要阻塞线程去内核读取数据的，因此不算异步 I/O。
 
    以下是模型图
 
@@ -170,7 +170,7 @@ npm start
 
 ## 1.3 事件驱动
 
-Node还有另一个重要的特性：事件驱动。
+Node 还有另一个重要的特性：事件驱动。
 
 简单来说，事件驱动就是通过监听事件的状态变化来做出相应的操作。
 
@@ -184,19 +184,19 @@ fs.readFile('./math.js', { encoding: 'utf-8' }, function (error, data) {
 });
 ```
 
-上面的代码会读取math.js文件，然后将里面的内容打出来。如果没有，则会打出error信息。
+上面的代码会读取 math.js 文件，然后将里面的内容打出来。如果没有，则会打出 error 信息。
 
-对于事件驱动编程来说，如果某个事件的回调函数是计算密集型（CPU被占用）函数，那么这个回调函数将会阻塞所有回调函数的执行。这也是Node不适用于计算密集型业务的原因。
+对于事件驱动编程来说，如果某个事件的回调函数是计算密集型（CPU 被占用）函数，那么这个回调函数将会阻塞所有回调函数的执行。这也是 Node 不适用于计算密集型业务的原因。
 
-# 二、RESTful架构风格
+# 二、RESTful 架构风格
 
-REST全称是Representational State Transfer，即表征性状态转移。
+REST 全称是 Representational State Transfer，即表征性状态转移。
 
-REST指的是一组架构约束条件和原则。
+REST 指的是一组架构约束条件和原则。
 
-如果一个架构符合REST的约束条件和原则，那么就称它为RESTful架构。REST本身没有创造新的技术、组件或者服务，隐藏在RESTful背后的理念是使用Web现有的特征和能力，以及更好地使用现有的Web标准的一些准则和约束。
+如果一个架构符合 REST 的约束条件和原则，那么就称它为 RESTful 架构。REST 本身没有创造新的技术、组件或者服务，隐藏在 RESTful 背后的理念是使用 Web 现有的特征和能力，以及更好地使用现有的 Web 标准的一些准则和约束。
 
-RESTful是目前最流行的API设计规范，我们可以从3个方面来理解RESTful的基本特征：
+RESTful 是目前最流行的 API 设计规范，我们可以从 3 个方面来理解 RESTful 的基本特征：
 
 1. 资源和动作
 2. 响应状态码
@@ -204,15 +204,15 @@ RESTful是目前最流行的API设计规范，我们可以从3个方面来理解
 
 **资源和动作**
 
-RESTful架构应该遵循统一的接口原则。统一接口包含了一组受限的预定义操作，不管什么样的资源都使用相同的接口进行资源访问。
+RESTful 架构应该遵循统一的接口原则。统一接口包含了一组受限的预定义操作，不管什么样的资源都使用相同的接口进行资源访问。
 
-任何接口的URL都可以抽象成以下部分：
+任何接口的 URL 都可以抽象成以下部分：
 
-* 资源：必须是名词且都是复数形式。
+- 资源：必须是名词且都是复数形式。
 
-* 动作：通过HTTP定义的方法来表述对资源的动作
+- 动作：通过 HTTP 定义的方法来表述对资源的动作
 
-  常用5种HTTP方法对应CRUD操作：
+  常用 5 种 HTTP 方法对应 CRUD 操作：
 
   ```
   GET：读取（Read）
@@ -222,26 +222,24 @@ RESTful架构应该遵循统一的接口原则。统一接口包含了一组受�
   DELETE：删除（Delete）
   ```
 
-  上面的更新分为PUT和PATCH，它们的区别在于
+  上面的更新分为 PUT 和 PATCH，它们的区别在于
 
-  * PUT是幂等的，即多次进行PUT操作后的资源总是相同的，因为PUT会更新整个资源。
-  * PATCH是非幂等的，多次进行PATCH操作会导致资源有不同的变化，PATCH只更新资源的部分字段。
+  - PUT 是幂等的，即多次进行 PUT 操作后的资源总是相同的，因为 PUT 会更新整个资源。
+  - PATCH 是非幂等的，多次进行 PATCH 操作会导致资源有不同的变化，PATCH 只更新资源的部分字段。
 
 **响应状态码**
 
-客户端每一次请求服务器都必须给出回应。服务器响应包括HTTP状态码和数据两部分。其中，状态码分为五大类，覆盖绝大部分情况。每一种状态码都有标准的解释，客户端只需要查看状态码就可以判断发生什么情况，因此客户端应该尽可能返回精确地状态码。
-
-
+客户端每一次请求服务器都必须给出回应。服务器响应包括 HTTP 状态码和数据两部分。其中，状态码分为五大类，覆盖绝大部分情况。每一种状态码都有标准的解释，客户端只需要查看状态码就可以判断发生什么情况，因此客户端应该尽可能返回精确地状态码。
 
 **响应数据**
 
-API返回的数据格式不推荐使用纯文本，应该返回标准化的结构数据，如JSON格式的数据。因此，在服务器响应的HTTP头上，将Content-Type设置为application/json。
+API 返回的数据格式不推荐使用纯文本，应该返回标准化的结构数据，如 JSON 格式的数据。因此，在服务器响应的 HTTP 头上，将 Content-Type 设置为 application/json。
 
-客户端请求时也要明确告诉服务器可以接受JSON数据的格式，即在请求的HTTP头上将ACCEPT属性设置为application/json。
+客户端请求时也要明确告诉服务器可以接受 JSON 数据的格式，即在请求的 HTTP 头上将 ACCEPT 属性设置为 application/json。
 
-API的调用者未必知道URL是如何设计的，一个解决方法是在响应中添加相关的链接，以便下一步操作。这样用户只需要记住一个URL，就可以发现其他URL，这种方法叫HATEOAS。
+API 的调用者未必知道 URL 是如何设计的，一个解决方法是在响应中添加相关的链接，以便下一步操作。这样用户只需要记住一个 URL，就可以发现其他 URL，这种方法叫 HATEOAS。
 
-以GitHub的API为例，当访问https://api.github.com/时，就可以得到其他相关的URL，如下：
+以 GitHub 的 API 为例，当访问https://api.github.com/时，就可以得到其他相关的URL，如下：
 
 ```json
 {
@@ -255,9 +253,9 @@ API的调用者未必知道URL是如何设计的，一个解决方法是在响�
 }
 ```
 
-# 三、回调函数和Promise对象
+# 三、回调函数和 Promise 对象
 
-Node具有单线程和事件驱动的特性，这意味着我们需要用到大量的异步代码以让程序不被阻塞。
+Node 具有单线程和事件驱动的特性，这意味着我们需要用到大量的异步代码以让程序不被阻塞。
 
 下面是利用异步回调函数来读取文件的示例代码
 
@@ -275,11 +273,11 @@ fs.readFile('./test.txt', { encoding: 'utf8' }, function (err, data) {
 console.log('read async');
 ```
 
-使用异步回调函数能够大大提升Node单线程的处理能力，但是基于回调函数的编程风格会让代码可读性变得更加糟糕，即所谓的回调地狱。
+使用异步回调函数能够大大提升 Node 单线程的处理能力，但是基于回调函数的编程风格会让代码可读性变得更加糟糕，即所谓的回调地狱。
 
-为么解决这个问题，ES6引进了Promise对象，有了Promise对象，就可以将异步操作以同步的流程表达出来，避免层层回调。
+为么解决这个问题，ES6 引进了 Promise 对象，有了 Promise 对象，就可以将异步操作以同步的流程表达出来，避免层层回调。
 
-使用Promise对象后的读取文件的示例
+使用 Promise 对象后的读取文件的示例
 
 ```JavaScript
 var fs = require('fs');
@@ -305,56 +303,56 @@ getData('./test.txt', { encoding: 'utf8' })
   });
 ```
 
-# 四、Node.js常用模块
+# 四、Node.js 常用模块
 
 ## 4.1 全局变量
 
-在浏览器中，window是全局对象，在Node中的全局变量是global，在任何地方都可以访问global的属性。
+在浏览器中，window 是全局对象，在 Node 中的全局变量是 global，在任何地方都可以访问 global 的属性。
 
-* 保留字
+- 保留字
 
   两个常用保留字`__filename`和`__dirname`
 
-  __filename表示正在执行脚本的文件名。它会输出文件所在位置的绝对路径，并且和命令行参数所指定的文件名并不一定相同。在模块中，返回的值是模块文件的路径。
+  \_\_filename 表示正在执行脚本的文件名。它会输出文件所在位置的绝对路径，并且和命令行参数所指定的文件名并不一定相同。在模块中，返回的值是模块文件的路径。
 
   ```javascript
   console.log(__filename);
-  
+
   /Users/qiuyanxi/Desktop/demo/NodeJS-demo/node-demo-1/index.js
   ```
 
-  __dirname表示当前执行的脚本所在的目录。
+  \_\_dirname 表示当前执行的脚本所在的目录。
 
   ```javascript
   console.log(__dirname);
   /Users/qiuyanxi/Desktop/demo/NodeJS-demo/node-demo-1
   ```
 
-* 定时任务
+- 定时任务
 
-  Node开发中的定时器除了setTimeout、setInterval外，还有setImmediate
+  Node 开发中的定时器除了 setTimeout、setInterval 外，还有 setImmediate
 
-* 控制台
+- 控制台
 
   console.log：向标准输出流打印字符并以换行符结束，该方法接收若干个参数；
 
-  console.info：输出提示信息，用法与console.log方法类似；
+  console.info：输出提示信息，用法与 console.log 方法类似；
 
-  console.warn：输出警告消息，在Chrome浏览器控制台会显示黄色的惊叹号；
+  console.warn：输出警告消息，在 Chrome 浏览器控制台会显示黄色的惊叹号；
 
-  console.error：输出错误消息，在Chrome浏览器控制台会显示红色的叉。
+  console.error：输出错误消息，在 Chrome 浏览器控制台会显示红色的叉。
 
   console.time：启动一个计时器；
 
-  console.timeEnd：停止一个通过console.time()启动的计时器。
+  console.timeEnd：停止一个通过 console.time()启动的计时器。
 
-* process进程
+- process 进程
 
-  process进程代表当前Node进程状态的对象，并提供一个与操作系统交互的简单接口。
+  process 进程代表当前 Node 进程状态的对象，并提供一个与操作系统交互的简单接口。
 
   ```
   import process from 'process';
-  
+
   process.on('exit', code => {
     console.log(process.cwd()); //打印出当前进程的工作目录
   });
@@ -362,26 +360,24 @@ getData('./test.txt', { encoding: 'utf8' })
 
   上面的代码监听进程退出时的生命周期。
 
-
-
 ## 4.2 系统模块-os
 
-os模块提供一些基本的系统操作函数，通过os模块，Node程序可以实现和操作系统的交互。
+os 模块提供一些基本的系统操作函数，通过 os 模块，Node 程序可以实现和操作系统的交互。
 
 ```javascript
 import os from 'os';
-console.log('hostname:' + os.hostname());//主机名
-console.log('type:' + os.type());//操作系统名
-console.log(os.userInfo());// 用户信息
+console.log('hostname:' + os.hostname()); //主机名
+console.log('type:' + os.type()); //操作系统名
+console.log(os.userInfo()); // 用户信息
 ```
 
 ## 4.3 路径模块-path
 
 系统中的每个文件都有路径。
 
-但是macos跟windows的路径符号是相反的，分别为`/`和`\`
+但是 macos 跟 windows 的路径符号是相反的，分别为`/`和`\`
 
-path模块提供用于处理文件路径和目录路径的工具来消除这种差异。
+path 模块提供用于处理文件路径和目录路径的工具来消除这种差异。
 
 ```javascript
 import path from 'path';
@@ -405,10 +401,10 @@ path.join('./user', 'local', 'bin'); // user/local/bin
 path.isAbsolute(full_path); // true
 
 //当包含类似 .、.. 或双斜杠等相对的说明符时，则尝试计算实际的路径
-path.normalize('/users/joe/..//test.txt') //'/users/test.txt'
+path.normalize('/users/joe/..//test.txt'); //'/users/test.txt'
 
 // 解析对象的路径为组成其的片段
-path.parse('/users/test.txt')
+path.parse('/users/test.txt');
 /*
 {
   root: '/',
@@ -420,28 +416,28 @@ path.parse('/users/test.txt')
 */
 
 // 接受 2 个路径作为参数。 基于当前工作目录，返回从第一个路径到第二个路径的相对路径。
-path.relative('/Users/joe', '/Users/joe/test.txt') //'test.txt'
+path.relative('/Users/joe', '/Users/joe/test.txt'); //'test.txt'
 
 //获得相对路径的绝对路径计算
-path.resolve('joe.txt') //'/Users/joe/joe.txt' 如果从主文件夹运行
+path.resolve('joe.txt'); //'/Users/joe/joe.txt' 如果从主文件夹运行
 
 //通过指定第二个参数，resolve 会使用第一个参数作为第二个参数的基准：
-path.resolve('tmp', 'joe.txt') //'/Users/joe/tmp/joe.txt' 如果从主文件夹运行
+path.resolve('tmp', 'joe.txt'); //'/Users/joe/tmp/joe.txt' 如果从主文件夹运行
 
 //第一个参数以斜杠开头，则表示它是绝对路径：
-path.resolve('/etc', 'joe.txt') //'/etc/joe.txt'
+path.resolve('/etc', 'joe.txt'); //'/etc/joe.txt'
 ```
 
 ## 4.4 文件模块-fs
 
 **获取详细信息**
 
-每个文件都有一组详细信息，可以使用fs模块提供的stat()方法获取。
+每个文件都有一组详细信息，可以使用 fs 模块提供的 stat()方法获取。
 
 ```javascript
 import fs from 'fs';
 fs.stat('./math.ts', (err, Stats) => {
-  console.log(Stats);//打印出math.js的信息
+  console.log(Stats); //打印出math.js的信息
 });
 ```
 
@@ -455,10 +451,10 @@ const stats = fs.statSync('./math.ts');
 文件的信息包含在属性变量中，我们可以通过以下常见的属性来获取信息
 
 ```javascript
-console.log(stats.isFile());//是否为文件
-console.log(stats.isDirectory());//是否为文件夹
-console.log(stats.isSymbolicLink());//是否符号链接
-console.log(stats.size);// 文件大小
+console.log(stats.isFile()); //是否为文件
+console.log(stats.isDirectory()); //是否为文件夹
+console.log(stats.isSymbolicLink()); //是否符号链接
+console.log(stats.size); // 文件大小
 ```
 
 **读取文件**
@@ -478,7 +474,7 @@ fs.writeFile('./test.txt', 'hello23', { flag: 'a+' }, err => {
 });
 ```
 
-flag标志可以指定写的行为。
+flag 标志可以指定写的行为。
 
 > 默认为 ‘w’: 打开文件进行写入， 创建（如果它不存在）或截断（如果它存在）该文件。
 
@@ -541,18 +537,18 @@ let folderName = './dir';
 })();
 ```
 
-在fs模块中，我们可以使用非常使用的函数来访问文件系统并与文件系统进行交互。
+在 fs 模块中，我们可以使用非常使用的函数来访问文件系统并与文件系统进行交互。
 
-所有办法默认是异步的，但是通过添加上Sync就是同步代码。
+所有办法默认是异步的，但是通过添加上 Sync 就是同步代码。
 
 ```javascript
-fs.rename()
-fs.renameSync()
-fs.write()
-fs.writeSync()
+fs.rename();
+fs.renameSync();
+fs.write();
+fs.writeSync();
 ```
 
-当调用`fs.rename`方法时，异步API会与回调一起使用。
+当调用`fs.rename`方法时，异步 API 会与回调一起使用。
 
 ```javascript
 let folderName = './dir';
@@ -561,7 +557,7 @@ fs.rename(folderName, 'afterDir', err => {
 });
 ```
 
-当使用同步API时，则使用try/catch捕获错误
+当使用同步 API 时，则使用 try/catch 捕获错误
 
 ```javascript
 try {
@@ -571,7 +567,7 @@ try {
 }
 ```
 
-主要的区别在于，同步API会阻塞脚本执行，直到文件操作成功。
+主要的区别在于，同步 API 会阻塞脚本执行，直到文件操作成功。
 
 # 五、流-stream
 
@@ -585,12 +581,12 @@ try {
 
 流相对于其他数据处理方法的优点：
 
-* 内存更效率：无需加载大量的数据到内存中即可进行处理
-* 时间效率：当获得数据之后即可立即开始处理数据，这样所需的时间更少，而不必等到整个数据有效负载可用才开始。
+- 内存更效率：无需加载大量的数据到内存中即可进行处理
+- 时间效率：当获得数据之后即可立即开始处理数据，这样所需的时间更少，而不必等到整个数据有效负载可用才开始。
 
-以下是Node中常用的实现流接口的内建模块
+以下是 Node 中常用的实现流接口的内建模块
 
-<img src="assets/image-20211214223840155.png" alt="image-20211214223840155" style="zoom:50%;" />
+<img src="../assets/image-20211214223840155.png" alt="image-20211214223840155" style="zoom:50%;" />
 
 上边的列表中有一些 Node.js 原生的对象，这些对象也是可以读写的流。这些对象中的一部分是既可读、又可写的流，例如 TCP sockets，zlib 以及 crypto。
 
@@ -614,19 +610,19 @@ stream.end(); //结束流
 console.log('done');
 ```
 
-上面的代码从创建流开始，会多次往index.txt中用流的方式写入内容
+上面的代码从创建流开始，会多次往 index.txt 中用流的方式写入内容
 
-> stream是水流，但里面没有水，stream.write可以让水流中有水（数据）
+> stream 是水流，但里面没有水，stream.write 可以让水流中有水（数据）
 >
->  写的小数据叫做chunk（块）chunk是不完整的数据
+> 写的小数据叫做 chunk（块）chunk 是不完整的数据
 >
-> 产生数据的地方叫source（源头）
+> 产生数据的地方叫 source（源头）
 >
-> 得到数据的地方叫sink（水池）
+> 得到数据的地方叫 sink（水池）
 
 **传统的磁盘读取并传输文件**
 
-如果用普通磁盘的方式读取上述示例中用流写入的index.txt文件，如下面代码所示
+如果用普通磁盘的方式读取上述示例中用流写入的 index.txt 文件，如下面代码所示
 
 ```javascript
 import http from 'http';
@@ -641,42 +637,44 @@ server.listen(3000);
 
 任务管理器的内存会在程序运行时大量被占用，因为需要开辟内存来读取，并且读取完后要发送给客户端，操作开销非常大。
 
-以下是客户端请求`localhost:3000`时的node开销
+以下是客户端请求`localhost:3000`时的 node 开销
 
-<img src="assets/image-20211212094323846.png" alt="image-20211212094323846" style="zoom:50%;" />
+<img src="../assets/image-20211212094323846.png" alt="image-20211212094323846" style="zoom:50%;" />
 
 结束后的开销
 
-<img src="assets/image-20211212094347666.png" alt="image-20211212094347666" style="zoom:50%;" />
+<img src="../assets/image-20211212094347666.png" alt="image-20211212094347666" style="zoom:50%;" />
 
-使用传统方式时，readfile会读取文件的全部内容，并在完成时调用回调函数。
+使用传统方式时，readfile 会读取文件的全部内容，并在完成时调用回调函数。
 
 如果文件很大，则操作会花费很多时间。最后通过回调将内容返回给客户端。
 
 **使用流读取数据并传输**
 
-如果用流方式读取上述示例中用流写入的index.txt文件，如下面代码所示
+如果用流方式读取上述示例中用流写入的 index.txt 文件，如下面代码所示
 
 ```javascript
 import http from 'http';
 import fs from 'fs';
 const server = http.createServer(function (req, res) {
-  const stream = fs.createReadStream('./index.txt');//创建可读流
+  const stream = fs.createReadStream('./index.txt'); //创建可读流
   stream.pipe(res);
-  stream.on('end',()=>{console.log('done')})
+  stream.on('end', () => {
+    console.log('done');
+  });
 });
 server.listen(3000);
 ```
 
 > Node `fs` 模块中的 `createReadStream` 方法可以针对任何文件给我们返回一个可读流。我们可以把它和响应对象连接起来
 
-客户端请求`localhost:3000`时的node开销
+客户端请求`localhost:3000`时的 node 开销
 
-<img src="assets/image-20211212094940057.png" alt="image-20211212094940057" style="zoom:50%;" />
+<img src="../assets/image-20211212094940057.png" alt="image-20211212094940057" style="zoom:50%;" />
 
 可以看出流占用的开销比普通磁盘小得多。
 
-当要发送的数据块已获得时就立即开始流式传输到HTTP客户端，而不用等到文件全部被读取。
+当要发送的数据块已获得时就立即开始流式传输到 HTTP 客户端，而不用等到文件全部被读取。
 
 ## 5.2 流的类型
 
@@ -687,19 +685,19 @@ server.listen(3000);
 - `Duplex`: 可以通过管道写入和读取的流，基本上相对于是可读流和可写流的组合。
 - `Transform`: 类似于双工流、但其输出是其输入的转换的转换流。
 
-Duplex的读和写是双轨道的，读取的数据来源于source（源头），写入的数据注入sink（水池）。通俗点说就是别人的数据你来读，读完你来写入一个地方。**读跟写是互相独立的**
+Duplex 的读和写是双轨道的，读取的数据来源于 source（源头），写入的数据注入 sink（水池）。通俗点说就是别人的数据你来读，读完你来写入一个地方。**读跟写是互相独立的**
 
 ```bash
                              Duplex Stream
                           ------------------|
                     Read  <-----               External Source
-            You           ------------------|   
+            You           ------------------|
                     Write ----->               External Sink
                           ------------------|
             You don't get what you write. It is sent to another source.
 ```
 
-Transform的读和写的单轨道的，通俗点说就是你写的你自己读。**读来自于写，并非互相独立的关系**
+Transform 的读和写的单轨道的，通俗点说就是你写的你自己读。**读来自于写，并非互相独立的关系**
 
 ```bash
 															Transform Stream
@@ -713,7 +711,7 @@ Transform的读和写的单轨道的，通俗点说就是你写的你自己读�
 
 管道提供了一个输出流到输入流的机制。通常我们用于从一个流中获取数据并将数据传递到另外一个流中。
 
-<img src="assets/bVcla61.png" alt="img" style="zoom:66%;" />
+<img src="../assets/bVcla61.png" alt="img" style="zoom:66%;" />
 
 如上面的图片所示，我们把文件比作装水的桶，而水就是文件里的内容，我们用一根管子(pipe)连接两个桶使得水从一个桶流入另一个桶，这样就慢慢的实现了大文件的复制过程。
 
@@ -730,7 +728,7 @@ import fs from 'fs';
 
 const readStream = fs.createReadStream('./index.txt');
 const writeStream = fs.createWriteStream('./name.txt');
-readStream.pipe(writeStream);//注意看这行代码
+readStream.pipe(writeStream); //注意看这行代码
 writeStream.on('finish', () => {
   writeStream.end();
 });
@@ -741,17 +739,17 @@ writeStream.on('finish', () => {
 `pipe()`方法的返回值是目标流，它可以链式调用。
 
 ```javascript
-src.pipe(dest1).pipe(dest2)
+src.pipe(dest1).pipe(dest2);
 ```
 
 相当于
 
 ```javascript
-src.pipe(dest1)
-dest1.pipe(dest2)
+src.pipe(dest1);
+dest1.pipe(dest2);
 ```
 
-它使得stream对象可以链接多个 `pipe()` 调用。
+它使得 stream 对象可以链接多个 `pipe()` 调用。
 
 如果我们使用管道连接的是双向流，我们就可以像 Linux 系统里那样连接多个流：
 
@@ -759,7 +757,7 @@ dest1.pipe(dest2)
 readableSrc
   .pipe(transformStream1)
   .pipe(transformStream2)
-  .pipe(finalWrtitableDest)
+  .pipe(finalWrtitableDest);
 ```
 
 `pipe` 方法会返回最后一个流，这使得我们可以串联多个流。对于流 `a` （可读），`b` 和 `c` （双向），以及 `d`（可写）。我们可以这样
@@ -782,9 +780,9 @@ $ a | b | c | d
 const stream1 = fs.createReadStream('./index.txt');
 const stream2 = fs.createWriteStream('./name.txt');
 // stream1一有数据就塞给stream2
-stream1.on('data',(chunk)=>stream2.write(chunk))
+stream1.on('data', chunk => stream2.write(chunk));
 // stream1停了就让stream2也结束
-stream1.on('end',()=>stream2.end())
+stream1.on('end', () => stream2.end());
 ```
 
 一般情况下使用 `pipe` 方法时你就不必再使用事件了。但如果你想以一种更加自定义的方式使用流，就要用到事件了。
@@ -793,9 +791,9 @@ stream1.on('end',()=>stream2.end())
 
 **Readable Stream**
 
-**data事件**：监听每次读取数据的操作，我们能够在回调中知道chunk的内容
+**data 事件**：监听每次读取数据的操作，我们能够在回调中知道 chunk 的内容
 
-**end事件**：监听读取数据结束的操作
+**end 事件**：监听读取数据结束的操作
 
 ```javascript
 import http from 'http';
@@ -815,14 +813,14 @@ server.listen(3000);
 
 **Writeable Stream**
 
-**drain事件**：高速写入流的时候，有可能造成堵塞现象，类似水流在管道中由于流入太快，导致管道堵水，一时之间水无法全部流出管道。这时候就可以停止写入，再监听被流入的地方的drain事件，只要触发了就可以继续写入
+**drain 事件**：高速写入流的时候，有可能造成堵塞现象，类似水流在管道中由于流入太快，导致管道堵水，一时之间水无法全部流出管道。这时候就可以停止写入，再监听被流入的地方的 drain 事件，只要触发了就可以继续写入
 
 ```javascript
 import http from 'http';
 import fs from 'fs';
 const server = http.createServer(function (req, res) {
-  const stream1 = fs.createReadStream('./index.txt');// 创建可读流
-  const stream2 = fs.createWriteStream('./name.txt');// 创建可写流
+  const stream1 = fs.createReadStream('./index.txt'); // 创建可读流
+  const stream2 = fs.createWriteStream('./name.txt'); // 创建可写流
   stream1.on('data', chunk => {
     const flag = stream2.write(chunk);
     if (!flag) {
@@ -833,46 +831,46 @@ const server = http.createServer(function (req, res) {
     });
   });
   stream1.on('end', () => {
-    stream2.end()
+    stream2.end();
   });
   stream1.pipe(res);
 });
 server.listen(3000);
 ```
 
-上面的代码创建了可读流stream1和可写流stream2，我们会从stream1中读出内容写到stream2中，如果此时流入过快导致管道堵塞，flag会变成false，此时不再进行写入。
+上面的代码创建了可读流 stream1 和可写流 stream2，我们会从 stream1 中读出内容写到 stream2 中，如果此时流入过快导致管道堵塞，flag 会变成 false，此时不再进行写入。
 
-当流入stream2的内容干涸之后再继续写的逻辑，所以此时需要监听stream2的drain事件。
+当流入 stream2 的内容干涸之后再继续写的逻辑，所以此时需要监听 stream2 的 drain 事件。
 
 > 可以理解成水池出水太快会造成管道无法快速排出，那么需要先塞住管道，等下方的水流干了之后再打开管道让水继续流
 
-**finish事件**：整个写入流的动作完成了触发的事件。
+**finish 事件**：整个写入流的动作完成了触发的事件。
 
 ## 5.5 可读流的暂停和流动模式
 
-可读流分两种状态：静止态paused和流动态flowing
+可读流分两种状态：静止态 paused 和流动态 flowing
 
-默认处于静止态。下面的代码会创建可读流，此时流的状态是静止的paused
+默认处于静止态。下面的代码会创建可读流，此时流的状态是静止的 paused
 
 ```
 const stream = fs.createReadStream('./index.txt')
 ```
 
-当添加data事件后，它的状态就变成流动态flowing
+当添加 data 事件后，它的状态就变成流动态 flowing
 
 ```javascript
-stream.on('data',(chunk)=>{
-	/* 此时变成流动态 */
-})
+stream.on('data', chunk => {
+  /* 此时变成流动态 */
+});
 ```
 
-`pipe()`方法是data事件+写入流的语法糖，当调用pipe事件时，也会变成流动态
+`pipe()`方法是 data 事件+写入流的语法糖，当调用 pipe 事件时，也会变成流动态
 
-`pause()`方法可以让流暂停-进入paused状态
+`pause()`方法可以让流暂停-进入 paused 状态
 
-`resume`方法可以让流恢复-进入flowing状态
+`resume`方法可以让流恢复-进入 flowing 状态
 
-下面的代码会先创建`name.txt`文件,然后暂停流入，直到3秒钟后再开始往`name.txt`中写入数据
+下面的代码会先创建`name.txt`文件,然后暂停流入，直到 3 秒钟后再开始往`name.txt`中写入数据
 
 ```javascript
 import fs from 'fs';
@@ -886,11 +884,11 @@ setTimeout(() => {
 }, 3000);
 ```
 
-## 5.6 可写流的drain事件
+## 5.6 可写流的 drain 事件
 
-这里结合Readable再谈谈可写流的drain事件，这个事件触发时机是finish事件还未触发，但是数据积压了的情况。
+这里结合 Readable 再谈谈可写流的 drain 事件，这个事件触发时机是 finish 事件还未触发，但是数据积压了的情况。
 
-当调用`stream.write(chunk)`时,可能会得到`false`,造成的原因可能是读取快写入慢导致数据积压，此时我们不能再write了，需要先暂停流入`readStream.pause()`,再监听drain事件，当数据流干了，就触发drain事件，此时恢复流入`readStream.resume()`
+当调用`stream.write(chunk)`时,可能会得到`false`,造成的原因可能是读取快写入慢导致数据积压，此时我们不能再 write 了，需要先暂停流入`readStream.pause()`,再监听 drain 事件，当数据流干了，就触发 drain 事件，此时恢复流入`readStream.resume()`
 
 ```javascript
 import fs from 'fs';
@@ -917,7 +915,7 @@ function write() {
 write();
 ```
 
-上面代码中的`index.txt`文件中拥有10000行数据，我们运行上面代码时，由于写入太快，会在log台上打印如下内容
+上面代码中的`index.txt`文件中拥有 10000 行数据，我们运行上面代码时，由于写入太快，会在 log 台上打印如下内容
 
 ```bash
 数据积压了...
@@ -928,11 +926,11 @@ write();
 水流干了,继续写入...
 ```
 
-当数据积压时，可以调用`readStream.pause()`停止数据流入。当`writeStream`监听的drain事件触发了（表示writeStream积压的数据写完了），此时恢复数据流动`readStream.resume()`。
+当数据积压时，可以调用`readStream.pause()`停止数据流入。当`writeStream`监听的 drain 事件触发了（表示 writeStream 积压的数据写完了），此时恢复数据流动`readStream.resume()`。
 
 ## 5.7 自己动手实现流
 
-我们经常使用的是`fs.createXXXSteam`来使用fs模块帮我们写好的流。
+我们经常使用的是`fs.createXXXSteam`来使用 fs 模块帮我们写好的流。
 
 实际上该流是继承自`Stream`类的。
 
@@ -943,11 +941,11 @@ Writable.__proto__===> Stream
 Stream.__proto__ ===> EventEmitter
 ```
 
-上面代码中通过fs模块创建的`writeStream`的原型链是链接到Writable上的，Writable则是链接到Stream上。
+上面代码中通过 fs 模块创建的`writeStream`的原型链是链接到 Writable 上的，Writable 则是链接到 Stream 上。
 
-这意味着writeStream可以调用Writable、Stream的方法。
+这意味着 writeStream 可以调用 Writable、Stream 的方法。
 
-本质上来说fs模块的`createWriteStream`方法针对特定文件，创建了一个“可写数据流”，创建的方式是对写入操作部署了`Stream`接口。
+本质上来说 fs 模块的`createWriteStream`方法针对特定文件，创建了一个“可写数据流”，创建的方式是对写入操作部署了`Stream`接口。
 
 ### 5.7.1 实现一个可写流
 
@@ -962,8 +960,7 @@ const { Writable } = require('stream');
 实现一个可写流的方式很多，例如我们可以继承 `Writable` 类
 
 ```javascript
-class myWritableStream extends Writable {
-}
+class myWritableStream extends Writable {}
 ```
 
 更简单的方法是直接给 `Writable` 构造函数传入配置项来创建一个对象。唯一必须的配置项是一个 `write` 函数，它用于暴露一个写入数据的接口。
@@ -975,7 +972,7 @@ const outStream = new Writable({
   write(chunk, encoding, callback) {
     console.log(chunk.toString());
     callback();
-  }
+  },
 });
 
 process.stdin.pipe(outStream);
@@ -983,13 +980,13 @@ process.stdin.pipe(outStream);
 
 write 方法接受三个参数
 
-* **chunk** 通常是一个 buffer，除非我们对流进行了特殊配置。
+- **chunk** 通常是一个 buffer，除非我们对流进行了特殊配置。
 
-* **encoding** 通常可以忽略。除非 chunk 被配置为不是 buffer。
+- **encoding** 通常可以忽略。除非 chunk 被配置为不是 buffer。
 
-* **callback** 方法是一个在我们完成数据处理后要执行的回调函数。它用来表示数据是否成功写入。若是写入失败，在执行该回调函数时需要传入一个错误对象。
+- **callback** 方法是一个在我们完成数据处理后要执行的回调函数。它用来表示数据是否成功写入。若是写入失败，在执行该回调函数时需要传入一个错误对象。
 
-`process.stdin.pipe(outStream);`会将进程的标准输入通过管道`pipe`流向outStream中。
+`process.stdin.pipe(outStream);`会将进程的标准输入通过管道`pipe`流向 outStream 中。
 
 我们换事件的方式来看一下上面这行代码
 
@@ -1001,16 +998,16 @@ process.stdin.on('data', chunk => {
 });
 ```
 
-现在我们运行上面的代码，然后在控制台输入内容1，就可以看到以下结果。
+现在我们运行上面的代码，然后在控制台输入内容 1，就可以看到以下结果。
 
-![image-20211214124638801](assets/image-20211214124638801.png)
+![image-20211214124638801](../assets/image-20211214124638801.png)
 
 ### 5.7.2 实现一个可读流
 
 同样的，只要部署了`Stream.readable`接口，也拥有了可读数据流。这个对象就可以被读。
 
 ```javascript
-const { Readable } = require('stream');  
+const { Readable } = require('stream');
 
 const inStream = new Readable();
 
@@ -1039,15 +1036,15 @@ const inStream = new Readable({
     if (this.currentCharCode > 90) {
       this.push(null);
     }
-  }
+  },
 });
 
-inStream.currentCharCode = 65
+inStream.currentCharCode = 65;
 
 inStream.pipe(process.stdout);
 ```
 
-上面的例子中，当可读流的read方法被调用时，流实现可以向队列中推送部分数据。例如，从字符编码65（A）开始，一次推送一个字母，每次推送后都把字符编码+1。
+上面的例子中，当可读流的 read 方法被调用时，流实现可以向队列中推送部分数据。例如，从字符编码 65（A）开始，一次推送一个字母，每次推送后都把字符编码+1。
 
 当使用者读取该可读流时，`read` 方法会持续被触发，我们不断推送字母。我们需要在某处停止该循环，这就是为何我们放置了一个 if 语句以便在 currentCharCode 大于 90（代表 Z） 时推送一个 null 值。
 
@@ -1071,7 +1068,7 @@ const inoutStream = new Duplex({
     if (this.currentCharCode > 90) {
       this.push(null);
     }
-  }
+  },
 });
 
 inoutStream.currentCharCode = 65;
@@ -1081,7 +1078,7 @@ process.stdin.pipe(inoutStream).pipe(process.stdout);
 
 上面的代码中，我们在可读的`process.stdin`上插了一根管道以接入这个双向流，然后利用其可写的特点将其接入可写的`process.stdout`上。
 
-在控制台我们首先可以看到A-Z的字母被写入到`process.stdout`上了。后续每次我们在`process.stdin`输入，都会经过管道最终流到`process.stdout`上。
+在控制台我们首先可以看到 A-Z 的字母被写入到`process.stdout`上了。后续每次我们在`process.stdin`输入，都会经过管道最终流到`process.stdout`上。
 
 理解双向流的读取和写入部分是完全独立的这一点非常重要。它只不过是把两种特性在同一个对象上实现罢了。
 
@@ -1100,7 +1097,7 @@ const upperCaseTr = new Transform({
   transform(chunk, encoding, callback) {
     this.push(chunk.toString().toUpperCase());
     callback();
-  }
+  },
 });
 
 process.stdin.pipe(upperCaseTr).pipe(process.stdout);
@@ -1108,7 +1105,7 @@ process.stdin.pipe(upperCaseTr).pipe(process.stdout);
 
 在这个变换流中，我们只实现了 `transform()` 方法，却达到了前面双向流例子的效果。在该方法中，我们把 `chunk` 转换为大写然后通过 `push` 方法传递给下游。
 
-## 5.8 内置的Transform流
+## 5.8 内置的 Transform 流
 
 Node 内置了一些非常有用的变换流。这就是 zlib 和 crypto 流。
 
@@ -1122,9 +1119,9 @@ const stream = fs.createReadStream(filePath);
 stream.pipe(zlib.createGzip()).pipe(fs.createWriteStream('./index.zip'));
 ```
 
-我们可以通过上面的代码来读取`index.txt`文件并将其床底给zlib内置的变换流，压缩后通过一个可写流输出成`index.zip`
+我们可以通过上面的代码来读取`index.txt`文件并将其床底给 zlib 内置的变换流，压缩后通过一个可写流输出成`index.zip`
 
-使用管道非常棒的一点在于，我们还可以用它来跟事件组合。例如，我希望能够在脚本执行的时候给用户一些提示，在脚本执行完成时显示完成。pipe方法会返回下游流，我们就可以在下游流上监听data方法。
+使用管道非常棒的一点在于，我们还可以用它来跟事件组合。例如，我希望能够在脚本执行的时候给用户一些提示，在脚本执行完成时显示完成。pipe 方法会返回下游流，我们就可以在下游流上监听 data 方法。
 
 ```javascript
 import fs from 'fs';
@@ -1142,7 +1139,7 @@ stream
   });
 ```
 
-使用pipe方法，我们可以很简单地使用流。有需要时，我们可以通过事件进一步定制和流相关的交互。
+使用 pipe 方法，我们可以很简单地使用流。有需要时，我们可以通过事件进一步定制和流相关的交互。
 
 `pipe` 方法的好处在于，我们可以用一种更加可读的方式通过若干片段**组合**我们的程序。例如，我们可以通过创建一个变换流来显示进度，而不是直接监听 `data` 事件。把 `.on()` 调用换成另一个 `.pipe()` 调用
 
@@ -1167,9 +1164,9 @@ stream
   });
 ```
 
-上面的代码会在转换进度时报告进度，最终将数据流向index.zip。
+上面的代码会在转换进度时报告进度，最终将数据流向 index.zip。
 
-在`reportProgress`方法里，我们将chunk通过callback的第二个参数传递给下游流，效果跟push后调用callback是一致的。
+在`reportProgress`方法里，我们将 chunk 通过 callback 的第二个参数传递给下游流，效果跟 push 后调用 callback 是一致的。
 
 ```javascript
 const reportProgress = new Transform({
@@ -1196,32 +1193,32 @@ const commaSplitter = new Transform({
   transform(chunk, encoding, callback) {
     this.push(chunk.toString().trim().split(','));
     callback();
-  }
+  },
 });
 const arrayToObject = new Transform({
   readableObjectMode: true,
   writableObjectMode: true,
   transform(chunk, encoding, callback) {
     const obj = {};
-    for(let i=0; i < chunk.length; i+=2) {
-      obj[chunk[i]] = chunk[i+1];
+    for (let i = 0; i < chunk.length; i += 2) {
+      obj[chunk[i]] = chunk[i + 1];
     }
     this.push(obj);
     callback();
-  }
+  },
 });
 const objectToString = new Transform({
   writableObjectMode: true,
   transform(chunk, encoding, callback) {
     this.push(JSON.stringify(chunk) + '\n');
     callback();
-  }
+  },
 });
 process.stdin
   .pipe(commaSplitter)
   .pipe(arrayToObject)
   .pipe(objectToString)
-  .pipe(process.stdout)
+  .pipe(process.stdout);
 ```
 
 我们给 `commaSplitter` 传入一个字符串（假设是 `"a,b,c,d"`），它会输出一个数组作为可读数据（`[“a”, “b”, “c”, “d”]`）。在该流上增加 `readableObjectMode` 标记是必须的，因为我们在给下游推送一个对象，而不是字符串。
@@ -1232,22 +1229,22 @@ process.stdin
 
 ## 6.1 进程
 
-当应用程序被打开时，会开启一个进程。比如打开chrome.exe，这时候就会开启chrome的进程。
+当应用程序被打开时，会开启一个进程。比如打开 chrome.exe，这时候就会开启 chrome 的进程。
 
 通过任务管理器查看的进程信息
 
-<img src="assets/image-20211216214036962.png" alt="image-20211216214036962" style="zoom:50%;" />
+<img src="../assets/image-20211216214036962.png" alt="image-20211216214036962" style="zoom:50%;" />
 
 进程的定义：
 
-* 进程是程序的执行实例。
-* 程序在cpu的活动也可以叫进程。
+- 进程是程序的执行实例。
+- 程序在 cpu 的活动也可以叫进程。
 
 一个进程可以创建另一个进程。（父进程和子进程）
 
 ## 6.2 进程的状态
 
-一个单核CPU，在一个时刻，只能做一件事情。但是随着它不断地快速切换进程，就可以同时让用户看电影、听音乐、写代码等。
+一个单核 CPU，在一个时刻，只能做一件事情。但是随着它不断地快速切换进程，就可以同时让用户看电影、听音乐、写代码等。
 
 **多程序并发执行**
 
@@ -1259,31 +1256,31 @@ process.stdin
 
 进程的状态
 
-当我们进入某个应用程序时，进程就是非运行状态，当cpu运行进程时，进程会变成运行状态，这个过程叫分派（cpu资源）。当cpu转移调度资源时（可能要执行其他程序），那么此时进程就会暂停，从运行状态变回到运行状态。直到运行结束后，进程退出。
+当我们进入某个应用程序时，进程就是非运行状态，当 cpu 运行进程时，进程会变成运行状态，这个过程叫分派（cpu 资源）。当 cpu 转移调度资源时（可能要执行其他程序），那么此时进程就会暂停，从运行状态变回到运行状态。直到运行结束后，进程退出。
 
-<img src="assets/image-20211216220753119.png" alt="image-20211216220753119" style="zoom:50%;" />
+<img src="../assets/image-20211216220753119.png" alt="image-20211216220753119" style="zoom:50%;" />
 
-以下是进程在cpu中的队列，遵循先进先出的规则，当cpu运行一段时间进程后，经过资源调度，有可能进程会退出，也可能会暂停并回到队尾，此时后面的进程往前走让cpu执行。
+以下是进程在 cpu 中的队列，遵循先进先出的规则，当 cpu 运行一段时间进程后，经过资源调度，有可能进程会退出，也可能会暂停并回到队尾，此时后面的进程往前走让 cpu 执行。
 
-<img src="assets/image-20211216221002350.png" alt="image-20211216221002350" style="zoom:50%;" />
+<img src="../assets/image-20211216221002350.png" alt="image-20211216221002350" style="zoom:50%;" />
 
 ## 6.2 阻塞进程
 
-当进程在进程队列中等待时，它们都处于非运行态。一些资源在等待cpu给资源，还有一些资源在等待I/O完成。（比如读取文件）
+当进程在进程队列中等待时，它们都处于非运行态。一些资源在等待 cpu 给资源，还有一些资源在等待 I/O 完成。（比如读取文件）
 
-cpu会执行最前面的进程。如果最前面的进程并不急于让cpu执行，比如这个进程正在等待I/O操作并不需要cpu的资源，此时这个进程就被称之为阻塞进程。那么分派资源的程序会将cpu的资源分配给非阻塞进程。这就类似于进程的资源调度。
+cpu 会执行最前面的进程。如果最前面的进程并不急于让 cpu 执行，比如这个进程正在等待 I/O 操作并不需要 cpu 的资源，此时这个进程就被称之为阻塞进程。那么分派资源的程序会将 cpu 的资源分配给非阻塞进程。这就类似于进程的资源调度。
 
 ## 6.3 进程的三个状态
 
 由于阻塞进程的出现，我们发现，进程又可以被分成三个状态：
 
-<img src="assets/image-20211216221949754.png" alt="image-20211216221949754" style="zoom:50%;" />
+<img src="../assets/image-20211216221949754.png" alt="image-20211216221949754" style="zoom:50%;" />
 
-从创建开始，进程处于就绪状态，当cpu分派资源的时候，就会变成运行状态，此时cpu发现进程正在做其他操作，于是进程就会变成阻塞状态，此时调度资源的程序将资源分配给其他非阻塞的程序，等到阻塞进程的事件执行完毕，就会重新进入就绪状态等待cpu资源。
+从创建开始，进程处于就绪状态，当 cpu 分派资源的时候，就会变成运行状态，此时 cpu 发现进程正在做其他操作，于是进程就会变成阻塞状态，此时调度资源的程序将资源分配给其他非阻塞的程序，等到阻塞进程的事件执行完毕，就会重新进入就绪状态等待 cpu 资源。
 
-cpu运行进程的时候也可能发生超时，于是进程从运行状态又回到就绪状态。
+cpu 运行进程的时候也可能发生超时，于是进程从运行状态又回到就绪状态。
 
-以上是cpu与进程的大概关系。
+以上是 cpu 与进程的大概关系。
 
 ## 6.4 线程
 
@@ -1295,21 +1292,21 @@ cpu运行进程的时候也可能发生超时，于是进程从运行状态又�
 
 线程的基本概念
 
-* 线程是cpu调度和执行的最小单位。
-* 一个进程中至少有一个线程，可以有多个线程
-* 一个进程中的线程共享进程的所有资源
-* 进程的第一个线程叫初始化线程
-* 线程的调度可以由操作系统负责，也可以用户自己负责
+- 线程是 cpu 调度和执行的最小单位。
+- 一个进程中至少有一个线程，可以有多个线程
+- 一个进程中的线程共享进程的所有资源
+- 进程的第一个线程叫初始化线程
+- 线程的调度可以由操作系统负责，也可以用户自己负责
 
 举例：
 
-chrome浏览器的进程就有渲染引擎、V8引擎、存储模块、网络模块、用户界面模块等，每一个模块都由一个或多个线程负责执行。
+chrome 浏览器的进程就有渲染引擎、V8 引擎、存储模块、网络模块、用户界面模块等，每一个模块都由一个或多个线程负责执行。
 
-## 6.5 Nodejs操作子进程
+## 6.5 Nodejs 操作子进程
 
 使用子进程的目的在于能够执行命令行程序。
 
-下面介绍运行命令行程序的一些API
+下面介绍运行命令行程序的一些 API
 
 ### 6.5.1 exec
 
@@ -1324,9 +1321,9 @@ exec('ls -al', (error, stdout, stderr) => {
 });
 ```
 
-我们通过child_process来引进一个子进程。上面代码中子进程所做的事情是打印当前文件夹下的文件列表。
+我们通过 child_process 来引进一个子进程。上面代码中子进程所做的事情是打印当前文件夹下的文件列表。
 
-也可以用stream的形式
+也可以用 stream 的形式
 
 ```javascript
 import { exec } from 'child_process';
@@ -1338,7 +1335,7 @@ stream.stdout!.on('data', chunk => {
 });
 ```
 
-使用`util.promisify`可以将子进程promise化
+使用`util.promisify`可以将子进程 promise 化
 
 ```javascript
 import util from 'util';
@@ -1353,7 +1350,7 @@ exec2('ls -al').then(data => {
 
 ### 6.5.2 execFile
 
-exec有漏洞，如果cmd被注入了，就会运行一些危险的命令。比如
+exec 有漏洞，如果 cmd 被注入了，就会运行一些危险的命令。比如
 
 ```javascript
 import { exec } from 'child_process';
@@ -1366,7 +1363,7 @@ exec2('ls -al && pwd').then(data => {
 //当加入&&后，exec会再次运行pwd这个命令，所以说有注入风险
 ```
 
-execFile这个APi能够解决这个问题。它每次都只能运行一条命令，不会有注入风险。
+execFile 这个 APi 能够解决这个问题。它每次都只能运行一条命令，不会有注入风险。
 
 ```javascript
 import { execFile } from 'child_process';
@@ -1378,9 +1375,9 @@ execFile('ls', ['-al'], (error, stdout) => {
 });
 ```
 
-execFile的第二个参数是命令行的参数，所以不会有注入危险。
+execFile 的第二个参数是命令行的参数，所以不会有注入危险。
 
-execFile也是支持流的。
+execFile 也是支持流的。
 
 ```javascript
 import { execFile } from 'child_process';
@@ -1390,7 +1387,7 @@ const stream = execFile('ls', ['-al']);
 stream.stdout!.on('data', chunk => console.log(chunk));
 ```
 
-同时execFile的第三个参数如果是对象，那么就会被当成程序运行的选项，比如：
+同时 execFile 的第三个参数如果是对象，那么就会被当成程序运行的选项，比如：
 
 ```javascript
 const stream = execFile('ls', ['-al'], {
@@ -1403,7 +1400,7 @@ const stream = execFile('ls', ['-al'], {
 
 ### 6.5.3 spawn
 
-这个api是用流的形式来运行脚本，相当于语法糖。用法与execFile类似，但是没有回调函数。
+这个 api 是用流的形式来运行脚本，相当于语法糖。用法与 execFile 类似，但是没有回调函数。
 
 ```javascript
 import { spawn } from 'child_process';
@@ -1417,15 +1414,15 @@ const stream = spawn('ls', ['-al'], {
 stream.stdout!.on('data', chunk => console.log(chunk.toString()));
 ```
 
-一般情况下使用spawn会比execFile的形式更好
+一般情况下使用 spawn 会比 execFile 的形式更好
 
 ### 6.5.4 fork
 
-fork直接创建一个子进程。执行Nodejs程序。它是专用于执行nodejs的子进程的API。
+fork 直接创建一个子进程。执行 Nodejs 程序。它是专用于执行 nodejs 的子进程的 API。
 
-fork(‘./child.js’)相当于spawn(‘node’,[‘./child.js’])
+fork(‘./child.js’)相当于 spawn(‘node’,[‘./child.js’])
 
-我们可以通过fork来进行进程通信。
+我们可以通过 fork 来进行进程通信。
 
 ```javascript
 // index.ts
@@ -1444,15 +1441,15 @@ setTimeout(() => {
 }, 1000);
 ```
 
-上面代码会通过`fork(‘./child.js’)`来运行`child.js`的node代码。
+上面代码会通过`fork(‘./child.js’)`来运行`child.js`的 node 代码。
 
-此时child.js通过process来发送信息，而index.ts则监听message事件来获取child.js的发送信息，最终打出来的m为
+此时 child.js 通过 process 来发送信息，而 index.ts 则监听 message 事件来获取 child.js 的发送信息，最终打出来的 m 为
 
 ```javascript
 我是父进程，我得到值 { name: 'qiuyanxi' }
 ```
 
-同时也可以在index.ts中发送信息给child.js
+同时也可以在 index.ts 中发送信息给 child.js
 
 ```javascript
 // child.js
@@ -1469,13 +1466,11 @@ n.send({
 });
 ```
 
-
-
-# 七、使用TypeScript运行Node
+# 七、使用 TypeScript 运行 Node
 
 ## 5.1 初始化项目
 
-使用TypeScript运行node，需要在cli运行以下命令
+使用 TypeScript 运行 node，需要在 cli 运行以下命令
 
 ```bash
 /* 初始化项目 */
@@ -1497,7 +1492,7 @@ yarn add ts-node-dev --dev
 yarn add @types/node --dev
 ```
 
-在package.json中配置scripts以自动运行node程序。
+在 package.json 中配置 scripts 以自动运行 node 程序。
 
 ```javascript
   "scripts": {
@@ -1513,33 +1508,30 @@ yarn start
 
 ## 5.2 debug
 
-在vscode中debug的方法，安装vscode插件 [TypeScript Debugger](https://marketplace.visualstudio.com/items?itemName=kakumei.ts-debug)
+在 vscode 中 debug 的方法，安装 vscode 插件 [TypeScript Debugger](https://marketplace.visualstudio.com/items?itemName=kakumei.ts-debug)
 
-1. F5选择调试环境
+1. F5 选择调试环境
 
-   ![image-20211212202855643](assets/image-20211212202855643.png)
+   ![image-20211212202855643](../assets/image-20211212202855643.png)
 
-2. 根据vscode的提示自动创建launch.json
+2. 根据 vscode 的提示自动创建 launch.json
 
 3. 插件会自动配置好配置项内容
 
-4. 在没有yarn start启动程序的情况下，点击vscode的某行代码打红点
+4. 在没有 yarn start 启动程序的情况下，点击 vscode 的某行代码打红点
 
-   <img src="assets/image-20211212203228325.png" alt="image-20211212203228325" style="zoom:50%;" />
+   <img src="../assets/image-20211212203228325.png" alt="image-20211212203228325" style="zoom:50%;" />
 
-5. F5进入调试程序-完成
+5. F5 进入调试程序-完成
 
-   <img src="assets/image-20211212203347046.png" alt="image-20211212203347046" style="zoom:50%;" />
-
-   
+   <img src="../assets/image-20211212203347046.png" alt="image-20211212203347046" style="zoom:50%;" />
 
 # 参考文献
 
 [[译] Node.js 流: 你需要知道的一切](https://juejin.cn/post/6844903481308872712#headin)
 
-[Stream接口](https://javascript.ruanyifeng.com/nodejs/stream.html)
+[Stream 接口](https://javascript.ruanyifeng.com/nodejs/stream.html)
 
-[Node.js官方入门教程](http://nodejs.cn/learn)
+[Node.js 官方入门教程](http://nodejs.cn/learn)
 
-[React+Node.js开发实战：从入门到项目上线](https://weread.qq.com/web/reader/29b322f07224e31b29b76fckc81322c012c81e728d9d180)
-
+[React+Node.js 开发实战：从入门到项目上线](https://weread.qq.com/web/reader/29b322f07224e31b29b76fckc81322c012c81e728d9d180)

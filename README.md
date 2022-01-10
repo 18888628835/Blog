@@ -50,45 +50,33 @@
 
 6.[JavaScript 设计模式小册](https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式小册.md)
 
-## 重学 JavaScript
+## JavaScript
 
-1.[页面加载生命周期](https://github.com/18888628835/Blog/blob/main/重学JavaScript/页面加载生命周期.md)
+[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
 
-2.[script 的 async 和 defer](https://github.com/18888628835/Blog/blob/main/重学JavaScript/script的async和defer.md)
+[解构赋值](https://github.com/18888628835/Blog/issues/12)
 
-3.[资源加载跟踪](https://github.com/18888628835/Blog/blob/main/重学JavaScript/资源加载跟踪.md)
+[扩展运算符](https://github.com/18888628835/Blog/issues/13)
 
-4.[模块(Module)](<https://github.com/18888628835/Blog/blob/main/重学JavaScript/模块(Module).md>)
+[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
 
-5.[JSON](https://github.com/18888628835/Blog/blob/main/重学JavaScript/JSON.md)
+[Symbol](https://github.com/18888628835/Blog/issues/19)
 
-6.[Generator(生成器)](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Generator.md)
+[async 和 await](https://github.com/18888628835/Blog/issues/20)
 
-7.[异步迭代和 generator](https://github.com/18888628835/Blog/blob/main/重学JavaScript/异步迭代和generator.md)
+[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
 
-8.[二进制数据和文件](https://github.com/18888628835/Blog/blob/main/重学JavaScript/二进制数据和文件.md)
+[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
 
-9.[Document](https://github.com/18888628835/Blog/blob/main/重学JavaScript/Document.md)
+[模块(Module)](<https://github.com/18888628835/Blog/blob/main/JavaScript/模块(Module).md>)
 
-## ES6 系列
+[JSON](https://github.com/18888628835/Blog/blob/main/JavaScript/JSON.md)
 
-1.[let、const 与 var 的区别](https://github.com/18888628835/Blog/issues/11)
+[Generator，高级 Iteration](https://github.com/18888628835/Blog/blob/main/JavaScript/Generator.md)
 
-2.[解构赋值](https://github.com/18888628835/Blog/issues/12)
+[二进制数据和文件](https://github.com/18888628835/Blog/blob/main/JavaScript/二进制数据和文件.md)
 
-3.[扩展运算符](https://github.com/18888628835/Blog/issues/13)
-
-4.[Set 和 Map 数据结构](https://github.com/18888628835/Blog/issues/18)
-
-5.[Symbol](https://github.com/18888628835/Blog/issues/19)
-
-6.[async 和 await](https://github.com/18888628835/Blog/issues/20)
-
-7.[Iterator（迭代器)](https://github.com/18888628835/Blog/issues/38)
-
-8.[对比 class 与旧构造函数的区别](https://github.com/18888628835/Blog/issues/39)
-
-## JavaScript 深入系列
+## JavaScript 深入
 
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
 
@@ -120,13 +108,17 @@
 
 15.[手写深拷贝](https://github.com/18888628835/Blog/issues/45)
 
-## 浏览器工作原理
+## 浏览器
 
-1.[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/浏览器渲染过程.md)
+[浏览器加载文档和资源](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器加载文档和资源.md)
 
-2.[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器工作原理/事件循环.md)
+[Document](https://github.com/18888628835/Blog/blob/main/浏览器/Document.md)
 
-## 了不起的 Node.js
+[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器渲染过程.md)
+
+[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器/事件循环.md)
+
+## Node.js
 
 1.[MySQL 基础（DQL 单表查询）](https://github.com/18888628835/Blog/issues/58)
 
