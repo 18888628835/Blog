@@ -114,6 +114,8 @@
 
 [Document](https://github.com/18888628835/Blog/blob/main/浏览器/Document.md)
 
+[浏览器事件简介](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器事件简介.md)
+
 [浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器渲染过程.md)
 
 [事件循环](https://github.com/18888628835/Blog/blob/main/浏览器/事件循环.md)
