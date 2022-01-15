@@ -173,7 +173,7 @@ contextmenu
 
 ## 2.2 跳过元素
 
-当鼠标移动时，会触发`mousemove`事件。但不意味着每个元素都会导致一个事件。
+当鼠标移动时，会触发`mousemove`事件。**但不意味着每个元素都会导致一个事件**。
 
 浏览器会一直检查鼠标的位置，如果发生了变化，就会触发事件。
 
@@ -223,9 +223,11 @@ contextmenu
 
 但还有一种更好的方式：`mouseenter`和`mouseleave`事件，它们没有这样的问题。
 
+
+
 ## 2.4 mouseenter和mouseleave
 
-当鼠标指针进入一个元素时 —— 会触发 `mouseenter`。而鼠标指针在元素或其后代中的确切位置无关紧要。
+ 当鼠标指针进入一个元素时 —— 会触发 `mouseenter`。而鼠标指针在元素或其后代中的确切位置无关紧要。
 
 当鼠标指针离开该元素时，事件 `mouseleave` 才会触发。
 
@@ -250,3 +252,200 @@ contextmenu
 2. `mouseover/out`和`mouseenter/leave`事件还有一个附加属性：`relatedTarget`。
 3. 如果我们从父元素转到子元素，也会触发`mouseover/out`事件。浏览器假定鼠标一次只会在最深的那个元素。
 4. `mouseenter/leave`跟`over/out`不同，它们仅在鼠标进入和离开时才会触发。它们并不会冒泡。
+
+
+
+# 三、鼠标拖放事件
+
+## 3.1 鼠标事件实现拖放
+
+本质上来说，一个鼠标的位置变动就是让我们设置元素的`left`和`top`。
+
+基本的拖放算法是这样的：
+
+1. 鼠标点击后，获取元素的坐标：元素当前相对于窗口的坐标、鼠标点击的坐标、鼠标到元素边缘的距离
+2. 鼠标移动，设置元素的属性为`position:absolute`,并用`left`和`top`来移动它的位置
+3. 鼠标抬起后取消移动事件
+
+预览：
+
+![ball](../assets/ball.gif)
+
+直接贴代码：
+
+```html
+  <style>
+    #ball {
+      position: absolute;
+    }
+  </style>
+  <body>
+    <img id="ball" src="https://js.cx/clipart/ball.svg" />
+    <script>
+      let mouseX, mouseY, elemX, elemY, shiftX, shiftY;
+      // 1 取消浏览器对图片和一些其他元素的拖放处理的默认行为
+      ball.ondragstart = function () {
+        return false;
+      };
+      function onMove(event) {
+        // 4
+        ball.style.left = event.pageX - shiftX + "px";
+        ball.style.top = event.pageY - shiftY + "px";
+      }
+      // 2
+      ball.addEventListener("mousedown", function (event) {
+        //取坐标
+        mouseX = event.clientX; //鼠标位置x
+        mouseY = event.clientY; //鼠标位置y
+        elemX = this.getBoundingClientRect().left; //元素的窗口位置x
+        elemY = this.getBoundingClientRect().top; //元素的窗口位置Y
+        // 3
+        shiftX = mouseX - elemX; //鼠标位置距离元素左边的坐标
+        shiftY = mouseY - elemY; //鼠标位置距离元素右边的坐标
+        //2 向document添加移动事件监听
+        document.addEventListener("mousemove", onMove);
+      });
+
+      ball.addEventListener("mouseup", function (event) {
+        //取消移动事件 5
+        document.removeEventListener("mousemove", onMove);
+      });
+    </script>
+  </body>
+```
+
+这里一共需要三个API，分别为鼠标按下去`mousedown`、鼠标移动`mousemove`、鼠标抬起`mouseup`。
+
+1. 由于拖动的元素是图片，浏览器有自己的对图片和一些其他元素的拖放处理，所以要禁止默认行为`ondragstart`。
+
+2. `mousemove` 会经常被触发，但不会针对每个像素都如此。因此，在快速移动鼠标后，鼠标指针可能会从球上跳转至文档中间的某个位置（甚至跳转至窗口外）。总而言之，快速的鼠标移动让浏览器跳过了`ball`上的鼠标移动事件，所以这里需要在`document`上跟踪`mousemove`，而不是`ball`上。
+
+3. `shiftX`跟`shiftY`代表的是鼠标的位置距离元素左侧/上侧边缘坐标的距离。
+
+   ![image-20220114230041227](../assets/image-20220114230041227.png)
+
+   本质上来说，一个鼠标的位置变动就是让我们设置元素的`left`和`top`。
+
+   我们需要计算鼠标在窗口的位置 - 元素在窗口的位置，就能够得到鼠标距离元素边缘的`shiftX`和`shiftY`
+
+   * `shiftX`=鼠标的`pageX` - 元素的窗口坐标`getBoundingClientRect().left`
+   * `shiftY`=鼠标的`pageY` - 元素的窗口坐标`getBoundingClientRect().top`
+
+   > 有个太先进而导致浏览器还未全部兼容的API，offsetX跟offsetY，可以直接得到shiftX和shiftY的值。
+
+4. **移动后的鼠标相对于文档（不是窗口）的位置**减去`shiftX/Y`就可以得到`left`和`top`。
+
+5. 当鼠标抬起代表移动要结束，直接删除移动事件就可以了。
+
+
+
+## 3.2 放置目标 
+
+球可以放置在任何地方，下面完成一个当球放置在目标元素时，目标元素高亮的功能。
+
+我们需要知道目标元素是什么。当我们拖动时，我们可以利用`document.elementFromPoint(clientX,clientY)`通过坐标的位置来知道当前被移动到的是哪个元素。
+
+问题是我们的鼠标是一直在球这个元素上的，所以我们需要另外处理一下，否则`document.elementFromPoint(clientX,clientY)`将会一直返回球（因为它在最上面）。
+
+处理方式如下：
+
+```javascript
+        ball.hidden = true;// 先隐藏球
+        currentDrop = document.elementFromPoint(event.clientX, event.clientY);//获取球下面的元素
+        ball.hidden = false;
+```
+
+当返回的元素是目标元素或者是它的子元素时，我们就可以处理让目标元素高亮的元素了。
+
+```javascript
+        if (currentDrop.closest("#div")) {//匹配球下面的元素的祖先（或自己）的id是否为目标元素的。
+          enterDroppable(div);
+        } else {
+          leaveDroppable(div);
+        }
+```
+
+实现效果：
+
+![ballInto](../assets/ballInto.gif)
+
+完整代码：
+
+```html
+  <style>
+    body {
+      height: 2000px;
+      width: 100%;
+    }
+    #ball {
+      position: absolute;
+    }
+    #div {
+      width: 200px;
+      height: 100px;
+      border: 1px solid red;
+    }
+  </style>
+  <body>
+    <div id="div"></div>
+    <img id="ball" src="https://js.cx/clipart/ball.svg" />
+    <script>
+      let mouseX, mouseY, elemX, elemY, shiftX, shiftY, currentDrop;
+      // 1 取消浏览器对图片和一些其他元素的拖放处理的默认行为
+      ball.ondragstart = function () {
+        return false;
+      };
+      function enterDroppable(elem) {
+        elem.style.background = "red";
+      }
+      function leaveDroppable(elem) {
+        elem.style.background = "";
+      }
+      function onMove(event) {
+        // 4
+        ball.style.left = event.pageX - shiftX + "px";
+        ball.style.top = event.pageY - shiftY + "px";
+
+        ball.hidden = true;
+        currentDrop = document.elementFromPoint(event.clientX, event.clientY);
+        ball.hidden = false;
+
+        if (currentDrop.closest("#div")) {
+          enterDroppable(div);
+        } else {
+          leaveDroppable(div);
+        }
+      }
+      // 2
+      ball.addEventListener("mousedown", function (event) {
+        //取坐标
+        mouseX = event.clientX; //鼠标位置x
+        mouseY = event.clientY; //鼠标位置y
+        elemX = this.getBoundingClientRect().left; //元素的窗口位置x
+        elemY = this.getBoundingClientRect().top; //元素的窗口位置Y
+        // 3
+        shiftX = mouseX - elemX; //鼠标位置距离元素左边的坐标
+        shiftY = mouseY - elemY; //鼠标位置距离元素右边的坐标
+        //2 向document添加移动事件监听
+        document.addEventListener("mousemove", onMove);
+      });
+
+      ball.addEventListener("mouseup", function (event) {
+        //取消移动事件 5
+        document.removeEventListener("mousemove", onMove);
+      });
+    </script>
+  </body>
+```
+
+## 3.3 小结
+
+基础的使用鼠标的拖放方法是这样的：
+
+1. 事件构成：`mousedown` —> `mousemove` —> `mouseup` (由于浏览器对图片等有默认拖拽行为，所以这里取消`dragstart`的默认行为)
+2. 拖放本质上就是给被拖放的元素设置`left`和`top`，这里需要获取到鼠标指针对于元素的边缘的坐标距离`shiftX/shiftY`,也可以直接用`offsetX/Y`但兼容性不好
+3. 使用 `document.elementFromPoint` 检测鼠标指针下的 “droppable” 的元素。
+4. 由于`mousemove`事件触发频繁，有可能会忽略元素，所以需要设置在顶层`document`上。
+
+
+
