@@ -449,3 +449,120 @@ contextmenu
 
 
 
+# 四、键盘事件
+
+## 4.1 keydown和keyup
+
+* `keydown` 键盘按下
+* `keyup` 键盘抬起
+
+事件对象的`key`属性允许获得字符，而`code`属性则允许获取物理按键代码。
+
+以下以按键z/Z为例
+
+| Key       | `event.key` | `event.code`                |
+| :-------- | :---------- | :-------------------------- |
+| Z         | `z`（小写） | `KeyZ`                      |
+| Shift+Z   | `Z`（大写） | `KeyZ`                      |
+| F1        | `F1`        | `F1`                        |
+| Backspace | `Backspace` | `Backspace`                 |
+| Shift     | `Shift`     | `ShiftRight` 或 `ShiftLeft` |
+
+同一个按键 Z，可以与或不与 `Shift` 一起按下。我们会得到两个不同的字符：小写的 `z` 和大写的 `Z`。
+
+`event.key` 正是这个字符，并且它将是不同的。但是，`event.code` 是相同的。
+
+`event.code`可以标明是左边的还是右边的shift被按下了。
+
+我们要处理一个热键：Ctrl+Z（或 Mac 上的 Cmd+Z）,则可以用以下代码：
+
+```javascript
+document.addEventListener('keydown', function(event) {
+  if (event.code == 'KeyZ' && (event.ctrlKey || event.metaKey)) {
+    alert('Undo!')
+  }
+});
+```
+
+`event.code` 有一个问题。对于不同的键盘布局，相同的按键可能会具有不同的字符。
+
+下面是美式布局（“QWERTY”）和德式布局（“QWERTZ”）
+
+![image-20220115221720693](../assets/image-20220115221720693.png)
+
+对于同一个按键，美式布局为 “Z”，而德式布局为 “Y”（字母被替换了）。
+
+从字面上看，对于使用德式布局键盘的人来说，但他们按下 Y 时，`event.code` 将等于 `KeyZ`。
+
+因此，`event.code` 可能由于意外的键盘布局而与错误的字符进行了匹配。不同键盘布局中的相同字母可能会映射到不同的物理键，从而导致了它们有不同的代码。
+
+为了可靠地跟踪与受键盘布局影响的字符，使用 `event.key` 可能是一个更好的方式。
+
+另一方面，`event.code` 的好处是，即使访问者更改了语言，绑定到物理键位置的 `event.code` 会始终保持不变。因此，即使在切换了语言的情况下，依赖于它的热键也能正常工作。
+
+我们想要处理与布局有关的按键？那么 `event.key` 是我们必选的方式。
+
+或者我们希望一个热键即使在切换了语言后，仍能正常使用？那么 `event.code` 可能会更好。
+
+## 4.2 自动重复
+
+如果按下一个键足够长的时间，它就会开始“自动重复”：`keydown` 会被一次又一次地触发，然后当按键被释放时，我们最终会得到 `keyup`。因此，有很多 `keydown` 却只有一个 `keyup` 是很正常的。
+
+对于由自动重复触发的事件，`event` 对象的 `event.repeat` 属性被设置为 `true`。
+
+## 4.3 默认行为
+
+默认行为各不相同，因为键盘可能会触发很多可能的东西。
+
+例如：
+
+- 出现在屏幕上的一个字符（最明显的结果）。
+- 一个字符被删除（Delete 键）。
+- 滚动页面（PageDown 键）。
+- 浏览器打开“保存页面”对话框（Ctrl+S）
+- ……等。
+
+阻止对 `keydown` 的默认行为可以取消大多数的行为，但基于 OS 的特殊按键除外。例如，在 Windows 中，Alt+F4 会关闭当前浏览器窗口。并且无法通过在 JavaScript 中阻止默认行为来阻止它。
+
+## 4.4 keypress事件
+
+过去曾经有一个 `keypress` 事件，还有事件对象的 `keyCode`、`charCode` 和 `which` 属性。
+
+大多数浏览器对它们都存在兼容性问题，虽然浏览器还在支持它们，但现在完全没必要再使用它们。
+
+## 4.5 小结
+
+按一个按键总是会产生一个键盘事件，无论是符号键，还是例如 Shift 或 Ctrl 等特殊按键。唯一的例外是有时会出现在笔记本电脑的键盘上的 Fn 键。它没有键盘事件，因为它通常是被在比 OS 更低的级别上实现的。
+
+键盘事件：
+
+- `keydown` —— 在按下键时（如果长按按键，则将自动重复），
+- `keyup` —— 释放按键时。
+
+键盘事件的主要属性：
+
+- `code` —— “按键代码”（`"KeyA"`，`"ArrowLeft"` 等），特定于键盘上按键的物理位置。
+- `key` —— 字符（`"A"`，`"a"` 等），对于非字符（non-character）的按键，通常具有与 `code` 相同的值。
+
+过去，键盘事件有时会被用于跟踪表单字段中的用户输入。这并不可靠，因为输入可能来自各种来源。
+
+
+
+# 五、滚动事件
+
+`scroll`事件在`window`和可滚动元素上都可以运行。
+
+下面是一个滚动事件的示例：
+
+```javascript
+      window.addEventListener("scroll", function (event) {
+        console.log(this.pageXOffset);
+        console.log(this.pageYOffset);
+      });
+```
+
+## 5.1 防止滚动
+
+我们不能通过在 `onscroll` 监听器中使用 `event.preventDefault()` 来阻止滚动，因为默认事件是在滚动发生 **之后** 才触发的。
+
+我们可以设置`overflow: hidden;`来让防止滚动。
