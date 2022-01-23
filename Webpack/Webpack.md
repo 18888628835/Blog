@@ -53,7 +53,7 @@ Webpack是一个开源的JavaScript模块打包工具，其最核心的功能是
 4. plugin：插件。让webpack能够处理打包优化、压缩等功能性任务
 5. mode：模式。development模式、production模式、none。能够设置`process.env.NODE_ENV`的值，并且根据环境不同自动开启一些插件。
 
-## 3.5 打包js文件
+## 1.5 打包js文件
 
 ```bash
 mkdir webpack-demo-1
@@ -193,4 +193,141 @@ module.exports = {
 
 ## 1.6 打包css
 
-打包除js文件外的资源需要用到`loader`，
+打包除js文件外的资源需要用到`loader`，根据目前的官方网站，配置如下：
+
+```javascript
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],//注意顺序，webpack从右到左读取loader
+      },
+    ],
+  },
+};
+```
+
+安装两个loader
+
+```bash
+yarn add style-loader css-loader --dev
+```
+
+使用：
+
+```javascript
+import './login.css'
+```
+
+`style-loader`用于将css插入到页面中，`css-loader`是用于识别并打包css文件。
+
+
+
+## 1.7 打包less
+
+安装less和less-loader
+
+```bash
+yarn add less less-loader --dev
+```
+
+配置：
+
+```js
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      {
+        test: /\.less$/i,
+        use: ['style-loader', 'css-loader', 'less-loader'],
+      },
+    ],
+  },
+};
+```
+
+## 1.8 postcss
+
+postcss是利用JavaScript转换样式的工具。我们可以用它配合`autoprefixer`来给css添加更多兼容性的前缀代码以支持更多浏览器平台。
+
+```bash
+yarn add postcss autoprefixer postcss-loader --dev
+```
+
+配置：
+
+```json
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('autoprefixer')],
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+```
+
+postcss中还有很多有关于css加载所需要的插件，都集成到`postcss-preset-env`的插件中了，比如能够让浏览器支持`#12345678`这样的八位数颜色以及`autoprefixer`支持的功能。
+
+使用方法：
+
+```bash
+yarn add postcss-preset-env --dev
+```
+
+直接配置在`options.postcssOptions.plugins`中即可
+
+```json
+              postcssOptions: {
+                plugins: ['postcss-preset-env'],
+              },
+```
+
+### **专用的postcss配置**
+
+我们可以使用less、css等来书写css，而postcss则需要体现到所有css上，因此我们需要给所有css预编译工具配置postcss-loader，但这就会增加大量重复的配置代码。
+
+为了解决这个问题，我们可以使用默认的`postcss.config.js`来给postcss做共同的配置。
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: ['postcss-preset-env'],
+};
+```
+
+```js
+// webpack.config.js
+module.exports = {
+...
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
+      },
+      {
+        test: /\.less$/i,
+        use: ['style-loader', 'css-loader', 'postcss-loader', 'less-loader'],
+      },
+    ],
+  },
+};
+```
+
