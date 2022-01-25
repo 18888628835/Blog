@@ -178,7 +178,9 @@ npx webpack --entry=./src/index.js --output-filename=bundle.js --mode=developmen
 
 此时，根目录下应该会多了`dist`目录，下面有一个`bundle.js`的文件，它就是打包后的`index.js`文件。
 
-如果此时用`http-server`或者`vscode`的`open in browser`插件打开本地项目，你会发现`chrome`浏览器屏幕前输出现`hello world`字样，代表打包成功了。
+如果此时用`http-server`或者`vscode`的`live server`插件打开本地项目，你会发现`chrome`浏览器屏幕前输出现`hello world`字样，代表打包成功了。
+
+> 由于目前是从0开始配置，您需要自行下载http-server或者vscode的live-server插件来查看打包后的项目页面。
 
 简单总结，我们刚才的操作是：
 
@@ -245,7 +247,7 @@ module.exports = {
 
 默认的配置输出路径相当于
 
-```js
+```javascript
   output: {  path: path.join(__dirname, 'dist') } 
 ```
 
@@ -374,7 +376,7 @@ yarn add postcss autoprefixer postcss-loader --dev
 
 然后在webpack中配置规则：
 
-```js
+```javascript
   module: {
     rules: [
       {
@@ -412,10 +414,10 @@ yarn add postcss-preset-env --dev
 
 直接配置在`options.postcssOptions.plugins`中即可,这里就替换掉上面的`require(autoprefixer)`,因为`postcss-preset-env`已经拥有它的功能了。
 
-```js
+```javascript
               postcssOptions: {
                 plugins: ['postcss-preset-env'],
-              },
+              }
 ```
 
 ### **专用的postcss配置**
@@ -962,3 +964,63 @@ function createImg() {
 实际开发中，我们有时候也会这样用静态资源，很多框架就提供了这样的功能，一些特别大的静态资源（例如地图）等，我们并不需要它们再被打包工具“翻译”一遍，而是直接拷贝到`dist`目录，在这种情况下，我们就能够直接使用`./`的形式引入这些静态资源。
 
 毫无疑问，如果你的项目中不需要被打包的静态资源特别多，那使用这种拷贝的方式能够大大提高上线前构建的速度。
+
+## 3.13 webpack-dev-server
+
+实际开发中，我们都会用脚手架提供的`webpack-dev-server`这样的静态服务器协助开发，它的好处是能够自动监控文件的修改，而且不用打包就能够直接预览效果。
+
+>  当前我们的方案是每次修改后执行yarn build打包然后用`live-server`预览打包后的项目页面。
+>
+> 它有以下缺点：
+>
+> * 每次修改后都需要重新将所有的源码编译打包一次
+> * 每次编译成功后都需要进行文件读写，性能开销大
+> * 不能实现局部刷新
+
+而webpack的`webpack-dev-server`能够提供热更新、无需打包即可预览的功能，完美解决上述的问题。
+
+首先我们在package.json的`script`里创建脚本命令：
+
+```javascript
+  "scripts": {
+    ...
+    "dev": "webpack serve"
+  },
+```
+
+然后安装
+
+```bash
+yarn add -D webpack-dev-server
+```
+
+接着使用命令
+
+```bash
+yarn dev
+```
+
+`webpack-dev-server`就启动好了
+
+```bash
+<i> [webpack-dev-server] Project is running at:
+<i> [webpack-dev-server] Loopback: http://localhost:8080/
+<i> [webpack-dev-server] On Your Network (IPv4): http://192.168.199.229:8080/
+```
+
+接着我们进入`http://localhost:8080/`就可以预览效果。
+
+此时可以删除`dist`目录，并且任意修改各个地方的源代码，修改后保存，`webpack-dev-server`会自动识别修改的部分，并且更新页面。
+
+> `Webpack-dev-server`默认会查找`webpack.config.js`。
+>
+> 如果你的`webpack`配置文件不是默认的`webpack.config.js`，假设这里叫`wb.config.js`那么package.json需要这么配
+>
+> ```javascript
+>   "scripts": {
+>     "build": "webpack --config wb.config.js",
+>     "dev": "webpack serve --config wb.config.js"
+>   },
+> ```
+
+`webpack-dev-server`的热更新功能主要是将数据保存在缓存当中，每次启动后，都去缓存中更新数据，这样的好处是提高开发效率，减少文件读写，提升静态服务器的性能。
