@@ -245,7 +245,7 @@ module.exports = {
 
 默认的配置输出路径相当于
 
-```json
+```js
   output: {  path: path.join(__dirname, 'dist') } 
 ```
 
@@ -374,7 +374,7 @@ yarn add postcss autoprefixer postcss-loader --dev
 
 然后在webpack中配置规则：
 
-```json
+```js
   module: {
     rules: [
       {
@@ -412,7 +412,7 @@ yarn add postcss-preset-env --dev
 
 直接配置在`options.postcssOptions.plugins`中即可,这里就替换掉上面的`require(autoprefixer)`,因为`postcss-preset-env`已经拥有它的功能了。
 
-```json
+```js
               postcssOptions: {
                 plugins: ['postcss-preset-env'],
               },
