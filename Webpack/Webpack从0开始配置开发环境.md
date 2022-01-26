@@ -994,6 +994,22 @@ function createImg() {
 yarn add -D webpack-dev-server
 ```
 
+修改配置文件，告知 dev server，从什么位置查找文件：
+
+```diff
+ module.exports = {
+  ...
++  devServer: {
++    static: './dist',
++  },
+ ...
+ };
+```
+
+以上配置告知 `webpack-dev-server`，将 `dist` 目录下的文件 serve 到 `localhost:8080` 下。
+
+> serve，将资源作为 server 的可访问文件
+
 接着使用命令
 
 ```bash
@@ -1010,7 +1026,7 @@ yarn dev
 
 接着我们进入`http://localhost:8080/`就可以预览效果。
 
-此时可以删除`dist`目录，并且任意修改各个地方的源代码，修改后保存，`webpack-dev-server`会自动识别修改的部分，并且更新页面。
+此时可以删除`dist`目录，并且任意修改各个地方的源代码，修改后保存，`webpack-dev-server`会监听到文件有修改，于是会实时重新加载。
 
 > `Webpack-dev-server`默认会查找`webpack.config.js`。
 >
@@ -1024,3 +1040,224 @@ yarn dev
 > ```
 
 `webpack-dev-server`的热更新功能主要是将数据保存在缓存当中，每次启动后，都去缓存中更新数据，这样的好处是提高开发效率，减少文件读写，提升静态服务器的性能。
+
+
+
+## 3.14 HMR功能
+
+HMR是hot module replacement的简写，翻译过来就是模块热替换。
+
+它允许在运行时更新所有类型的模块，而无需完全刷新。
+
+当前的开发模式是组件化开发，当我们修改其中一个组件时，启动HMR功能则会让浏览器只对局部发生源代码改变的组件进行更新展示，不需要全部刷新一遍。
+
+`webpack5`已经内置了这样的功能，我们只需要开启它就行
+
+```diff
+ module.exports = {
+  ...
+  devServer: {
+    static: './dist',
++   hot: true,
+  },
+ ...
+ };
+```
+
+然后我们需要在入口文件（我这里是`src/index.js`）内写上需要热更新模块的代码
+
+```diff
+// src/index.js
+
+/* ...省略其他代码...*/
++if (module.hot) {
++  module.hot.accept(['./es6.js'], function () {
++    console.log('Accepting the updated printMe module!');
++  });
++}
+```
+
+在上面的代码中，数组的每个项是需要热更新文件的路径。当这些文件的源码修改后，就会触发局部更新，然后执行`callback`。
+
+当前我的项目中`es6.js`文件修改了任何代码都只会局部刷新，并且热替换完成后会打印`Accepting the updated printMe module!`
+
+
+
+## 3.15 打包React组件jsx
+
+打包jsx的代码依然需要用到babel，我们需要安装以下插件（其中章节【babel的使用】已经用了前三个 ）：
+
+```bash
+yarn add @babel/core --dev // babel核心，需要跟各种插件配合
+yarn add @babel/preset-env --dev // babel预设的插件集合
+yarn add babel-loader --dev // babel的webpack loader
+yarn add @babel/preset-react --dev
+```
+
+接着安装`react`
+
+```bash
+yarn add react react-dom
+```
+
+然后在`index.js`中添加如下代码
+
+```javascript
+import App from './App.jsx';
+import React, { StrictMode } from 'react';
+import ReactDOM from 'react-dom';
+
+const rootElement = document.getElementById('root');
+ReactDOM.render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+  rootElement
+);
+```
+
+接着新建`App.jsx`,内容如下：
+
+```jsx
+import React from 'react';
+
+const App = () => {
+  return <div>hello world</div>;
+};
+
+export default App;
+```
+
+下面修改配置：
+
+```diff
+// webpack.config.js 
+  module: {
+    rules: [
+    ...
+-      {
+-        test: /\.js$/i,
+-        use: ['babel-loader'],
+-      },
++      {
++        test: /\.jsx$/i,
++        use: ['babel-loader'],
++      },
+    ],
+  }
+```
+
+最后在babel.config.js中添加`@babel/preset-react`即可
+
+```javascript
+module.exports = {
+  presets: ['@babel/preset-env', '@babel/preset-react'],
+};
+```
+
+## 3.16 React组件热更新
+
+下面实现React组件热更新的功能
+
+安装
+
+```javascript
+yarn add @pmmmwh/react-refresh-webpack-plugin react-refresh --dev
+```
+
+在`webpack.config.js`中添加插件
+
+```diff
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+  	...
+  },
+  mode: 'development',
+  module: {
+    rules: [
+    ...
+    ],
+  },
+  plugins: [
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      title: 'my APP',
+      template: './public/template.html', //指定index.html模板而不用插件内置的ejs模板
+    }),
+    new DefinePlugin({
+      BASE_URL: '"./"', // 可以替换模板中的<%=BASE_URL %> 为”./“
+    }),
++   new ReactRefreshWebpackPlugin(),
+  ],
+};
+```
+
+当前是启动`babel`插件来`loader`React组件的，我们还需要到`babel.config.js`中添加插件
+
+```diff
+// babel.config.js
+module.exports = {
+  presets: ['@babel/preset-env', '@babel/preset-react'],
++ plugins: [['react-refresh/babel']],
+};
+```
+
+下面测试一下：
+
+在`src`目录下新建一个`Hello.jsx`,内容如下：
+
+```jsx
+import React from 'react';
+
+const Hello = () => {
+  return (
+    <section>
+      <input type='text' />
+    </section>
+  );
+};
+
+export default Hello;
+```
+
+然后到`App.jsx`中使用这个组件
+
+```diff
+import React from 'react';
++ import Hello from './Hello.jsx';
+
+const App = () => {
+  return (
+    <div>
+      hello231
++     <Hello />
+    </div>
+  );
+};
+
+export default App;
+```
+
+打开`localhost:8080`,然后在输入框中输入任意内容：
+
+![image-20220126130554796](../assets/image-20220126130554796.png)
+
+为了测试组件是否支持热更新，我们在`App`组件中任意修改内容，这里就把`hello231`修改成`hello i am qiuyanxi`。
+
+按照我们的设想，App组件的修改不会影响到`Hello`组件，所以原来在输入框中输入的内容依然会存在。
+
+保存后，查看一下页面，成功了
+
+![image-20220126131056353](../assets/image-20220126131056353.png)
+
+查看`chrome`控制台提示
+
+```bash
+[HMR] Updated modules:
+[HMR]  - ./src/App.jsx
+[HMR] App is up to date.
+```
+
