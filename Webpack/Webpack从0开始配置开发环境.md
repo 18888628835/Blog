@@ -125,7 +125,7 @@ src
 index.css
 
 ```css
-div {
+.div {
   color: red;
   font-size: 16px;
 }
@@ -153,6 +153,7 @@ index.js
 function createElement() {
   const div = document.createElement('div');
   div.innerHTML = 'hello world';
+  div.classList.add('div');
   document.body.append(div);
 }
 createElement();
@@ -360,9 +361,9 @@ postcss是利用JavaScript转换样式的工具。我们可以用它配合`autop
 
 首先我们在当前的index.css上加一句css代码：
 
-```css
-@import './style.less';
-div {
+```diff
+// index.css
+.div {
   color: red;
   font-size: 16px;
   /* 为了查看postcss-loader有没有效果 */
@@ -468,7 +469,7 @@ css-loader能够支持类似于`@import xxx.css`之类的css引入。
 
 ```js
 @import './test.css';
-div {
+.div {
   color: red;
   font-size: 16px;
   /* 为了查看postcss-loader有没有效果 */
@@ -585,7 +586,7 @@ module.exports = {
 
 ```css
 // index.css
-div {
+.div {
   background: url('./assets/animal.jpg');/*会被替换成require('./assets/animal.jpg') */
 }
 ```
@@ -616,7 +617,7 @@ function createImg() {
 
 ```css
 // index.css
-div {
+.div {
   background: url('./assets/animal.jpg');/* 这是比较小的图片 */
 }
 ```
@@ -720,7 +721,7 @@ webpack5内置了asset模块，它包含了`file-loader`和`url-loader`这两个
   }
 ```
 
-我在这里直接使用`asset`混用模式的配置来替换掉上面的`url-loader`模块。
+我在这里直接使用`asset`混用模式的配置来**替换**掉上面的`url-loader`模块。
 
 > 请删除原来的dist目录再重新打包试一试。由于目前没配plugin，所以只能手动清除原有的dist目录。
 
@@ -1140,7 +1141,7 @@ export default App;
 -        use: ['babel-loader'],
 -      },
 +      {
-+        test: /\.jsx$/i,
++        test: /\.jsx?$/i,
 +        use: ['babel-loader'],
 +      },
     ],
@@ -1260,4 +1261,269 @@ export default App;
 [HMR]  - ./src/App.jsx
 [HMR] App is up to date.
 ```
+
+## 3.17 Vue组件热更新
+
+`Vue`组件需要用`Vue-loader`加载
+
+```bash
+yarn add vue-loader --dev
+```
+
+相对于React来说，Vue的配置简单很多。Vue组件默认支持HMR功能，因此我们不需要额外配置。
+
+```diff
+// webpack.config.js
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
+module.exports={
+		...
+  module: {
+    rules: [
+    ...
++      {
++        test: /\.vue$/i,
++        use: ['vue-loader'],
++      },
+    ],
+  }
+  plugins: [
+		...
++   new VueLoaderPlugin(),
+  ],  
+}
+```
+
+
+
+## 3.18 output.publicPath
+
+在打包时，`output.publicPath`属性影响打包后的`index.html`内部的引用路径。
+
+当不设置或者设置成空字符串时，打包后的资源会通过`origin`+`/`+`output.filename`来获取资源
+
+举个例子：
+
+当前我的设置如下：
+
+```javascript
+module.exports={
+  output: {
+    filename: 'bundle.js',
+    path: path.join(__dirname, 'dist'),
+    publicPath: '',// 也可以不设置，默认为空字符串
+  },
+}
+```
+
+那么打包后的脚本被这样引用
+
+```html
+<script defer src="bundle.js"></script>
+```
+
+当我们开启`http-server`去访问本地`http://127.0.0.0`时，会自动访问到`http://127.0.0.0/bundle.js`
+
+浏览器会自动帮我们加上`/`。
+
+为了保险起见，我们将`output.publicPath`设置成`/`
+
+```diff
+module.exports={
+  output: {
+    filename: 'bundle.js',
+    path: path.join(__dirname, 'dist'),
++    publicPath: '/',
+  },
+}
+```
+
+这样打包后的脚本引用方式就变成这样
+
+```html
+<script defer src="/bundle.js"></script>
+```
+
+相当于我们手动加上了`/`。
+
+> 原来版本不知道是webpack的bug还是浏览器的bug，加上/后可能导致build后的资源无法在本地被访问，在笔者写这篇博客时，已经没有这个问题了。——本地静态服务器用的是http-server
+
+## 3.19 devServer常用配置
+
+`devServer.hot`:开启HMR时，我们将其设置成了true，但是更好的做法是设置成`only`，因为在构建失败时不刷新页面作为回退。举个例子，当你在某个组件上写错代码时，设置成`only`不会自动重新刷新全部的组件。
+
+`devServer.open`:设置成`true`后，启动server服务时，自动打开浏览器
+
+`devServer.port`:设置端口号
+
+`devServer.historyApiFallback`:使用 HTML5 History API 时，可能必须提供 index.html 页面来代替任何 404 响应。
+
+```js
+  devServer: {
+    static: './dist',
+    hot: 'only', // 构建失败时不刷新页面作为回退
+    open: true, // 自动打开浏览器
+    port: 8888, // 端口号
+    compress: true, // 自动压缩
+    historyApiFallback: true,
+  },
+```
+
+比较值得说的是`devServer.historyApiFallback`，下面我们创建目录`src/components`，再在里面新建几个两个React组件，如下：
+
+```bash
+components
+├── About.jsx
+└── Home.jsx
+```
+
+内容如下：
+
+```jsx
+// Home.jsx
+import React from 'react';
+
+const Home = () => {
+  return <div>Home</div>;
+};
+
+export default Home;
+```
+
+```jsx
+// About.jsx
+import React from 'react';
+
+const About = () => {
+  return <div>about</div>;
+};
+
+export default About;
+```
+
+再修改`App.jsx`的源代码
+
+```diff
+import React from 'react';
+import Hello from './Hello.jsx';
++ import Home from './components/Home.jsx';
++ import About from './components/About.jsx';
++ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+const App = () => {
+  return (
+    <div>
+      hello i am qiuyanxi
+      <Hello />
++      <BrowserRouter>
++        <Link to='/home'>Home</Link>
++        <br />
++        <Link to='/about'>About</Link>
++        <Routes>
++          <Route path='/home' element={<Home />} />
++          <Route path='about' element={<About />} />
++        </Routes>
++      </BrowserRouter>
+    </div>
+  );
+};
+
+export default App;
+```
+
+现在我们进入页面`http://localhost:8888/about`,刷新一下。
+
+如果没有配置`historyApiFallback`,则会提示404。因为此时类似于向后端请求接口，而`/about`是前端路由，所以报404了。
+
+如果配置了`historyApiFallback`,则会出现正确的页面。
+
+## 3.20 proxy设置
+
+在我们开发过程中，请求后端接口时，经常遇到跨域问题。
+
+此时就需要使用代理转发一下请求。
+
+配置如下:
+
+```diff
+  devServer: {
+  	...
++    proxy: {
++      '/api': {
++        target: 'https://api.github.com',
++        pathRewrite: { '^/api': '' }, // 把/api重写为空
++        changeOrigin: true, // 修改主机来源，一般情况下不需要设置
++      },
++    },
+  },
+```
+
+举个例子，现在有个现成的github接口：
+
+```js
+https://api.github.com/users
+```
+
+我在本地通过设置好上面的代理后，再通过`axios`访问
+
+```js
+axios.get('/api/users').then(res => {
+  console.log('res.data:', res.data);
+});
+```
+
+如果没有写`pathRewrite`,就将请求转发到了`https://api.github.com/api/users`上。
+
+如果不希望传递`/api`，则需要通过`pathRewrite`重写路径。重写后转发到`https://api.github.com/users`
+
+> 默认情况下，代理时会保留主机头的来源。
+>
+> `https://api.github.com/users`这个接口通过判断来源来响应数据，我们可以通过设置`changeOrigin: true`来绕过github的判断。一般开发时并不需要这样设置
+
+## 3.21 resolve解析规则
+
+webpack内部有自己的一套解析规则，我们也可以通过`resolve`设置来修改它。
+
+常见的有
+
+1. `alias`：设置别名
+
+   ```js
+       alias: {
+         '@': path.resolve(__dirname, 'src'),
+       },
+   ```
+
+   设置以上的别名后，可以通过`import xxx from '@/xx'`来引入根目录下`src`目录的xx文件。
+
+2. `enforceExtension`：是否允许导入时有扩展名。
+
+3. `extensions`:尝试按顺序解析后缀名。如果有多个文件有相同的名字，但后缀名不同，webpack 会解析列在数组首位的后缀的文件 并跳过其余的后缀。
+
+   举个例子,当前配置如下：
+
+   ```js
+     resolve: {
+       extensions: ['.js', '.jsx', '.tsx'],
+     },
+   ```
+
+   当我修改如下代码后：
+
+   ```diff
+   - import Home from './components/Home.jsx
+   // 修改成
+   + import Home from './components/Home
+   ```
+
+   `Webpack`会按照`extensions`属性自动加上后缀名。如果加上后缀名后依然没有找到文件，就会报错。
+
+4. `mainFiles`:解析目录时要使用的文件名。
+
+   假设当前有个`components`目录，我在某个地方这样`import`：
+
+   ```js
+   import xx from './components'
+   ```
+
+   如果此时`resolve`设置为`mainFiles: ['index']`,则会引入`components`目录下的`index`文件。
 
