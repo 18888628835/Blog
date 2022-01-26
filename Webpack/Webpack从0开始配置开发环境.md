@@ -1527,3 +1527,126 @@ webpack内部有自己的一套解析规则，我们也可以通过`resolve`设�
 
    如果此时`resolve`设置为`mainFiles: ['index']`,则会引入`components`目录下的`index`文件。
 
+## 3.22 source map
+
+顾名思义，source map是源代码映射。
+
+如果没有配置`source map`,那浏览器的报错信息显示将会是打包后的对应位置
+
+比如我在`index.js`内写这样一段代码
+
+```js
+console.log(abc);
+```
+
+在没有声明的情况下，浏览器会报错
+
+![image-20220126190438414](../assets/image-20220126190438414.png)
+
+此时定位的代码错误显示是在打包后的`bundle.js`中。这对于程序员来说基本无用。
+
+程序员希望得到的信息是：在源代码中的哪一个文件哪一行出问题了。
+
+于是`source map`出场了，它可以定位到源代码中的信息。
+
+在`webpack.config.js`中添加配置：
+
+```diff
+module.exports = {
+ ...
+  mode: 'development',
++  devtool: 'source-map',
+}
+```
+
+此时`yarn dev`后就可以看到源代码中的错误信息了
+
+![image-20220126191425180](../assets/image-20220126191425180.png)
+
+它的原理是，在打包后，生成一份`map`映射文件，它能够体现`bundle.js`和源代码的映射关系。
+
+你可以通过`yarn build`后看到它。
+
+## 3.23 编译TS
+
+支持TS语法需要安装`typescript`和执行`tsc --init`
+
+```bash
+yarn add typescript @types/react --dev
+yarn add ts-loader --dev
+tsc --init  // 初始化`tsconfig.json`文件
+```
+
+在`tsconfig.json`文件中开启`sourceMap`以及开启jsx语法
+
+```json
+"compilerOptions": {
+  "jsx": "react",
+  "sourceMap": true,
+  ...
+}
+```
+
+最后配置
+
+```javascript
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.tsx?$/i,
+        use: ['ts-loader'],
+      },
+    ],
+  },
+};
+```
+
+这里有个小插曲，我们已经在项目中使用了babel，根据官方文档的一篇介绍，我觉得我们可以使用另一个loader
+
+> Note that if you're already using [`babel-loader`](https://github.com/babel/babel-loader) to transpile your code, you can use [`@babel/preset-typescript`](https://babeljs.io/docs/en/babel-preset-typescript) and let Babel handle both your JavaScript and TypeScript files instead of using an additional loader. Keep in mind that, contrary to `ts-loader`, the underlying [`@babel/plugin-transform-typescript`](https://babeljs.io/docs/en/babel-plugin-transform-typescript) plugin does not perform any type checking.
+
+> 注意如果你已经使用了`babel-loader`去转译你的代码，你可以使用`@babel/preset-typesctipt`让`babel`去处理你的`jvascript`以及`typesctipt`代码来替代其他额外的loader。请记住，与 ts-loader 不同，底层的 @babel/plugin-transform-typescript 插件不执行任何类型检查。
+
+这种情况下需要下载`@babel/preset-typescript`
+
+```
+yarn add @babel/preset-typescript --dev
+```
+
+修改配置：
+
+```diff
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.tsx?$/i,
+-       use: ['ts-loader'],
++       use: ['babel-loader'],
+      },
+    ],
+  },
+};
+```
+
+添加`babel`的预设
+
+```diff
+// babel.config.js
+module.exports = {
+  presets: [
+    '@babel/preset-env',
+    '@babel/preset-react',
++    '@babel/preset-typescript',
+  ],
+  plugins: [['react-refresh/babel']],
+};
+```
+
