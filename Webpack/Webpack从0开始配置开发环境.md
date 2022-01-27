@@ -1,3 +1,22 @@
+# 前言
+
+这是一篇关于`webpack5`从0开始配置的入门文章。
+
+通过本文你可以获得：
+
+* 了解webpack具体的作用
+* 了解一些基本的配置
+* 能看懂官方文档的配置项
+* 能获得一些优化的知识
+
+>  本文阅读时长大概在15分钟左右，如果你能根据例子来配置的话，可能花费的时间更长一些。
+
+我会尽可能用白话跟你解释所有配置项的由来，能解决什么问题。
+
+同时也希望读者能亲自配一下，加深自己的印象。
+
+话不多说，我们开始。
+
 # 一、基本概念
 
 ## 1.1 Webpack是什么
@@ -50,7 +69,7 @@ Webpack是一个开源的JavaScript模块打包工具，其最核心的功能是
 
 打包工具做以下内容：
 
-1. 从一个打算放在 HTML 中的 `<script type="module">` “主”模块开始。（Webpack默认从`index.js`开始）
+1. 从一个打算放在 HTML 中的 `<script type="module">` “主”模块开始。（Webpack默认从`src/index.js`开始）
 2. 分析它的依赖：它的导入，以及它的导入的导入等。
 3. 使用所有模块构建一个文件（或者多个文件，这是可调的），并用打包函数（bundler function）替代原生的 `import` 调用，以使其正常工作。还支持像 HTML/CSS 模块等“特殊”的模块类型。
 4. 在处理过程中，可能会应用其他转换和优化：
@@ -161,7 +180,9 @@ createElement();
 
 ## 2.2 打包第一个js文件
 
-初始化好后，我们可以看到`index.html`上的`<script src="./dist/bundle.js"></script>`，目前我们的项目并没有创建`dist`这个目录，`bundle.js`也是不存在的，我们期望能够用`webpack`打包`index.js`的内容。
+初始化好后，我们可以看到`index.html`上的`<script src="./dist/bundle.js"></script>`，目前我们的项目并没有创建`dist`这个目录，`bundle.js`也是不存在的。
+
+我们期望能够用`webpack`打包`index.js`的内容来生成`dist`目录和`bundle.js`文件
 
 此时在命令行上输入：
 
@@ -173,7 +194,7 @@ npx webpack --entry=./src/index.js --output-filename=bundle.js --mode=developmen
 
 `--entry` 参数是寻找当前目录下的`src/index.js`文件
 
-`--output-filename` 是指定输出的文件名
+`--output-filename` 是指定输出的文件名 
 
 `--mode `指的是开发模式
 
@@ -252,7 +273,7 @@ module.exports = {
   output: {  path: path.join(__dirname, 'dist') } 
 ```
 
->  由于是默认配置所以webpack.config.js中省略了`output.path`的配置
+>  由于是默认配置，所以webpack.config.js中省略了`output.path`的配置
 
 写好配置项后，我们就可以去除`package.json`中配置的打包参数了。
 
@@ -286,6 +307,8 @@ import './index.css';
 yarn add style-loader css-loader --dev
 ```
 
+`style-loader`用于将`<style>`标签插入到html中，`css-loader`是用于识别`import './index.css'`语句并打包css文件。
+
 根据目前的官方网站，配置如下：
 
 ```javascript
@@ -303,7 +326,11 @@ module.exports = {
 };
 ```
 
-`style-loader`用于将css插入到页面中，`css-loader`是用于识别并打包css文件。
+webpack 根据正则表达式，来确定应该查找哪些文件，并将其提供给指定的 loader。在这个示例中，所有以 `.css` 结尾的文件，都将被提供给 `style-loader` 和 `css-loader`。
+
+模块 loader 可以链式调用。链中的每个 loader 都将对资源进行转换。链会逆序执行。第一个 loader 将其结果（被转换后的资源）传递给下一个 loader，依此类推。最后，webpack 期望链中的最后的 loader 返回 JavaScript。
+
+上面的顺序是先执行`css-loader`再执行`style-loader`。
 
 配置完后，请用`yarn build`构建并在`chrome`上查看结果，以下不再提示。
 
@@ -727,6 +754,25 @@ webpack5内置了asset模块，它包含了`file-loader`和`url-loader`这两个
 
 ## 3.8 使用plugin在打包前删除dist
 
+> 注意：webpack5内置了此功能。
+>
+> 在webpack.config.js中设置成`output.clean为true即可`
+>
+> ```diff
+>  module.exports = {
+>    ...
+>    output: {
+>      filename: '[name].bundle.js',
+>      path: path.resolve(__dirname, 'dist'),
+> +    clean: true,
+>    },
+>  };
+> ```
+
+以下为旧方法：
+
+——分割线——
+
 webpack在打包时并不会删除原有的`dist`目录，而是在其基础上替换内容，所以我们需要手动删除`dist`目录，下面介绍打包时自动帮我们先删除`dist`目录的`plugin`。
 
 ```bash
@@ -769,7 +815,7 @@ clean-webpack-plugin: options.output.path not defined. Plugin disabled...
     rules: [
     ...
       {
-        test: /\.(ttf|woff2?)$/i,
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
         generator: {
           filename: 'fonts/[name].[hash:3][ext]', //输出规则
@@ -1042,7 +1088,7 @@ yarn dev
 
 `webpack-dev-server`的热更新功能主要是将数据保存在缓存当中，每次启动后，都去缓存中更新数据，这样的好处是提高开发效率，减少文件读写，提升静态服务器的性能。
 
-
+想要获得热更新功能，我们需要手动开启HMR。
 
 ## 3.14 HMR功能
 
@@ -1650,3 +1696,125 @@ module.exports = {
 };
 ```
 
+## 3.24 打包CSV、TSV 和 XML
+
+webpack内置支持json，但如果项目要导入csv、tsv、xml等资源，需要另外安装loader
+
+```bash
+yarn add csv-loader xml-loader --dev
+```
+
+```js
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.(csv|tsv)$/i,
+        use: ['csv-loader'],
+      },
+      {
+        test: /\.xml$/i,
+        use: ['xml-loader'],
+      },
+    ],
+  },
+};
+```
+
+## 3.25 区分生产、打包环境
+
+如何区分生产、打包环境其实官网上已经有详细的介绍了，简单来说，就是将`webpack.config.js`分成三个文件
+
+```diff
+  webpack-demo
+  |- package.json
+  |- package-lock.json
+- |- webpack.config.js
++ |- webpack.common.js
++ |- webpack.dev.js
++ |- webpack.prod.js
+```
+
+其中dev.js是存放开发环境要用的配置，prod.js存放生产环境要用的配置，common.js则存放两者都要用的配置。
+
+比如，common.js会放置入口、出口、必须的插件、必须的loader等
+
+**webpack.common.js**
+
+```js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+ module.exports = {
+   entry: {
+     app: './src/index.js',
+   },
+   plugins: [
+     new HtmlWebpackPlugin({
+       title: 'Production',
+     }),
+   ],
+   output: {
+     filename: '[name].bundle.js',
+     path: path.resolve(__dirname, 'dist'),
+     clean: true,
+   },
+ };
+```
+
+`dev.js`则存放开发时要用的devServer之类的配置,`mode`是一定要写的（也可以通过脚本命令传递模式）
+
+```js
+ const { merge } = require('webpack-merge');
+ const common = require('./webpack.common.js');
+
+ module.exports = merge(common, {
+   mode: 'development',
+   devtool: 'inline-source-map',
+   devServer: {
+     static: './dist',
+   },
+ });
+```
+
+`prod.js`则存放生产环境要用的插件之类的
+
+```js
+ const { merge } = require('webpack-merge');
+ const common = require('./webpack.common.js');
+
+ module.exports = merge(common, {
+   mode: 'production',
+ });
+```
+
+其中`dev.js`和`prod.js`是通过webpack提供的merge函数对common.js的配置进行合并。
+
+最后在package.json中设置脚本命令对应不同的`config.js`即可
+
+```js
+  "scripts": {
+    "build": "webpack --config ./webpack.prod.js",
+    "dev": "webpack serve --config ./webpack.dev.js"
+  },
+```
+
+
+
+# 四、关于优化
+
+webpack是用来编译、打包的，所以能够优化的无非两种：更快、更小。
+
+## 如何更快——优化打包速度
+
+打包速度影响到的是开发过程中的热更新速度以及上线前的构建速度。
+
+通过以下方式我们可以优化打包速度：
+
+1. mode参数
+2. 缩小文件搜索范围
+
+## 如何更小——缩小打包体积
