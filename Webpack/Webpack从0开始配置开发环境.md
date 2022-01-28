@@ -5,7 +5,8 @@
 通过本文你可以获得：
 
 * 了解webpack具体的作用
-* 了解一些基本的配置
+* 了解如何使用webpack做打包资源
+* 了解如何利用webpack提升开发体验
 * 能看懂官方文档的配置项
 * 能获得一些优化的知识
 
@@ -98,6 +99,8 @@ Webpack是一个开源的JavaScript模块打包工具，其最核心的功能是
 
 4. Webpack有庞大的社区支持,插件齐全。
 
+4. webpack可以提高前端开发的体验，`webpack-dev-server`具备整套的协同开发功能，提高前端开发、调试的效率
+
    
 
 ## 1.5 Webpack五个核心概念
@@ -112,7 +115,11 @@ Webpack是一个开源的JavaScript模块打包工具，其最核心的功能是
 
 * `mode`：模式。development模式、production模式、none。能够设置`process.env.NODE_ENV`的值，并且根据环境不同自动开启一些插件。
 
+## 1.6 小结
 
+通过上面的介绍，我们能够大概知道webpack的概念、作用。
+
+下面我们进入实战环节，在实战环节，我们需要做一些准备工作。
 
 # 二、准备工作
 
@@ -287,9 +294,19 @@ module.exports = {
 
 当构建后，请使用编辑器打开并在chrome上查看结果。
 
+## 2.5 小结
 
+准备工作主要是熟悉webpack-cli的使用以及webpack脚本、webpack配置文件的默认项等。
 
-# 三、开始实战
+我们还用webpack打包了一个js文件，这甚至不需要任何配置，因为webpack自身就具备打包js的能力。
+
+但是它默认不具备打包其他静态资源（css、sass、file文件等）的能力，所以我们需要给它配置`loader`，让它可以”翻译“这些静态资源。
+
+在翻译的同时，我们还能够使用`plugin`让webpack帮助我们做一些额外的工作，例如生成模板文件、压缩、优化等等。
+
+下面进入配置`loader`、`plugin`的环节。
+
+# 三、利用loader、plugin打包资源
 
 ## 3.1 打包css 
 
@@ -988,6 +1005,8 @@ function createImg() {
 
 我们在引用该静态资源时，已经预先知道它会被拷贝到`dist`目录下了，所以可以直接用`./`而不是`require`或`import`。
 
+实际开发中，我们有时候也会这样用静态资源，很多框架就提供了这样的功能，一些特别大的静态资源（例如地图）等，我们并不需要它们再被打包工具“翻译”一遍，而是直接拷贝到`dist`目录，在这种情况下，我们就能够直接使用`./`的形式引入这些静态资源。
+
 接着补充配置
 
 ```js
@@ -1008,21 +1027,228 @@ function createImg() {
 
 当前`public`下的`template.html`会被`html-webpack-plugin`拷贝到`dist`目录下并被读写成`index.html`模板，所以我们在这里就忽略它。
 
-实际开发中，我们有时候也会这样用静态资源，很多框架就提供了这样的功能，一些特别大的静态资源（例如地图）等，我们并不需要它们再被打包工具“翻译”一遍，而是直接拷贝到`dist`目录，在这种情况下，我们就能够直接使用`./`的形式引入这些静态资源。
-
 毫无疑问，如果你的项目中不需要被打包的静态资源特别多，那使用这种拷贝的方式能够大大提高上线前构建的速度。
 
-## 3.13 webpack-dev-server
 
-实际开发中，我们都会用脚手架提供的`webpack-dev-server`这样的静态服务器协助开发，它的好处是能够自动监控文件的修改，而且不用打包就能够直接预览效果。
+
+## 3.13 编译TS
+
+支持TS语法需要安装`typescript`和执行`tsc --init`
+
+```bash
+yarn add typescript @types/react --dev
+yarn add ts-loader --dev
+tsc --init  // 初始化`tsconfig.json`文件
+```
+
+在`tsconfig.json`文件中开启`sourceMap`以及开启jsx语法
+
+```json
+"compilerOptions": {
+  "jsx": "react",
+  "sourceMap": true,
+  ...
+}
+```
+
+最后配置
+
+```javascript
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.tsx?$/i,
+        use: ['ts-loader'],
+      },
+    ],
+  },
+};
+```
+
+这里有个小插曲，我们已经在项目中使用了babel，根据官方文档的一篇介绍，我觉得我们可以使用另一个loader
+
+> Note that if you're already using [`babel-loader`](https://github.com/babel/babel-loader) to transpile your code, you can use [`@babel/preset-typescript`](https://babeljs.io/docs/en/babel-preset-typescript) and let Babel handle both your JavaScript and TypeScript files instead of using an additional loader. Keep in mind that, contrary to `ts-loader`, the underlying [`@babel/plugin-transform-typescript`](https://babeljs.io/docs/en/babel-plugin-transform-typescript) plugin does not perform any type checking.
+
+> 注意如果你已经使用了`babel-loader`去转译你的代码，你可以使用`@babel/preset-typesctipt`让`babel`去处理你的`jvascript`以及`typesctipt`代码来替代其他额外的loader。请记住，与 ts-loader 不同，底层的 @babel/plugin-transform-typescript 插件不执行任何类型检查。
+
+这种情况下需要下载`@babel/preset-typescript`
+
+```
+yarn add @babel/preset-typescript --dev
+```
+
+修改配置：
+
+```diff
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.tsx?$/i,
+-       use: ['ts-loader'],
++       use: ['babel-loader'],
+      },
+    ],
+  },
+};
+```
+
+添加`babel`的预设
+
+```diff
+// babel.config.js
+module.exports = {
+  presets: [
+    '@babel/preset-env',
+    '@babel/preset-react',
++    '@babel/preset-typescript',
+  ],
+  plugins: [['react-refresh/babel']],
+};
+```
+
+## 3.14 打包CSV、TSV 和 XML
+
+webpack内置支持json，但如果项目要导入csv、tsv、xml等资源，需要另外安装loader
+
+```bash
+yarn add csv-loader xml-loader --dev
+```
+
+```js
+// webpack.config.js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.(csv|tsv)$/i,
+        use: ['csv-loader'],
+      },
+      {
+        test: /\.xml$/i,
+        use: ['xml-loader'],
+      },
+    ],
+  },
+};
+```
+
+## 3.15 区分生产、打包环境
+
+如何区分生产、打包环境其实官网上已经有详细的介绍了，简单来说，就是将`webpack.config.js`分成三个文件
+
+```diff
+  webpack-demo
+  |- package.json
+  |- package-lock.json
+- |- webpack.config.js
++ |- webpack.common.js
++ |- webpack.dev.js
++ |- webpack.prod.js
+```
+
+其中dev.js是存放开发环境要用的配置，prod.js存放生产环境要用的配置，common.js则存放两者都要用的配置。
+
+比如，common.js会放置入口、出口、必须的插件、必须的loader等
+
+**webpack.common.js**
+
+```js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+ module.exports = {
+   entry: {
+     app: './src/index.js',
+   },
+   plugins: [
+     new HtmlWebpackPlugin({
+       title: 'Production',
+     }),
+   ],
+   output: {
+     filename: '[name].bundle.js',
+     path: path.resolve(__dirname, 'dist'),
+     clean: true,
+   },
+ };
+```
+
+`dev.js`则存放开发时要用的devServer之类的配置,`mode`是一定要写的（也可以通过脚本命令传递模式）
+
+```js
+ const { merge } = require('webpack-merge');
+ const common = require('./webpack.common.js');
+
+ module.exports = merge(common, {
+   mode: 'development',
+   devtool: 'inline-source-map',
+   devServer: {
+     static: './dist',
+   },
+ });
+```
+
+`prod.js`则存放生产环境要用的插件之类的
+
+```js
+ const { merge } = require('webpack-merge');
+ const common = require('./webpack.common.js');
+
+ module.exports = merge(common, {
+   mode: 'production',
+ });
+```
+
+其中`dev.js`和`prod.js`是通过webpack提供的merge函数对common.js的配置进行合并。
+
+最后在package.json中设置脚本命令对应不同的`config.js`即可
+
+```js
+  "scripts": {
+    "build": "webpack --config ./webpack.prod.js",
+    "dev": "webpack serve --config ./webpack.dev.js"
+  },
+```
+
+区分生产、开发环境的难点在于需要根据环境理清每个配置项、插件、loader。
+
+## 3.16 小结
+
+在这个环节，我们利用`webpack`替我们打包了一些资源，由于篇幅原因，这里没办法具体讲到所有静态资源。
+
+落实到实际开发也是如此。我们没办法考虑到所有因素，只能在遇到实际问题时再对症下药，去寻找网上提供的方案，再配置`webpack`帮助我们解决这些问题。
+
+好在很多优秀的模板，例如`next.js`，`umi.js`等，得益于这些集成型前端框架的作者，或由于其高超的技术水平，或脱胎于大量实际场景，我们获得了配套的、成熟的webpack配置，开箱即用。
+
+我们可以参考它们的配置来做细小的优化或者更多的扩展。
+
+`webpack`除了拥有几乎所有类型的静态资源的打包能力，对前端开发来说，更重要的是它带来的不一样的开发体验。这对于从远古时期一路走来的前端er来说，是革命性的创举，同时也真正让前端拥有模块化开发的感受。
+
+下面介绍webpack配套的开发工具。
+
+# 四、开发工具
+
+## 4.1 webpack-dev-server
+
+实际开发中，我们都会用到`webpack-dev-server`这样的静态服务器协助开发，它的好处是能够自动监控文件的修改，而且不用打包就能够直接预览效果。
 
 >  当前我们的方案是每次修改后执行yarn build打包然后用`live-server`预览打包后的项目页面。
 >
-> 它有以下缺点：
+>  它有以下缺点：
 >
-> * 每次修改后都需要重新将所有的源码编译打包一次
-> * 每次编译成功后都需要进行文件读写，性能开销大
-> * 不能实现局部刷新
+>  * 每次修改后都需要重新将所有的源码编译打包一次
+>  * 每次编译成功后都需要进行文件读写，性能开销大
+>  * 不能实现局部刷新
 
 而webpack的`webpack-dev-server`能够提供热更新、无需打包即可预览的功能，完美解决上述的问题。
 
@@ -1080,17 +1306,17 @@ yarn dev
 > 如果你的`webpack`配置文件不是默认的`webpack.config.js`，假设这里叫`wb.config.js`那么package.json需要这么配
 >
 > ```javascript
->   "scripts": {
->     "build": "webpack --config wb.config.js",
->     "dev": "webpack serve --config wb.config.js"
->   },
+> "scripts": {
+>  "build": "webpack --config wb.config.js",
+>  "dev": "webpack serve --config wb.config.js"
+> },
 > ```
 
 `webpack-dev-server`的热更新功能主要是将数据保存在缓存当中，每次启动后，都去缓存中更新数据，这样的好处是提高开发效率，减少文件读写，提升静态服务器的性能。
 
 想要获得热更新功能，我们需要手动开启HMR。
 
-## 3.14 HMR功能
+## 4.2 HMR功能
 
 HMR是hot module replacement的简写，翻译过来就是模块热替换。
 
@@ -1130,7 +1356,7 @@ HMR是hot module replacement的简写，翻译过来就是模块热替换。
 
 
 
-## 3.15 打包React组件jsx
+## 4.3 打包React组件jsx
 
 打包jsx的代码依然需要用到babel，我们需要安装以下插件（其中章节【babel的使用】已经用了前三个 ）：
 
@@ -1202,7 +1428,7 @@ module.exports = {
 };
 ```
 
-## 3.16 React组件热更新
+## 4.4 React组件热更新
 
 下面实现React组件热更新的功能
 
@@ -1308,7 +1534,7 @@ export default App;
 [HMR] App is up to date.
 ```
 
-## 3.17 Vue组件热更新
+## 4.5 Vue组件热更新
 
 `Vue`组件需要用`Vue-loader`加载
 
@@ -1341,7 +1567,7 @@ module.exports={
 
 
 
-## 3.18 output.publicPath
+## 4.6 output.publicPath
 
 在打包时，`output.publicPath`属性影响打包后的`index.html`内部的引用路径。
 
@@ -1393,7 +1619,7 @@ module.exports={
 
 > 原来版本不知道是webpack的bug还是浏览器的bug，加上/后可能导致build后的资源无法在本地被访问，在笔者写这篇博客时，已经没有这个问题了。——本地静态服务器用的是http-server
 
-## 3.19 devServer常用配置
+## 4.7 devServer常用配置
 
 `devServer.hot`:开启HMR时，我们将其设置成了true，但是更好的做法是设置成`only`，因为在构建失败时不刷新页面作为回退。举个例子，当你在某个组件上写错代码时，设置成`only`不会自动重新刷新全部的组件。
 
@@ -1482,7 +1708,7 @@ export default App;
 
 如果配置了`historyApiFallback`,则会出现正确的页面。
 
-## 3.20 proxy设置
+## 4.8 proxy设置
 
 在我们开发过程中，请求后端接口时，经常遇到跨域问题。
 
@@ -1525,7 +1751,7 @@ axios.get('/api/users').then(res => {
 >
 > `https://api.github.com/users`这个接口通过判断来源来响应数据，我们可以通过设置`changeOrigin: true`来绕过github的判断。一般开发时并不需要这样设置
 
-## 3.21 resolve解析规则
+## 4.9 resolve解析规则
 
 webpack内部有自己的一套解析规则，我们也可以通过`resolve`设置来修改它。
 
@@ -1573,7 +1799,7 @@ webpack内部有自己的一套解析规则，我们也可以通过`resolve`设�
 
    如果此时`resolve`设置为`mainFiles: ['index']`,则会引入`components`目录下的`index`文件。
 
-## 3.22 source map
+## 4.10 source map
 
 顾名思义，source map是源代码映射。
 
@@ -1613,198 +1839,9 @@ module.exports = {
 
 你可以通过`yarn build`后看到它。
 
-## 3.23 编译TS
-
-支持TS语法需要安装`typescript`和执行`tsc --init`
-
-```bash
-yarn add typescript @types/react --dev
-yarn add ts-loader --dev
-tsc --init  // 初始化`tsconfig.json`文件
-```
-
-在`tsconfig.json`文件中开启`sourceMap`以及开启jsx语法
-
-```json
-"compilerOptions": {
-  "jsx": "react",
-  "sourceMap": true,
-  ...
-}
-```
-
-最后配置
-
-```javascript
-// webpack.config.js
-module.exports = {
-  ...
-  module: {
-    rules: [
-      ...
-      {
-        test: /\.tsx?$/i,
-        use: ['ts-loader'],
-      },
-    ],
-  },
-};
-```
-
-这里有个小插曲，我们已经在项目中使用了babel，根据官方文档的一篇介绍，我觉得我们可以使用另一个loader
-
-> Note that if you're already using [`babel-loader`](https://github.com/babel/babel-loader) to transpile your code, you can use [`@babel/preset-typescript`](https://babeljs.io/docs/en/babel-preset-typescript) and let Babel handle both your JavaScript and TypeScript files instead of using an additional loader. Keep in mind that, contrary to `ts-loader`, the underlying [`@babel/plugin-transform-typescript`](https://babeljs.io/docs/en/babel-plugin-transform-typescript) plugin does not perform any type checking.
-
-> 注意如果你已经使用了`babel-loader`去转译你的代码，你可以使用`@babel/preset-typesctipt`让`babel`去处理你的`jvascript`以及`typesctipt`代码来替代其他额外的loader。请记住，与 ts-loader 不同，底层的 @babel/plugin-transform-typescript 插件不执行任何类型检查。
-
-这种情况下需要下载`@babel/preset-typescript`
-
-```
-yarn add @babel/preset-typescript --dev
-```
-
-修改配置：
-
-```diff
-// webpack.config.js
-module.exports = {
-  ...
-  module: {
-    rules: [
-      ...
-      {
-        test: /\.tsx?$/i,
--       use: ['ts-loader'],
-+       use: ['babel-loader'],
-      },
-    ],
-  },
-};
-```
-
-添加`babel`的预设
-
-```diff
-// babel.config.js
-module.exports = {
-  presets: [
-    '@babel/preset-env',
-    '@babel/preset-react',
-+    '@babel/preset-typescript',
-  ],
-  plugins: [['react-refresh/babel']],
-};
-```
-
-## 3.24 打包CSV、TSV 和 XML
-
-webpack内置支持json，但如果项目要导入csv、tsv、xml等资源，需要另外安装loader
-
-```bash
-yarn add csv-loader xml-loader --dev
-```
-
-```js
-// webpack.config.js
-module.exports = {
-  ...
-  module: {
-    rules: [
-      ...
-      {
-        test: /\.(csv|tsv)$/i,
-        use: ['csv-loader'],
-      },
-      {
-        test: /\.xml$/i,
-        use: ['xml-loader'],
-      },
-    ],
-  },
-};
-```
-
-## 3.25 区分生产、打包环境
-
-如何区分生产、打包环境其实官网上已经有详细的介绍了，简单来说，就是将`webpack.config.js`分成三个文件
-
-```diff
-  webpack-demo
-  |- package.json
-  |- package-lock.json
-- |- webpack.config.js
-+ |- webpack.common.js
-+ |- webpack.dev.js
-+ |- webpack.prod.js
-```
-
-其中dev.js是存放开发环境要用的配置，prod.js存放生产环境要用的配置，common.js则存放两者都要用的配置。
-
-比如，common.js会放置入口、出口、必须的插件、必须的loader等
-
-**webpack.common.js**
-
-```js
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
- module.exports = {
-   entry: {
-     app: './src/index.js',
-   },
-   plugins: [
-     new HtmlWebpackPlugin({
-       title: 'Production',
-     }),
-   ],
-   output: {
-     filename: '[name].bundle.js',
-     path: path.resolve(__dirname, 'dist'),
-     clean: true,
-   },
- };
-```
-
-`dev.js`则存放开发时要用的devServer之类的配置,`mode`是一定要写的（也可以通过脚本命令传递模式）
-
-```js
- const { merge } = require('webpack-merge');
- const common = require('./webpack.common.js');
-
- module.exports = merge(common, {
-   mode: 'development',
-   devtool: 'inline-source-map',
-   devServer: {
-     static: './dist',
-   },
- });
-```
-
-`prod.js`则存放生产环境要用的插件之类的
-
-```js
- const { merge } = require('webpack-merge');
- const common = require('./webpack.common.js');
-
- module.exports = merge(common, {
-   mode: 'production',
- });
-```
-
-其中`dev.js`和`prod.js`是通过webpack提供的merge函数对common.js的配置进行合并。
-
-最后在package.json中设置脚本命令对应不同的`config.js`即可
-
-```js
-  "scripts": {
-    "build": "webpack --config ./webpack.prod.js",
-    "dev": "webpack serve --config ./webpack.dev.js"
-  },
-```
 
 
-
-# 四、关于优化
+# 五、关于优化
 
 webpack是用来编译、打包的，所以能够优化的无非两种：更快、更小。
 
@@ -1814,7 +1851,166 @@ webpack是用来编译、打包的，所以能够优化的无非两种：更快�
 
 通过以下方式我们可以优化打包速度：
 
-1. mode参数
-2. 缩小文件搜索范围
+### mode参数
+
+webpack内部对`production`或者`development`有做优化，所以针对开发和生产环境我们需要配置不同的`mode`。
+
+### resolve配置
+
+通过`resolve`解析规则，我们可以手动控制`webpack`的查找规则，除了对开发友好外，相当于显式告诉`webpack`利用`resolve`中的配置规则查找文件，合理的配置会提高`webpack`查找文件的效率。
+
+* **alias设置别名**
+
+  通过`alisa`设置别名可以让`webpack`通过规则项从上到下查找文件，而不是递归查找。
+
+  ```js
+      alias: {
+        '@': path.resolve(process.cwd(), 'src'),
+      },
+  ```
+
+  通过上面的别名设置，除了让我们开发时可以通过`import xx from '@/xxx'` 引用`src`目录下的内容以外，还对`webpack`的查找规则非常友好——`webpack`知道可以`src`目录从上到下查找文件，而不是通过相对路径递归向上查找文件。
+
+* **extensions高频扩展名前置**
+
+  通过设置`extensions`可以在引入时不写扩展名。
+
+  ```
+    resolve: {
+      extensions: ['.js', '.jsx', '.tsx'],
+    },
+  ```
+
+  webpack会从前到后遍历`extensions`属性来匹配是否有对应扩展名的文件，一些高频的后缀放在前面可以提高webpack搜索的速度
+
+* **`modules`告诉webpack 解析模块时应该搜索的目录**
+
+  ```js
+  const path = require('path');
+  
+  module.exports = {
+    //...
+    resolve: {
+      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+    },
+  };
+  ```
+
+  上面的代码将告诉`webpack`搜索`src`目录和`node_modules`目录，`src`目录优先搜索。
+
+  这样有助于加快搜索时间
+
+### cache属性
+
+```javascript
+module.exports = {
+  //...
+  cache: {
+    type: 'filesystem',
+  },
+};
+```
+
+通过设置cache属性为文件系统缓存生成的 webpack 模块和 chunk，来改善构建速度。
+
+###  thread-loader
+
+在耗时的操作中使用此loader可以生成独立的worker池。每个 worker 都是一个独立的 node.js 进程。
+
+相当于开启了多进程来处理耗时慢的`loader`，这样就达到了多`loader`同时处理的效果。
+
+下面是官方文档的示例：
+
+```javascript
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        include: path.resolve('src'),
+        use: [
+          "thread-loader",
+          // 耗时的 loader （例如 babel-loader）
+        ],
+      },
+    ],
+  },
+};
+```
+
+
 
 ## 如何更小——缩小打包体积
+
+缩小打包体积的思路有利用一些plugin来缩小代码量，或者利用webpack的Tree-shaking功能来删除没用过的代码。
+
+### 压缩css
+
+[Optimize CSS Assets Webpack Plugin](https://www.npmjs.com/package/optimize-css-assets-webpack-plugin)
+
+使用方式参照官方文档
+
+```javascript
+var OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+module.exports = {
+  module: {
+  ...
+  },
+  plugins: [
+    new OptimizeCssAssetsPlugin({
+      assetNameRegExp: /\.optimize\.css$/g,
+      cssProcessor: require('cssnano'),
+      cssProcessorPluginOptions: {
+        preset: ['default', { discardComments: { removeAll: true } }],
+      },
+      canPrint: true
+    })
+  ]
+};
+```
+
+### 压缩bundle
+
+通过webpack内置的[optimization](https://webpack.docschina.org/configuration/optimization/#optimizationminimizer)属性开启压缩功能。
+
+```javascript
+module.exports = {
+  //...
+  optimization: {
+    minimize: true,
+  },
+};
+```
+
+### Tree Shaking
+
+*tree shaking* 是一个术语，通常用于描述移除 JavaScript 上下文中的未引用代码(dead-code)。
+
+`webpack`内置这个功能，只需要通过`mode:"production"`来开启就行。
+
+
+
+## 最后
+
+webpack生态太庞大了，而且变更非常快。
+
+不单单是生态、插件、配置项的变化，包括优化方案变化都非常快。
+
+本篇博客作为入门，只能提供一个构思，尽可能结合实际开发来解释`webpack`对我们的作用。
+
+如果你详细看完了本篇博客，就可以去啃一啃`webpack`官方文档的配置说明了。
+
+最后建议大家⭐️**使用vite**⭐️，手动狗头
+
+新年快乐，我们下期再见👋🏻👋🏻
+
+# 六、参考来源
+
+[webpack-guides](https://webpack.docschina.org/guides/)
+
+[Webpack实战：入门、进阶与调优](https://weread.qq.com/web/reader/8fc322d07185cc948fc5aa8)
+
+
+
+
+
