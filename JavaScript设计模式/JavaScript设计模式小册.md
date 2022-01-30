@@ -1497,7 +1497,25 @@ registerForm.onsubmit = function() {
 
 
 
-# 预加载图片(代理模式)
+
+
+# 七、代理模式
+
+代理模式就是给原对象提供一个替身对象，以便控制对原对象的访问。
+
+一般我们访问的是替身对象，替身对象对请求做处理后再转交给本体对象。
+
+<img src="../assets/image-20211103104857197.png" alt="image-20211103104857197" style="zoom:50%;" />
+
+## 7.1 预加载图片
+
+代理模式实现预加载图片的思路是：
+
+1. 先用一个占位的图片当做加载时显示的loading图
+2. 设置一个代理对象的src属性来帮助本体完成资源的加载
+3. 监听代理对象的onload事件，当资源加载成功时，再给本体对象设置src属性
+
+下面是代码：
 
 ```javascript
 var myImage = (function() {
@@ -1527,7 +1545,9 @@ var proxyImage = (function() {
 proxyImage.setSrc('http://xxxx') // proxyImage代理了myImage的访问，并且加入额外的预加载操作
 ```
 
-# 缓存代理(代理模式)
+## 7.2 函数缓存代理
+
+函数的缓存代理可以为一些开销大的运算结果提供暂时的存储，在下次运算时，如果传递进来的参数跟之前一致，则可以直接返回前面存储的运算结果。
 
 ```javascript
 var mult = function(...rest) {
@@ -1558,7 +1578,20 @@ console.log(proxyMult(1, 2, 3))
 console.log(proxyMult(1, 2, 3))
 ```
 
-# 发布订阅模式
+
+
+# 八、发布订阅模式
+
+## 8.1 通用的发布订阅模式
+
+本质上来说，发布订阅模式就是创建一个构造函数，这个构造函数可以创造一个同时具有订阅事件、发布事件、删除事件的对象。
+
+具体的实现就是：
+
+1. 在内部生成一个缓存对象
+2. 订阅事件时，传递的key是该缓存对象的属性，属性值是一个数组，传递的函数则被push到数组中成为数组的元素。
+3. 发布事件时，找到对应的key，遍历该key对应的数组，并执行里面的函数
+4. 删除事件时，找到对应的key，遍历该key对应的数组，并删除要删除的函数
 
 ```javascript
 class eventHub {
@@ -1601,3 +1634,146 @@ class eventHub {
 }
 ```
 
+## 8.2 在 React 应用内使用发布-订阅模式
+
+我们经常遇到这样一个场景：进入列表页面，可以得到一个 ID，然后通过这个 ID 进行详情页面。
+
+列表页面跟详情页面是兄弟页面，这里我们有几种方式传递 ID
+
+- 我们自然可以用状态提升的方式将 ID 传递给两者的父组件，然后 props 或者 Context 传递（太麻烦）
+- Redux 全局管理（太重了）
+- 通过 url 的 queryString 传递（常用方法）
+- 通过浏览器 storage
+- 通过发布-订阅模式传递(不常用但很高级)
+
+下面是发布订阅的代码，采用 TS 编写，方法基本一样，但也略有不同
+
+```typescript
+// EventHub.ts
+type Cache = {
+  [key: string]: Array<(args?: unknown) => any>;
+};
+class _EventHub {
+  private cache: Cache = {};
+  //订阅事件
+  listen(key, fn) {
+    if (key in this.cache === false) {
+      this.cache[key] = [];
+    }
+    this.cache[key].push(fn);
+  }
+  // 发布事件
+  trigger(key, ...rest) {
+    if (!this.cache[key] || this.cache[key].length === 0) {
+      return false;
+    }
+    const result: any[] = [];
+    for (let fn of this.cache[key]) {
+      result.push(fn.call(this, ...rest));
+    }
+    //触发后马上清空以免有缓存
+    this.remove(key);
+    return result;
+  }
+  //删除订阅事件
+  remove(key, fn?) {
+    if (!key) {
+      return false;
+    }
+    //如果没传递指定的函数，则删除全部订阅
+    if (!fn) {
+      this.cache[key] = [];
+    }
+    const len = this.cache[key].length;
+    // 遍历cache，删除指定的函数
+    for (let i = 0; i < len; i++) {
+      let _fn = this.cache[key][i];
+      if (fn === _fn) {
+        this.cache[key].splice(i, 1);
+        break;
+      }
+    }
+  }
+}
+//一个代理类，使用单例模式，可以返回同一个EventHub的实例
+const EventHub = (function () {
+  var cache;
+  return function () {
+    if (cache) {
+      return cache;
+    }
+    return (cache = new _EventHub());
+  };
+})();
+
+export default EventHub;
+```
+
+```tsx
+// App.tsx
+import './styles.css';
+import Page1 from './page1';
+import Page2 from './page2';
+import { Routes, Route } from 'react-router-dom';
+export default function App() {
+  return (
+    <div className='App'>
+      <Routes>
+        <Route path='/page1' element={<Page1 />} />
+        <Route path='/page2' element={<Page2 />} />
+      </Routes>
+    </div>
+  );
+}
+```
+
+```tsx
+// Page1.tsx
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import Eventhub from './eventHub';
+export default function Page1() {
+  const id = 2;
+  useEffect(() => {
+    Eventhub().listen('k', function () {
+      return id;
+    });
+  }, []);
+  return (
+    <div className='page1'>
+      <h1>页面1</h1>
+      <Link to='/page2'>to页面2</Link>
+    </div>
+  );
+}
+```
+
+```tsx
+// Page2.tsx
+import './styles.css';
+import Eventhub from './eventHub';
+import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+
+export default function Page2() {
+  useEffect(() => {
+    const id = Eventhub().trigger('k');
+    console.log('id=' + id);
+  }, []);
+  return (
+    <div className='page2'>
+      <h2>页面2</h2>
+      <Link to='/page1'>to页面1</Link>
+    </div>
+  );
+}
+```
+
+以下是不同的地方：
+
+- 当触发后，需要及时清空 cache 以免有缓存
+- 这里使用单例模式，让每次使用 Eventhub 时都返回同一个对象,做到全局使用同一个发布者对象的效果
+
+![React-eventhub](../assets/React-eventhub.gif)
+
+> 注意，上面的代码没有做持久化，所以刷新浏览器后数据会消失。比较简单的方式是把缓存数据存在sessionStorage中以实现持久化。
