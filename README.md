@@ -22,7 +22,7 @@
 
 7.[动画效果](https://github.com/18888628835/Blog/blob/main/CSS高级技巧案例/动画效果.md)
 
-## JavaScript you should know
+## 开发技巧
 
 1.[代码优化小技巧](https://github.com/18888628835/Blogs/issues/9)
 
@@ -75,6 +75,8 @@
 [Generator，高级 Iteration](https://github.com/18888628835/Blog/blob/main/JavaScript/Generator.md)
 
 [二进制数据和文件](https://github.com/18888628835/Blog/blob/main/JavaScript/二进制数据和文件.md)
+
+[WebSocket](https://github.com/18888628835/Blog/blob/main/JavaScript/WebSocket.md#websocket简介)
 
 ## JavaScript 深入
 
