@@ -172,6 +172,8 @@
 
 11.[快速排序](https://github.com/18888628835/Blog/issues/54)
 
+12.[扁平化数组与树形结构的互转](https://github.com/18888628835/Blog/issues/65)
+
 ## 深入浅出 HTTP 协议
 
 1.[HTTP 的由来](https://github.com/18888628835/Blog/issues/22)
