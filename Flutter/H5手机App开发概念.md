@@ -4,7 +4,7 @@
 
 手机App则是手机中的内容载体，我们在手机上浏览各种内容离不开手机App软件的开发。
 
-手机App开发可以分为三类：
+手机App可以分为三类：
 
 * 原生应用（native application，简称native App）
 * Web应用（web application，简称 Web App）
