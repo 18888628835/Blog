@@ -1428,7 +1428,7 @@ getComputedStyle(element, [pseudo]);
 
 ## 8.2 offsetParent，offsetLeft/offsetTop
 
-这些属性时最外层的属性：
+这些是元素最外层的属性：
 
 offsetParent 是最接近的祖先，在浏览器渲染时，它们被用于计算坐标。
 
@@ -1442,7 +1442,7 @@ offsetLeft/offsetTop 则提供相对于 offsetParent 左上角的 x/y 坐标。
 
 比如下面例子中，div 有 main 作为 offsetParent，并且`offsetLeft/offsetTop`是它距离左上角的位移。
 
-```
+```html
     <main style="position: relative;" id="main">
       <article>
         <div id="example" style="position: absolute; left: 180px; top: 150px;">
