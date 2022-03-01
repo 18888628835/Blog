@@ -36,8 +36,6 @@
 
 6.[封装一个请求工具函数](https://github.com/18888628835/Blog/issues/59)
 
-7.[前端性能优化](https://github.com/18888628835/Blog/blob/main/开发技巧/前端性能优化.md)
-
 ## JavaScript 设计模式
 
 1.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
@@ -149,6 +147,10 @@
 ## 前端可视化
 
 1.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/前端可视化/如何使用Echarts和SVG文件写大屏地图.md)
+
+## 前端性能优化
+
+1.[前端性能优化](https://github.com/18888628835/Blog/blob/main/开发技巧/前端性能优化.md)
 
 ## 数据结构和算法系列
 
