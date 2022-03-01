@@ -36,6 +36,8 @@
 
 6.[封装一个请求工具函数](https://github.com/18888628835/Blog/issues/59)
 
+7.[前端性能优化](https://github.com/18888628835/Blog/blob/main/开发技巧/前端性能优化.md)
+
 ## JavaScript 设计模式
 
 1.[JavaScript 设计模式与开发实践读书笔记(基础篇)](<https://github.com/18888628835/Blog/blob/main/JavaScript设计模式/JavaScript设计模式与开发实践读书笔记(基础篇).md>)
