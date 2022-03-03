@@ -88,7 +88,7 @@
 </svg>
 ```
 
-![Sep-18-2021 16-22-55](../assets/Sep-18-2021 16-22-55.gif)
+<img src="../assets/Sep-18-2021 16-22-55.gif" alt="Sep-18-2021 16-22-55" style="zoom:50%;" />
 
 左边的矩形由于加了 name，就自动拥有 hover 时高亮的效果，而右边的则没有。
 
@@ -113,7 +113,7 @@ option = {
 
 ## 实战开始吧！
 
-下面我将使用[slice(没加 text 标签和 name).svg](https://github.com/18888628835/Blog/blob/main/前端可视化/大屏项目的 svg/slice(没加 text 标签和 name).svg)作为底图，这个文件是 UI 小姐姐通过 figma 导出来给到我的。
+下面我将使用 [slice(没加 text 标签和 name).svg](https://github.com/18888628835/Blog/blob/main/前端可视化/大屏项目的 svg/slice(没加 text 标签和 name).svg) 作为底图，这个文件是 UI 小姐姐通过 figma 导出来给到我的。
 
 我们的目标是使用此文件配合 Echarts 在浏览器上描绘地图，并做一些简单的交互效果来熟悉 Echarts 的配置项。
 
