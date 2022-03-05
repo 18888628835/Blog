@@ -204,7 +204,7 @@
 
 14.[Cookie 机制](https://github.com/18888628835/Blog/issues/35)
 
-15.[HTTP 的缓存控制](https://github.com/18888628835/Blog/issues/36)
+15.[HTTP 缓存控制](https://github.com/18888628835/Blog/blob/main/HTTP/HTTP缓存控制.md)
 
 16.[HTTP 代理](https://github.com/18888628835/Blog/issues/37)
 
