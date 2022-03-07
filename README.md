@@ -116,17 +116,17 @@
 
 ## 浏览器
 
-[浏览器加载文档和资源](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器加载文档和资源.md)
+1.[浏览器加载文档和资源](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器加载文档和资源.md)
 
-[Document](https://github.com/18888628835/Blog/blob/main/浏览器/Document.md)
+2.[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器渲染过程.md)
 
-[浏览器事件简介](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器事件简介.md)
+3.[Document](https://github.com/18888628835/Blog/blob/main/浏览器/Document.md)
 
-[浏览器渲染过程](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器渲染过程.md)
+4.[浏览器事件简介](https://github.com/18888628835/Blog/blob/main/浏览器/浏览器事件简介.md)
 
-[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器/事件循环.md)
+5.[UI 事件](https://github.com/18888628835/Blog/blob/main/浏览器/UI事件.md)
 
-[UI 事件](https://github.com/18888628835/Blog/blob/main/浏览器/UI事件.md)
+6.[事件循环](https://github.com/18888628835/Blog/blob/main/浏览器/事件循环.md)
 
 ## Node.js
 
