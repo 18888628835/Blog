@@ -64,7 +64,7 @@ Int num=123;
 
 使用 var 可以自动推断类型，也可以像 Java 一样手动写上类型`String`。
 
-> 强类型语言，建议手动写类型
+> 首选自动推断
 
 常量可以用 final 和 const 修饰符来声明
 
@@ -133,7 +133,7 @@ assert(lineCount == null);
 
 数组类型：List
 
-Maps：Map
+Maps：Map类型
 
 Sets：Set
 
@@ -143,11 +143,191 @@ Null：null
 
 Runes：常用于在 `Characters` API 中进行字符替换
 
+
+
 ### 字符串
 
 其中字符串如果用三个（单/双）引号，就能够跨行。这是用 1 个或者 2 个（单/双）引号所不能实现的功能。
 
 字符串拼接用`$`或者`${}`。
+
+
+
+### 数字类型
+
+int 为整型，double 为浮点数类型。
+
+double 类型可以兼容整型，即 double 既可以是整型也可以是浮点数型
+
+
+
+### 布尔类型
+
+bool 表示布尔类型
+
+Dart 的条件判断跟 JavaScript 不太一样，JavaScript 可以用 falsy做条件判断，Dart 的只能用 bool 类型
+
+```javascript
+0、‘’、false、undefined、null、-0、NaN // javascript 的 falsy 值
+
+// 比如：
+let a;
+if (!a) {
+  console.log(`a为${a}`); // a为undefined
+}
+```
+
+但是 Dart 不能这样
+
+```dart
+  String? a = null;
+  // Conditions must have a static type of 'bool'.Try changing the condition
+	// 条件必须是bool 类型
+  if (a) {
+    print(a);
+  } else {
+    print(a);
+  }
+```
+
+下面的代码就是正确的
+
+```dart
+  bool getResult() {
+    return true;
+  }
+
+  bool a = getResult();
+  if (a) {
+    print(a);
+  } else {
+    print(a);
+  }
+```
+
+
+
+### Lists 类型
+
+跟 JavaScript 中的数组差不多，Dart 的数组也是封装后的 Object特殊类，并不是传统意义上的数组。
+
+```dart
+  var arr = <String>['0', '1', '2', '3']; // 定义数组类型
+  var arr1 = [0, 1, 2, 3, 4]; //自动推断
+  var arr2 = const [1, 2, 3, 4]; // 创建一个编译时的常量，不能修改、增加
+	var arr3 = List.filled(2,'');// 创建一个固定长度的集合
+	var arr4 = List.filled<int>(2,0);// 创建一个固定长度的有类型的集合
+  arr2.add(5); // Cannot add to an unmodifiable list
+```
+
+
+
+### Maps 类型
+
+Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需要强制在 key 上加引号。
+
+```dart
+  const a = [1, 2, 3];
+  var map = {a: '123'}; // map 当 js 的map 用，key 不用写成[key]
+  var map1 = {'a': '123'}; // map 当js 的 object用，key需要加引号
+  var map2 = Map(); // 创建自由类型的 map,可以加 new
+  var map3 = Map<int, String>(); // 创建 map 时定义类型
+  map3[1] = '1'; // 给 map 赋值
+  print(map);
+  print(map1);
+  print(map.containsKey(a)); // js的 map.has 方法判断是否有这个 key
+```
+
+
+
+### is 关键字判断类型
+
+```dart
+  Object a = 1;
+  dynamic b = 'string';
+  if (a is int) {
+    print('a 是 数字类型');
+  }
+  if (b is String) {
+    print('b 是字符串类型');
+  }
+```
+
+
+
+## 6. 运算符
+
+```dart
+  //赋值运算符
+  var a = 1;
+  int? b;
+  b ??= 2; // 如果 b 为空的话就把 2 赋值给 b
+  a += 0; // a=a+0
+  // 算数运算符
+  print(a + b);
+  print(a - b);
+  print(a * b);
+  print(a / b);
+  print(a % b); // 取余
+  print(a ~/ b); // 取整
+  // 关系运算符
+  print(a == b);
+  print(a >= b);
+  print(a <= b);
+  print(a != b);
+  // 逻辑运算符
+  var c = false;
+  var d = true;
+  /* 取反 */
+  if (!c) {
+    print(c);
+  }
+  /* && 并且 */
+  if (c && d) {}
+  /* || 或 */
+  if (c || d) {}
+
+  /* 条件表达式 */
+  var str = '123';
+  switch (str) {
+    case '111':
+      print('111');
+      break;
+    default:
+      print('123');
+  }
+  /* 三目运算符 */
+  var flag;
+  flag = true;
+  var f = flag ? 'true' : 'false';
+
+  /* ??运算符 */
+  var i;
+  var j = i ?? 10; // i 为空则将 10 赋值给 j，同 js 空值合并运算符
+  print(j);
+```
+
+## 7. 类型转换
+
+**数字转字符串：`toString()`**
+
+```dart
+  int a = 123;
+  double b = 123.23;
+  String _a = a.toString();
+  String _b = b.toString();
+```
+
+**字符串转数字：`parse`**
+
+```dart
+  String a = '123';
+  String b = '123.23';
+  int _a = int.parse(a);
+  double _b = double.parse(b);
+```
+
+建议都用 `double.parse` 转换成数字
 
 
 
