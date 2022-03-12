@@ -184,7 +184,7 @@ Dart 中每个变量引用都指向对象，通常也可以使用构造器来初
 5. dynamic：如果需要禁止静态检查，可以使用这个类型。平常可以用 Object 或者 Object?代替。
 6. void：多用于表示没有返回值
 
-### Numbers
+## Numbers
 
 int 为整型，double 为浮点数类型。
 
@@ -231,9 +231,7 @@ double 类型可以兼容整型，即 double 既可以是整型也可以是浮�
 
 建议都用 `double.parse` 转换成数字
 
-
-
-### Strings
+## Strings
 
 字符串可以用单/双引号，在双引号中使用单引号可以不用转义，反过来也是一样。
 
@@ -290,7 +288,9 @@ const validConstString = '$aConstNum $aConstBool $aConstString';
 var invalidConstString = '$aNum $aBool $aString $aConstList';
 ```
 
-### booleans
+
+
+## booleans
 
 bool 表示布尔类型
 
@@ -354,21 +354,47 @@ var iMeantToDoThis = 0 / 0;
 assert(iMeantToDoThis.isNaN);
 ```
 
-
-
-### Lists 类型
+## Lists
 
 跟 JavaScript 中的数组差不多，Dart 的数组也是封装后的 Object特殊类，并不是传统意义上的数组。
+
+`list`的声明方式
 
 ```dart
   var arr = <String>['0', '1', '2', '3']; // 定义数组类型
   var arr1 = [0, 1, 2, 3, 4]; //自动推断
-  var arr2 = const [1, 2, 3, 4]; // 创建一个编译时的常量，不能修改、增加
-	var arr3 = List.filled(2,'');// 创建一个固定长度的集合
-	var arr4 = List.filled<int>(2,0);// 创建一个固定长度的有类型的集合
 	List arr5 = <String>['0', '1', '2', '3'];// 使用类型的方式定义list
-  arr2.add(5); // Cannot add to an unmodifiable list
 ```
+
+* 使用 const 关键字创建编译时变量，不能修改、增加
+
+  ```dart
+    var arr2 = const [1, 2, 3, 4]; // 创建一个编译时的常量，不能修改、增加
+    arr2.add(5); // Cannot add to an unmodifiable list
+  ```
+
+* 创建一个固定长度的集合
+
+  ```dart
+  	var arr3 = List.filled(2,'');// 创建一个固定长度的集合
+  	var arr4 = List.filled<int>(2,0);// 创建一个固定长度的有类型的集合
+  ```
+
+* 扩展操作符对数组的操作
+
+  ```dart
+    var list = [1, 2, 3];
+    var list2 = [0, ...list]; // 将 list 插入 list2 中
+    assert(list2.length == 4);
+  ```
+
+* 空感知操作符对数组的操作,如果是 null 则可以避免异常
+
+  ```dart
+  var list;
+  var list2 = [0, ...?list];
+  assert(list2.length == 1);
+  ```
 
 * 获取数组长度
 
@@ -393,16 +419,89 @@ assert(iMeantToDoThis.isNaN);
     print(newArr);
   ```
 
+* 在 List 中可以使用 if 或 for
+
+  ```dart
+    var nav = ['Home', 'Furniture', 'Plants', if (true) 'Outlet'];
+    var listOfInts = [1, 2, 3];
+    var listOfStrings = ['#0', for (var i in listOfInts) '#$i'];
+    print(listOfStrings); // [#0, #1, #2, #3]
+  ```
+
 其他 API 就不废话了，参考官方文档即可。
 
-### Maps 类型
 
-Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需要强制在 key 上加引号。
+
+## Sets
+
+dart 的 set 声明
+
+```dart
+  var halogens = {'fluorine', 'chlorine', 'bromine', 'iodine', 'astatine'};
+  Set s = <String>{'fluorine', 'chlorine'};
+```
+
+在`{}`前加上类型参数可以创建一个空的 Set，或者将`{}`赋值给一个 Set 类型的变量
+
+```dart
+  var s = <String>{};
+  Set _s = <String>{};
+  Set<String> names = {};
+  var _names = {}; // 这是一个 map 不是 set
+```
+
+* 使用`add`方法或者`addAll`方法可以添加项目
+
+```dart
+  var sets = <Object>{};
+  sets.add('1');
+  sets.addAll([1, 2, 3]);
+  print(sets);
+```
+
+* 使用`.length`可以获取 Set 中元素的数量
+
+  ```dart
+    final sets = {'fluorine', 'chlorine'};
+    print(sets.length);
+  ```
+
+* Set 变量前添加`const`关键字创建 Set 编译时变量
+
+  ```dart
+  final constantSet = const {
+    'fluorine',
+    'chlorine',
+    'bromine',
+    'iodine',
+    'astatine',
+  };
+  // constantSet.add('helium'); // This line will cause an error.
+  ```
+
+* Set 可以使用扩展操作符和空感知操作符
+
+  ```dart
+    final sets = {'fluorine', 'chlorine'};
+    var maybeNull;
+    final a = <String>{'hello', ...sets};
+    final b = <String>{'hello', ...?maybeNull};
+    print(a);
+    print(b);
+  ```
+
+  
+
+## Maps 类型
+
+Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需要强制在 key 上加引号。Maps 类型在 Dart 中当 object 用。
+
+声明 map，使用 var 能让 Map 自动推断，也可以手动写Map 的类型
 
 ```dart
   const a = [1, 2, 3];
   var map = {a: '123'}; // map 当 js 的map 用，key 不用写成[key]
-  var map1 = {'a': '123'}; // map 当js 的 object用，key需要加引号
+  var map1 = <String,String>{'a': '123'}; // map 当js 的 object用，key需要加引号
   var map2 = Map(); // 创建自由类型的 map,可以加 new
   var map3 = Map<int, String>(); // 创建 map 时定义类型
   map3[1] = '1'; // 给 map 赋值
@@ -411,46 +510,238 @@ Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需�
   print(map.containsKey(a)); // js的 map.has 方法判断是否有这个 key
 ```
 
+JavaScript 中可以用`new Map()`让普通函数变成构造函数，dart 中则可以省略掉 new，上面的代码使用`Map()`构造函数就可以创建一个 map 对象。
 
+* 添加单个属性和多个属性
 
-### is 关键字判断类型
+  ```dart
+    var map = {};
+    map['age'] = 20;
+    map.addAll({"name": 'qiuyanxi', 1: 2});
+    print(map);
+  ```
+
+* 如果key 不在 map 中会返回 null
+
+  ```dart
+    var map = {};
+    assert(map['name'] == null);
+  ```
+
+* 获取`.length` 可以获取键值对的数量
+
+  ```dart
+    var map = {};
+    assert(map.length == 0);
+  ```
+
+* 在一个 Map 字面量前添加 `const` 关键字可以创建一个 Map 编译时常量：
+
+  ```dart
+  final constantMap = const {
+    2: 'helium',
+    10: 'neon',
+    18: 'argon',
+  };
+  
+  // constantMap[2] = 'Helium'; // This line will cause an error.
+  ```
+
+* Map 使用扩展运算符和空感知操作符
+
+  ```dart
+    var map = {'name': "qiuyanxi"};
+    Map? maybeNull;
+    var newMap = {...map};
+    var newMap2 = {...?maybeNull};
+  ```
+
+# 函数
+
+定义函数，建议定义返回类型
 
 ```dart
-  Object a = 1;
-  dynamic b = 'string';
-  if (a is int) {
-    print('a 是 数字类型');
-  }
-  if (b is String) {
-    print('b 是字符串类型');
+  String getName() {
+    return 'qiuyanxi';
   }
 ```
 
-# 运算符
+只有一个表达式的函数能够使用箭头函数简化
 
 ```dart
-  //赋值运算符
+  String getName() => 'qiuyanxi';
+```
+
+* 必要参数
+
+  ```dart
+    String getName(String name, int age) => '$name$age';
+    getName('qiuyanxi', 10);
+  ```
+
+* 使用`[]`表示可选的位置参数
+
+  ```dart
+    void printThings([String? str, String str2 = 'default value']) {
+      assert(str == null);
+      assert(str2 == 'default value');
+    }
+    printThings();
+  ```
+
+* 命名参数
+
+  命名参数默认都为可选参数。如果是必要参数，则需要用`required`
+
+  **定义函数时，使用`{参数 1，参数 2}`来指定命名参数**
+
+  ```dart
+    String getName2({required String name, int? age = 10}) => '$name$age';
+  ```
+
+  **调用函数时，使用 `参数名:参数值`指定命名参数**
+
+  ```dart
+    getName2(name: 'qiuyanxi');
+  ```
+
+* 默认参数
+
+  如果一个参数是可选的但是不能是 null，那么需要提供一个默认的值。没有默认值的情况下参数是 null
+
+  ```dart
+  /// Sets the [bold] and [hidden] flags ...
+  void enableFlags({bool bold = false, bool hidden = false}) {...}
+  
+  // bold will be true; hidden will be false.
+  enableFlags(bold: true);
+  ```
+
+* 默认值必须为编译时常量
+
+  默认的参数值必须为编译时常量，如以下的参数为默认的 List 和 Map，为了变成编译时常量，需要加上 const 关键字
+
+  ```dart
+    void getList([List<int> list = const [1, 2, 3]]) {}
+    void getMap([Map<String, String> map = const {"name": "qiuyanxi"}]) {}
+  ```
+
+* main函数
+
+  main 函数是每个 Dart 程序必须有的顶级函数，是程序的入口，main 函数返回值是void ，并且有一个`List<String>`类型的可选参数。
+
+  可以通过命令行给 main 函数传递参数
+
+  **hello-world.dart**
+
+  ```dart
+  void main(List<String> args) {
+    // 在命令行运行以下命令: dart hello-world.dart 1 test
+    print(args); //['1', 'test']
+    assert(args.length == 2);
+    assert(int.parse(args[0]) == 1);
+    assert(args[1] == 'test');
+  }
+  ```
+
+* 匿名函数
+
+  匿名函数被当做参数使用
+
+  ```dart
+  const list = ['apples', 'bananas', 'oranges'];
+  list.forEach((item) {
+    print('${list.indexOf(item)}: $item');
+  });
+  ```
+
+  使用匿名箭头函数当做参数使用
+
+  ```dart
+  const list = ['apples', 'bananas', 'oranges'];
+  list.forEach((item) => print('${list.indexOf(item)}: $item'));
+  ```
+
+* 词法作用域
+
+  Dart 的作用域是词法作用域，跟 JavaScript 一样，在写代码的时候就确定了。
+
+* 闭包
+
+  闭包也跟 JavaScript 一样，就不多介绍了。
+
+* 返回值
+
+  所有函数都有返回值的，即使返回值是 void。如果没有明确写返回语句，那么默认执行`return null`
+
+  ```dart
+  // 这是明确表示返回 void 的函数
+    void returnVoid() {
+      print('hello');
+    }
+  
+    var a = returnVoid();
+    // void 类型的变量不能被使用
+    // print(a);
+  
+  // 这是没有返回语句的函数
+    returnNull() {}
+    var b = returnNull();
+    assert(returnNull() == null); // true
+  ```
+
+# 运算符
+
+## 赋值运算符
+
+```dart
   var a = 1;
   int? b;
   b ??= 2; // 如果 b 为空的话就把 2 赋值给 b
   a += 0; // a=a+0
-	a ++ // 先运算再自增
-  a -- //先运算再自减
-  -- a // 先自减再运算
-  ++ a // 先自增再运算
-  // 算数运算符
+```
+
+## 算数运算符
+
+```dart
   print(a + b);
   print(a - b);
   print(a * b);
   print(a / b);
   print(a % b); // 取余
   print(a ~/ b); // 取整
-  // 关系运算符
+	a ++ // 先运算再自增
+  a -- //先运算再自减
+  -- a // 先自减再运算
+  ++ a // 先自增再运算
+```
+
+## 关系运算符
+
+```dart
   print(a == b);
   print(a >= b);
   print(a <= b);
   print(a != b);
-  // 逻辑运算符
+```
+
+## 类型判断运算符
+
+| Operator | Meaning                                                      |
+| -------- | ------------------------------------------------------------ |
+| `as`     | 类型转换（也用作指定 [类前缀](https://dart.cn/guides/language/language-tour#specifying-a-library-prefix))） |
+| `is`     | 如果对象是指定类型则返回 true                                |
+| `is!`    | 如果对象是指定类型则返回 false                               |
+
+## 逻辑运算符
+
+| 运算符      | 描述                                                      |
+| ----------- | --------------------------------------------------------- |
+| `!*表达式*` | 对表达式结果取反（即将 true 变为 false，false 变为 true） |
+| `||`        | 逻辑或                                                    |
+| `&&`        | 逻辑与                                                    |
+
+```dart
   var c = false;
   var d = true;
   /* 取反 */
@@ -461,30 +752,71 @@ Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需�
   if (c && d) {}
   /* || 或 */
   if (c || d) {}
+```
 
-  /* 条件表达式 */
-  var str = '123';
-  switch (str) {
-    case '111':
-      print('111');
-      break;
-    default:
-      print('123');
-  }
-  /* 三目运算符 */
-  var flag;
-  flag = true;
-  var f = flag ? 'true' : 'false';
+## 三目运算符和空值合并运算符
 
+***表达式 1* ?? *表达式 2***
+
+如果表达式1 为 null 则返回表达式 2
+
+```dart
   /* ??运算符 */
   var i;
   var j = i ?? 10; // i 为空则将 10 赋值给 j，同 js 空值合并运算符
   print(j);
 ```
 
-# 类型转换
+***条件* ? *表达式 1* : *表达式 2***
 
+```dart
+  /* 三目运算符 */
+  var flag;
+  flag = true;
+  var f = flag ? 'true' : 'false';
+```
 
+## 级联运算符
+
+级联运算符 (`..`, `?..`) 可以让你在同一个对象上连续调用多个对象的变量或方法。
+
+下面代码
+
+```dart
+var paint = Paint()
+  ..color = Colors.black
+  ..strokeCap = StrokeCap.round
+  ..strokeWidth = 5.0;
+
+/* 相当于  */
+var paint = Paint();
+paint.color = Colors.black;
+paint.strokeCap = StrokeCap.round;
+paint.strokeWidth = 5.0;
+
+querySelector('#confirm') // Get an object.
+  ?..text = 'Confirm' // Use its members.
+  ..classes.add('important')
+  ..onClick.listen((e) => window.alert('Confirmed!'));
+
+/* 相当于  */
+var button = querySelector('#confirm');
+button?.text = 'Confirm';
+button?.classes.add('important');
+button?.onClick.listen((e) => window.alert('Confirmed!'));
+```
+
+## 其他运算符
+
+| 运算符 | 名字          | 描述                                                         |
+| :----- | :------------ | ------------------------------------------------------------ |
+| `()`   | 使用方法      | 代表调用一个方法                                             |
+| `[]`   | 访问 List     | 访问 List 中特定位置的元素                                   |
+| `?[]`  | 判空访问 List | 左侧调用者不为空时，访问 List 中特定位置的元素               |
+| `.`    | 访问成员      | 成员访问符                                                   |
+| `?.`   | 条件访问成员  | 与上述成员访问符类似，但是左边的操作对象不能为 null，例如 foo?.bar，如果 foo 为 null 则返回 null ，否则返回 bar |
+
+# 判空
 
 **其他类型转布尔类型判断**
 
@@ -525,6 +857,8 @@ Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需�
     }
   ```
 
+  JavaScript 的 var 在 for 循环中只有一个作用域，dart 的 var 不存在这个问题，所以上面的代码能够正常打出 `i`的值。
+
 * while 循环
 
   ```dart
@@ -562,6 +896,8 @@ Dart 中的 Maps 类型类似 JavaScript 中的 Map 数据结构，区别是需�
 * break，continue 语句
 
   break 跳出循环，continue 跳过本轮循环
+  
+* switch和 case
 
 # Late 修饰符
 
