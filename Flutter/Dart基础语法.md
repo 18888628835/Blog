@@ -754,7 +754,7 @@ JavaScript 中可以用`new Map()`让普通函数变成构造函数，dart 中�
   if (c || d) {}
 ```
 
-## 三目运算符和空值合并运算符
+## 表达式
 
 ***表达式 1* ?? *表达式 2***
 
@@ -847,7 +847,7 @@ button?.onClick.listen((e) => window.alert('Confirmed!'));
     }
   ```
 
-#  循环语句
+#  流程控制语句
 
 * for 循环
 
@@ -858,6 +858,28 @@ button?.onClick.listen((e) => window.alert('Confirmed!'));
   ```
 
   JavaScript 的 var 在 for 循环中只有一个作用域，dart 的 var 不存在这个问题，所以上面的代码能够正常打出 `i`的值。
+
+* for...in 循环
+
+  使用 for..in 遍历可迭代对象，比如 Lists 类型和 Set 类型
+
+  ```dart
+    var list = [1, 2, 3];
+    var sets = <int>{1, 2, 3};
+    for (var value in list) {
+      print(value);
+    }
+    for (var value in sets) {
+      print(value);
+    }
+  ```
+
+  可迭代对象也可以使用`forEach`方法循环
+
+  ```dart
+  var collection = [1, 2, 3];
+  collection.forEach(print); // 1 2 3
+  ```
 
 * while 循环
 
@@ -899,6 +921,794 @@ button?.onClick.listen((e) => window.alert('Confirmed!'));
   
 * switch和 case
 
+* 断言——assert
+
+  ```dart
+    assert(1 < 2);
+    assert(1 > 2, '1>2 is wrong');
+  ```
+
+# 异常捕获
+
+Dart 提供 Exception 和 Error 两种类型的异常以及一些子类。我们可以自己定义异常类型，也可以将任何非 null 对象作为异常抛出。
+
+* 抛出异常
+
+```dart
+  throw new Exception('这是一个异常报错');
+  throw '这是一个异常报错';
+```
+
+* 捕获异常
+
+  ```dart
+    try {
+      // throw Error();
+      throw Exception('this is exception error');
+    } on Exception catch (e) {
+      print('this is Unknown exception $e');
+    } catch (e,s) {
+      print('No specified type, handles all error $e');
+      print('Stack trace:\n $s');
+    }
+  ```
+
+  上面的代码使用 on 和 catch 来捕获异常，on 来指定异常的类型，catch 则用来捕获对象。当抛出的错误并不是 on 指定的异常类型时，则走最后面的 catch 兜底。
+
+  catch 方法有两个参数，第一个参数是抛出的异常对象，第二个参数是栈信息。
+
+* rethrow 再次抛出异常 
+
+  当我们在捕获到一个异常时，还可以再次将这个异常抛出。
+
+  下面的例子将内层函数捕获的异常抛出到外部作用域让 main 函数里的代码捕获到。
+
+  ```dart
+  void misbehave() {
+    try {
+      dynamic foo = true;
+      print(foo++); // Runtime error
+    } catch (e) {
+      print('misbehave() partially handled ${e.runtimeType}.');
+      rethrow; // Allow callers to see the exception.
+    }
+  }
+  
+  void main() {
+    try {
+      misbehave();
+    } catch (e) {
+      print('main() finished handling ${e.runtimeType}.');
+    }
+  }
+  ```
+
+  上面的代码会打印出如下信息：
+
+  ```dart
+  misbehave() partially handled NoSuchMethodError.
+  main() finished handling NoSuchMethodError.
+  ```
+
+* Finally 
+
+  无论是否抛出异常，都会执行 finally 语句。
+
+  ```dart
+    try {
+      throw Error();
+    } catch (e) {
+      print('i will catch this error');
+    } finally {
+      print('finally print this message');
+    }
+  ```
+
+
+
+# 类
+
+Dart 是支持基于 mixin 继承机制的语言（JavaScript 是基于原型的），所有对象都是一个类的实例，而除了 null 以外所有的类都继承自 Object 类。
+
+## 定义类的属性和方法
+
+```dart
+// 类的定义不能写在 main 函数里
+class Person {
+  String? name; // Declare instance variable name, initially null.
+  int age = 0; // Declare y, initially 0.
+  void getInfo() {
+    print('${this.name} ------ ${this.age}');
+  }
+  void setName(String name) {
+    this.name=name;
+  }
+}
+void main(List<String> args) {
+  var p = new Person();// 可以省略 new
+  p.getInfo();
+  p.setName('my name');
+  p.getInfo();
+}
+```
+
+实例属性如果没有初始化的话，默认是 null。
+
+所有实例变量都会隐式声明 Getter 方法。可以修改的实例变量和 late final声明但是没有初始化的变量还会隐式声明一个 Setter 方法，我们可以通过 getter 和 setter 读取或设置实例对象。
+
+```dart
+class Person {
+  String? name;
+  int age = 0;
+  late final int height;
+}
+
+void main(List<String> args) {
+  var p = new Person();
+  p.name = 'my name';// setter
+  p.height = 180;// setter
+  print(p.name);// getter
+  print(p.height);// getter
+  p.height = 190; // Field 'height' has already been initialized.
+}
+```
+
+实例变量可以是 final 的，在这种情况下只能被set 一次。
+
+
+
+## 构造函数
+
+用一个**与类名一样的函数**就可以创建构造函数，还有一种命名式构造函数。
+
+```dart
+class Point {
+  double x = 0;
+  double y = 0;
+  // Point(double x, double y) {
+  //   this.x = x;
+  //   this.y = y;
+  // }
+  // 上面构造函数的语法糖可以写成这样
+  Point(this.x, this.y);
+  // 命名式构造函数——使用初始化列表
+  Point.origin(double xOrigin, double yOrigin):x=xOrigin,y=yOrigin
+  // 命名式构造函数还可以这么写
+  // Point.origin(double this.x, double this.y);
+}
+// 在 main 中使用
+void main(List<String> args) {
+  // 使用命名构造函数
+  var p1 = new Point.origin(10, 20);
+  var p2 = Point(10, 20);
+}
+```
+
+> 使用 `this` 关键字引用当前实例。
+
+如果没有声明构造函数，Dart 会自动生成一个没有参数的构造函数并且这个构造函数会调用其父类的无参数构造方法。
+
+构造函数不会被继承，也就是说子类没办法继承父类的构造函数。命名式构造函数也不能被继承。
+
+命名构造函数可以有多个，当实例化时根据需要直接调用就行了。
+
+**初始化列表**
+
+在构造函数运行之前，有一个初始化列表的概念。可以初始化实例变量
+
+```dart
+class Rect {
+  int height;
+  int width;
+  Rect()
+      : width = 10,
+        height = 10 {
+    print("${this.width}---${this.height}");
+  }
+  Rect.create(int width, int height)
+      : width = width,
+        height = height {
+    print("${this.width}---${this.height}");
+  }
+}
+
+void main(List<String> args) {
+  var p1 = Rect(); // 10---10
+
+  var p2 = Rect.create(100, 200); // 100---200
+}
+```
+
+当使用 `Rect` 构造时，会给 width 和 height 初始化为 10。
+
+当使用`Rect.create`构造时，用传入的值来初始化。
+
+
+
+## 实例的私有属性/方法
+
+将类抽离成一个文件，并在属性或者方法前加`_`就能定义实例对象的私有变量。
+
+**lib/Person.dart**
+
+```dart
+class Person {
+  String? name; // Declare instance variable name, initially null.
+  int _age = 0; // Declare y, initially 0.
+  void getInfo() {
+    print('${this.name} ------ ${this._age}');
+  }
+}
+```
+
+**main.dart**
+
+```dart
+import 'lib/Person.dart';
+
+void main(List<String> args) {
+  var p = Person();
+  // print(p._age); 无效
+  p.getInfo();
+}
+```
+
+## Getter 和 Setter
+
+构造函数自动会设置实例变量的 getter 和 setter ，我们也可以手动指定。
+
+```dart
+class Rect {
+  int height;
+  int width;
+  Rect(this.width, this.height);
+  // 手动指定 getter 的写法
+  get area {
+    return this.height * this.width;
+  }
+  // 手动指定 setter 的写法
+  set h(int value) {
+    this.height = value;
+  }
+
+  set w(int value) {
+    this.width = value;
+  }
+}
+
+void main(List<String> args) {
+  var p = Rect(10, 20);
+  print(p.area);// getter
+  p.h = 100;// setter
+  p.w = 100;
+  print(p.area);
+}
+```
+
+## 静态成员
+
+跟 TS 一样，使用 static 来声明静态成员。
+
+```dart
+class Rect {
+  static int height = 10;
+  static int width = 10;
+  static getArea() {
+    print(height * width);
+  }
+}
+
+void main(List<String> args) {
+  Rect.getArea();
+}
+```
+
+有两点需要注意:
+
+* 静态成员不能访问实例变量
+
+  ```dart
+  class Rect {
+    int height = 10;
+    static int width = 10;
+    static getArea() {
+      print(this.height * width); // 报错了 不能访问 实例属性 height
+    }
+  }
+  ```
+
+* 实例方法可以访问静态成员
+
+  ```dart
+  class Rect {
+    int height;
+    static int width = 10;
+    Rect(this.height);
+    getArea() {
+      print(this.height * width);// 如果访问实例属性，推荐加上 this。
+    }
+  }
+  
+  void main(List<String> args) {
+    new Rect(10).getArea();
+  }
+  ```
+
+## 继承
+
+构造函数不能被继承，使用 `extends` 和 `super` 关键字来继承父类的属性和方法。
+
+
+
+**纯继承父类**
+
+```dart
+class Animal {
+  String name;
+  void sound(voice) {
+    print(voice);
+  }
+
+  Animal(this.name);
+}
+
+class Dog extends Animal {
+  Dog([String name = 'dog']) : super(name);
+}
+
+void main(List<String> args) {
+  var dog = new Dog();
+  print(dog.name); // dog
+  dog.sound('汪汪'); // 汪汪
+}
+```
+
+其中`Dog([String name = 'dog']) : super(name);`需要解释一下：
+
+* `: super(name)`这种语法是用初始化列表在构造 Dog 时调用其父类的构造函数来设置 `name`
+* `Dog([String name = 'dog'])`这种语法是调用`new Dog()`时`name` 是可选的，默认值为`dog`
+
+
+
+**扩展子类的属性和方法**
+
+```dart
+class Animal {
+  String name;
+  void sound(voice) {
+    print(voice);
+  }
+
+  Animal.create(this.name);
+}
+
+class Dog extends Animal {
+  String sex;
+  Dog(this.sex, [String name = 'dog']) : super.create(name);
+  void run() {
+    print('${this.name} runrun');
+  }
+}
+```
+
+
+
+**重写父类的属性和方法**
+
+```dart
+class Animal {
+  String name;
+  void sound(voice) {
+    print(voice);
+  }
+
+  Animal.create(this.name);
+}
+
+class Dog extends Animal {
+  String sex;
+  Dog(this.sex, [String name = 'dog']) : super.create(name);
+  void run() {
+    print('${this.name} runrun');
+  }
+
+  @override
+  void sound(voice) {
+    print('${this.name} $voice');
+  }
+}
+
+void main(List<String> args) {
+  var dog = new Dog('雄');
+  print(dog.name); // dog
+  dog.sound('汪汪'); //dog 汪汪
+}
+```
+
+推荐使用`@override`来重写父类的属性和方法
+
+
+
+**子类中调用父类的方法**
+
+通过 `super `来调用父类的方法
+
+```dart
+class Dog extends Animal {
+  String sex;
+  Dog(this.sex, [String name = 'dog']) : super.create(name);
+  void run() {
+    super.sound('汪汪');
+    print('${this.name} runrun');
+  }
+}
+```
+
+
+
+# 抽象类
+
+抽象类主要用于定义标准，抽象类不能被实例化，只有继承它的子类才可以被实例化。
+
+使用`abstract`关键字表示这是抽象类。
+
+比如下面定义一个 Animal 的抽象类，这里面有所有动物的标准。
+
+```dart
+abstract class Animal {
+  sound(); // 抽象方法
+  print() {} // 普通方法
+}
+
+// 子类中必须写同样的抽象方法
+class Dog extends Animal {
+  @override
+  sound() {}
+}
+```
+
+# 多态
+
+多态就是同一操作作用于不同的对象时，可以产生不同的解释和不同的效果。
+
+在 JavaScript 中是用原型链的方式来实现多态的，比如 Object 和 Array 的原型上都有 `toString `方法，本质上是在`Array.prototype`写了一个`toString`来覆盖`Object.prototype`的原型上的`toString`
+
+`Dart`中的多态是通过子类重写父类定义的方法，这样每个子类都有不同的表现。
+
+**使用抽象类的话就只需要定义父类的方法而不用实现，让继承它的子类去实现，每个子类就是多态的。**
+
+```dart
+abstract class Animal {
+  sound(); // 抽象方法
+}
+
+class Dog extends Animal {
+  @override
+  sound() {
+    print('汪汪');
+  }
+
+  run() {}
+}
+
+class Cat extends Animal {
+  @override
+  sound() {
+    print('喵喵');
+  }
+
+  run() {}
+}
+
+void main(List<String> args) {
+  var dog = new Dog();
+  var cat = new Cat();
+  print(dog.sound());
+  print(cat.run());
+  // 下面两个不能调 run 方法
+  Animal _dog = new Dog();
+  Animal _cat = new Cat();
+}
+```
+
+
+
+# 接口
+
+dart 中没有 interface，我们使用**抽象类**来定义接口，使用`implements`来让类匹配接口。
+
+## 类匹配单个接口
+
+比如下面使用抽象类来封装统一的 增删改查 功能
+
+```dart
+abstract class Db {
+  String uri;
+  add();
+  remove();
+  save();
+  select();
+}
+```
+
+使用`implements`匹配接口
+
+```dart
+class MySql implements Db {
+  @override
+  add() {}
+
+  @override
+  remove() {}
+
+  @override
+  save() {}
+
+  @override
+  select() {}
+}
+```
+
+上面的代码也可以用 extends 关键字来继承后重写。一般情况下我们这么用：
+
+* 如果需要有共同的方法复用，我们用 extends
+
+* 如果需要一个规范约束，那就使用 implements
+
+  
+
+## 类匹配多个接口
+
+```dart
+abstract class A {
+  late String name;
+  getA();
+}
+
+abstract class B {
+  getB();
+}
+
+class C implements A, B {
+  @override
+  getA() {}
+
+  @override
+  getB() {}
+
+  @override
+  late String name;
+}
+```
+
+
+
+# mixins混入
+
+使用 mixins 可以实现类似多继承的功能，mixins 用关键字 with
+
+```dart
+mixin A {
+  void getA() {}
+}
+
+mixin B {
+  void getB() {}
+}
+
+class C with A, B {}
+
+void main(List<String> args) {
+  var c = new C();
+  c.getA();
+  c.getB();
+}
+```
+
+上面的代码混入（mixins）了多个类的实例方法。
+
+* **被 mixins 的类**只能继承自 Object，不能继承其他类。
+
+  ```dart
+  class A {
+    void getA() {}
+  }
+  
+  class B extends A { 
+    void getB() {}
+  }
+  
+  class C with A, B {} // ❌报错，B 是被 mixins 的类，不能继承
+  ```
+
+  为了让 mixins 类更加直观，推荐使用 mixin 关键字来定义` mixin` 类
+
+  ```
+  mixin A {
+    void getA() {}
+  }
+  
+  mixin B extends A { // ❌报错，B 是被 mixins 的类，不能继承
+    void getB() {}
+  }
+  
+  class C with A, B {} 
+  ```
+
+* **被 mixins 的类**不能有构造函数
+
+  ```dart
+  mixin A {
+    void getA() {}
+  }
+  
+  mixin B {
+    B(); // ❌报错 B 是被 mixins 的类，不能有构造函数
+    void getB() {}
+  }
+  
+  class C with A, B {} 
+  ```
+
+* 一个类可以 mixins **多个 mixins 类**
+
+* 一个类可以继承某个类再 mixins 一些 mixins 类
+
+  ```dart
+  class A {
+    void getA() {}
+  }
+  
+  class B {
+    void getB() {}
+  }
+  
+  class C extends A with B {}
+  ```
+
+* mixins 不是继承，也不是接口，当使用 mixins 后，相当于创建了一个超类，能够兼容下所有类
+
+  ```dart
+  class A {
+    void getA() {}
+  }
+  
+  mixin B {
+    void getB() {}
+  }
+  
+  class C extends A with B {}
+  
+  void main(List<String> args) {
+    var c = new C(); 
+    print(c is A);// true
+    print(c is B);// true
+    print(c is C);// true
+  }
+  ```
+
+* 使用 on 关键字可以指定哪些类可以使用该 Mixin 类
+
+  ```dart
+  class A {
+    void getA() {}
+  }
+  
+  mixin B on A {
+    void getB() {}
+  }
+  
+  // class C with B {}     ❌这样写是报错的
+  class C extends A with B {}
+  ```
+
+
+
+# 泛型
+
+跟 TS 一样，Dart 也支持泛型，泛型就是泛用的类型，是一种将指定权交给用户的不特定类型。
+
+比如下面的函数就由用户指定传入的类型。
+
+```dart
+  T getData<T>(T data) {
+    return data;
+  }
+
+// 调用者可以指定类型
+  getData<String>('123');
+  getData<num>(123);
+	getData<List>([1, 2, 3]);
+```
+
+## 泛型类
+
+在实例化一个类时可以通过泛型来指定实例对象的类型。
+
+下面就是实例化 List 后指定了List 对象属性值的类型。
+
+```dart
+  List l1 = new List<int>.filled(2, 1);
+  List l2 = new List<String>.filled(2, '');
+```
+
+* **定义泛型类**
+
+  ```dart
+  class A<T> {
+    T age;
+    A(T this.age);
+    T getAge() {
+      return this.age;
+    }
+  }
+  
+  ```
+
+* 使用泛型类
+
+  ```dart
+  void main(List<String> args) {
+    // 使用泛型类
+    var a = new A<int>(12);
+    var b = A<String>('12');
+  }
+  ```
+
+## 泛型接口
+
+泛型接口的定义方式就是接口跟泛型类的集合体，可以这么定义
+
+```dart
+// 泛型接口
+abstract class Cache<T> {
+  void setKey(String key, T value);
+}
+// 类匹配这个接口
+class FileCache<T> implements Cache<T> {
+  @override
+  void setKey(String key, T value) {}
+}
+
+class MemoryCache<T> implements Cache<T> {
+  @override
+  void setKey(String key, T value) {}
+}
+```
+
+使用时指定泛型的具体类型
+
+```dart
+  var f = new FileCache<String>();// 指定 String
+  f.setKey('key', 'string');
+  var m = new MemoryCache<int>();// 指定 int
+  m.setKey('key', 123);
+```
+
+
+
+## 限制泛型
+
+跟 Typescript 一样，泛型约束使用 extends 关键字。
+
+```dart
+abstract class Cache<T> {
+  void setKey(String key, T value);
+}
+// 这里约束MemoryCache只能为 int
+class MemoryCache<T extends int> implements Cache<T> {
+  @override
+  void setKey(String key, T value) {}
+}
+void main(List<String> args) {
+  // var m = new MemoryCache<String>(); 这里就不能是 String 类型了
+  var m = new MemoryCache<int>();
+  m.setKey('key', 123);
+}
+```
+
+
+
 # Late 修饰符
 
 Dart2.12 增加了 late 修饰符，它有两个用途：
@@ -932,5 +1742,5 @@ void main(List<String> args) {
 
 如果将变量标记为 late，但在其声明时对其进行初始化，则初始值设定项会在首次使用该变量时运行。这种惰性初始化在以下几种情况下非常方便：
 
-* 变量不一定会被使用，那么这种初始化非常节省内容
+* 变量不一定会被使用，那么这种初始化非常节省内存
 * 
