@@ -77,6 +77,30 @@ Int num=123;
   b = [];
 ```
 
+
+
+##  Object 和 dynamic 的区别
+
+Object 是所有类的基类，相当于一个可以兼容所有类型的超级类型。dynamic 就是一个动态类，类似 TypeScript 的 any。
+
+在下面代码中，如果用 Object 类声明会过不了编译。
+
+```dart
+  Object a = 'String';
+  a.subString(1); //❌The method 'subString' isn't defined for the type 'Object'
+```
+
+换成`dynamic`就表示这是动态类型，可以绕过编译检查。
+
+```dart
+  dynamic a = 'String';
+  a.substring(1);
+```
+
+
+
+## final 和 const 的区别
+
 **常量**可以用 final 和 const 修饰符来声明,这两个关键字可以替代 var或者加在类型前面。
 
 ```dart
@@ -86,24 +110,28 @@ const int age = 123;
 final List list = [];
 ```
 
-`final`比`const`功能更加强大，强大的地方在于：
+`final`包含了`const`的功能，区别在于：
 
 * final 可以一开始不赋值，如果赋值了则只赋值一次。const 一开始就需要赋值
-* final不仅有 const 编译时的常量的特性，而且是惰性初始化，即在运行时第一次使用前才初始化
+* const 必须给一个明确的编译常量值（即编译期间就确定的值）
+* final 可以通过计算/函数获取一个值（即运行期间确定的值）
+* final 不仅有 const 编译时的常量的特性，而且是惰性初始化，即在运行时第一次使用前才初始化
 
 举个例子
 
 ```dart
-  // const a; 报错了 const一开始就需要赋值  The constant 'a' must be initialized.
-
+  // 报错了 const一开始就需要赋值  The constant 'a' must be initialized.
+	const a; 
   // 报错了 Const variables must be initialized with a constant value.
-  // const a = new DateTime.now();调方法赋值时不能用 const
+  const a = new DateTime.now();
 
   final b;
   b = new DateTime.now(); // 不会报错
 ```
 
 const 变量是编译时常量。如果使用 const 修饰类中的变量，则必须加上 static 关键字，即 `static const`。
+
+## const
 
 在声明 const 变量时可以直接为其赋值，也可以使用其它的 const 变量为其赋值。
 
@@ -121,6 +149,23 @@ const 关键字不仅仅用来定义常量，还可以用来创建常量值，�
 ```
 
 使用初始化表达式为常量赋值就可以省略掉关键字 const，比如常量 bar 的赋值就省略掉了 const。
+
+使用 const 变量还能够创建一个类似单例的对象，比如下面的语法，能够创建一个相同的对象
+
+```dart
+class Person {
+  final String name;
+  const Person(this.name);
+}
+
+void main(List<String> args) {
+  const p1 = const Person('myname');
+  const p2 = Person('myname'); // const 可以省略
+  print(identical(p1, p2));// 这两个对象是相等的
+}
+```
+
+
 
 # 默认值
 
@@ -294,7 +339,7 @@ var invalidConstString = '$aNum $aBool $aString $aConstList';
 
 bool 表示布尔类型
 
-Dart 的条件判断跟 JavaScript 不太一样，JavaScript 可以用 falsy值或 truthy 值做条件判断返回布尔值
+Dart 的条件判断跟 JavaScript 不太一样，JavaScript 可以用 falsy值或 truthy 值做条件判断
 
 ```javascript
 0、‘’、false、undefined、null、-0、NaN // javascript 的 falsy 值
@@ -556,6 +601,21 @@ JavaScript 中可以用`new Map()`让普通函数变成构造函数，dart 中�
     var newMap2 = {...?maybeNull};
   ```
 
+
+
+# 获取类型
+
+使用`runtimeType`可以获得对象的类型
+
+```dart
+  var n = null;
+  var s = 'String';
+  print(n.runtimeType); // Null
+  print(s.runtimeType); // String
+```
+
+
+
 # 函数
 
 定义函数，建议定义返回类型
@@ -572,123 +632,125 @@ JavaScript 中可以用`new Map()`让普通函数变成构造函数，dart 中�
   String getName() => 'qiuyanxi';
 ```
 
-* 必要参数
+## 必要参数
 
-  ```dart
-    String getName(String name, int age) => '$name$age';
-    getName('qiuyanxi', 10);
-  ```
+```dart
+  String getName(String name, int age) => '$name$age';
+  getName('qiuyanxi', 10);
+```
 
-* 使用`[]`表示可选的位置参数
+## 可选的位置参数
 
-  ```dart
-    void printThings([String? str, String str2 = 'default value']) {
-      assert(str == null);
-      assert(str2 == 'default value');
-    }
-    printThings();
-  ```
+使用`[]`表示可选的位置参数
 
-* 命名参数
-
-  命名参数默认都为可选参数。如果是必要参数，则需要用`required`
-
-  **定义函数时，使用`{参数 1，参数 2}`来指定命名参数**
-
-  ```dart
-    String getName2({required String name, int? age = 10}) => '$name$age';
-  ```
-
-  **调用函数时，使用 `参数名:参数值`指定命名参数**
-
-  ```dart
-    getName2(name: 'qiuyanxi');
-  ```
-
-* 默认参数
-
-  如果一个参数是可选的但是不能是 null，那么需要提供一个默认的值。**没有默认值的情况下参数是 null**
-
-  ```dart
-  /// Sets the [bold] and [hidden] flags ...
-  void enableFlags({bool bold = false, bool hidden = false}) {...}
-  
-  // bold will be true; hidden will be false.
-  enableFlags(bold: true);
-  ```
-
-* 默认值必须为编译时常量
-
-  默认的参数值必须为编译时常量，如以下的参数为默认的 List 和 Map，为了变成编译时常量，需要加上 const 关键字
-
-  ```dart
-    void getList([List<int> list = const [1, 2, 3]]) {}
-    void getMap([Map<String, String> map = const {"name": "qiuyanxi"}]) {}
-  ```
-
-* main函数
-
-  main 函数是每个 Dart 程序必须有的顶级函数，是程序的入口，main 函数返回值是void ，并且有一个`List<String>`类型的可选参数。
-
-  可以通过命令行给 main 函数传递参数
-
-  **hello-world.dart**
-
-  ```dart
-  void main(List<String> args) {
-    // 在命令行运行以下命令: dart hello-world.dart 1 test
-    print(args); //['1', 'test']
-    assert(args.length == 2);
-    assert(int.parse(args[0]) == 1);
-    assert(args[1] == 'test');
+```dart
+  void printThings([String? str, String str2 = 'default value']) {
+    assert(str == null);
+    assert(str2 == 'default value');
   }
-  ```
+  printThings();
+```
 
-* 匿名函数
+## 命名参数
 
-  匿名函数被当做参数使用
+命名参数默认都为可选参数。如果是必要参数，则需要用`required`
 
-  ```dart
-  const list = ['apples', 'bananas', 'oranges'];
-  list.forEach((item) {
-    print('${list.indexOf(item)}: $item');
-  });
-  ```
+**定义函数时，使用`{参数 1，参数 2}`来指定命名参数**
 
-  使用匿名箭头函数当做参数使用
+```dart
+  String getName2({required String name, int? age = 10}) => '$name$age';
+```
 
-  ```dart
-  const list = ['apples', 'bananas', 'oranges'];
-  list.forEach((item) => print('${list.indexOf(item)}: $item'));
-  ```
+**调用函数时，使用 `参数名:参数值`指定命名参数**
 
-* 词法作用域
+```dart
+  getName2(name: 'qiuyanxi');
+```
 
-  Dart 的作用域是词法作用域，跟 JavaScript 一样，在写代码的时候就确定了。
+## 默认参数
 
-* 闭包
+如果一个参数是可选的但是不能是 null，那么需要提供一个默认的值。**没有默认值的情况下参数是 null**
 
-  闭包也跟 JavaScript 一样，就不多介绍了。
+```dart
+/// Sets the [bold] and [hidden] flags ...
+void enableFlags({bool bold = false, bool hidden = false}) {...}
 
-* 返回值
+// bold will be true; hidden will be false.
+enableFlags(bold: true);
+```
 
-  所有函数都有返回值的，即使返回值是 void。如果没有明确写返回语句，那么默认执行`return null`
+## 默认值
 
-  ```dart
-  // 这是明确表示返回 void 的函数
-    void returnVoid() {
-      print('hello');
-    }
-  
-    var a = returnVoid();
-    // void 类型的变量不能被使用
-    // print(a);
-  
-  // 这是没有返回语句的函数
-    returnNull() {}
-    var b = returnNull();
-    assert(returnNull() == null); // true
-  ```
+只有可选参数才有默认值，默认值必须为 **编译时常量**，如以下的参数为默认的 List 和 Map，为了变成编译时常量，需要加上 const 关键字
+
+```dart
+  void getList([List<int> list = const [1, 2, 3]]) {}
+  void getMap([Map<String, String> map = const {"name": "qiuyanxi"}]) {}
+```
+
+## main函数
+
+main 函数是每个 Dart 程序必须有的顶级函数，是程序的入口，main 函数返回值是void ，并且有一个`List<String>`类型的可选参数。
+
+可以通过命令行给 main 函数传递参数
+
+**hello-world.dart**
+
+```dart
+void main(List<String> args) {
+  // 在命令行运行以下命令: dart hello-world.dart 1 test
+  print(args); //['1', 'test']
+  assert(args.length == 2);
+  assert(int.parse(args[0]) == 1);
+  assert(args[1] == 'test');
+}
+```
+
+## 匿名函数
+
+匿名函数被当做参数使用
+
+```dart
+const list = ['apples', 'bananas', 'oranges'];
+list.forEach((item) {
+  print('${list.indexOf(item)}: $item');
+});
+```
+
+使用匿名箭头函数当做参数使用
+
+```dart
+const list = ['apples', 'bananas', 'oranges'];
+list.forEach((item) => print('${list.indexOf(item)}: $item'));
+```
+
+## 词法作用域
+
+Dart 的作用域是词法作用域，跟 JavaScript 一样，在写代码的时候就确定了。
+
+## 闭包
+
+闭包也跟 JavaScript 一样，就不多介绍了。
+
+## 返回值
+
+所有函数都有返回值的，即使返回值是 void。如果没有明确写返回语句，那么默认执行`return null`
+
+```dart
+// 这是明确表示返回 void 的函数
+  void returnVoid() {
+    print('hello');
+  }
+
+  var a = returnVoid();
+  // void 类型的变量不能被使用
+  // print(a);
+
+// 这是没有返回语句的函数
+  returnNull() {}
+  var b = returnNull();
+  assert(returnNull() == null); // true
+```
 
 # 运算符
 
@@ -723,6 +785,7 @@ JavaScript 中可以用`new Map()`让普通函数变成构造函数，dart 中�
   print(a >= b);
   print(a <= b);
   print(a != b);
+	identical(DateTime.now(), DateTime.now()); // 判断两个对象是否相等
 ```
 
 ## 类型判断运算符
@@ -817,8 +880,6 @@ button?.onClick.listen((e) => window.alert('Confirmed!'));
 | `?.`   | 条件访问成员  | 与上述成员访问符类似，但是左边的操作对象不能为 null，例如 foo?.bar，如果 foo 为 null 则返回 null ，否则返回 bar |
 
 # 判空
-
-**其他类型转布尔类型判断**
 
 * 判断字符串是否为空
 
@@ -1131,7 +1192,7 @@ void main(List<String> args) {
 
 命名构造函数可以有多个，当实例化时根据需要直接调用就行了。
 
-**初始化列表**
+## 初始化列表
 
 在构造函数运行之前，有一个初始化列表的概念。可以初始化实例变量
 
@@ -1158,9 +1219,103 @@ void main(List<String> args) {
 }
 ```
 
-当使用 `Rect` 构造时，会给 width 和 height 初始化为 10。
+当使用 `Rect` 构造时，初始化列表会给 width 和 height 初始化为 10。
 
-当使用`Rect.create`构造时，用传入的值来初始化。
+当使用`Rect.create`构造时，初始化列表会通过用传入的值来初始化。
+
+初始化列表可以解决一个类变量既是`final`的又是可选参数赋值的且可选参数默认值需要动态确定的问题。
+
+```dart
+class Person {
+  static final String name = 'myname';
+  final int age;
+  Person() : age = Person.name == 'myname' ? 10 : 20;
+}
+```
+
+上面的代码 age 是可选的且age 的默认值需要动态确定，这时候就没办法使用可选参数了，如以下示例：
+
+```dart
+class Person {
+  static final String name = 'myname';
+  final int age;
+  // ❌ The default value of an optional parameter must be constant.
+  Person([this.age = Person.name == 'myname' ? 10 : 20]);
+}
+```
+
+
+
+## 重定向构造函数
+
+当调用一个构造函数时，让这个构造函数能够调用另外一个构造函数，这就叫重定向构造函数。
+
+下面的代码中，当调用`Person.init()`时，会重定向到`Person`这个构造函数中，本质上是初始化列表。
+
+```dart
+class Person {
+  String name;
+  int age;
+  Person(this.name, this.age);
+  Person.init(String name, int age) : this(name, age);
+}
+```
+
+
+
+## 常量构造函数
+
+当类的变量是 `final`的，这时候就需要用`const`修饰构造函数，否则实例化时会报错。
+
+下面例子中会创建两个相等的对象，类似于单例模式。
+
+```dart
+class Person {
+  final String name;
+  const Person(this.name);
+}
+
+void main(List<String> args) {
+  const p1 = const Person('myname');
+  const p2 = Person('myname'); // const 可以省略
+  print(identical(p1, p2));// 这两个对象是相等的
+}
+```
+
+
+
+## 工厂构造函数
+
+普通构造函数会自动返回对象，工厂构造函数最大的特点是可以手动返回一个对象。
+
+> 在工厂构造函数中无法访问 `this`
+
+下面使用工厂构造函数能够主动返回一个单例
+
+```dart
+class Person {
+  String name;
+
+  static final Map<String, Person> cache = {};
+
+  Person(this.name);
+
+  factory Person.getSingle(String name) {
+    if (cache.containsKey(name)) {
+      return cache[name] as Person;
+    } else {
+      cache[name] = new Person(name);
+      return cache[name] as Person;
+    }
+  }
+}
+
+void main(List<String> args) {
+  var p1 = Person.getSingle('qyx');
+  var p2 = Person.getSingle('qyx');
+  print(identical(p1, p2));// true
+}
+```
 
 
 
@@ -1194,7 +1349,7 @@ void main(List<String> args) {
 
 ## Getter 和 Setter
 
-构造函数自动会设置实例变量的 getter 和 setter ，我们也可以手动指定。
+构造函数自动会设置实例变量的 getter 和 setter ，我们也可以手动指定，这种方式的好处是可以监听属性。
 
 ```dart
 class Rect {
@@ -1207,6 +1362,7 @@ class Rect {
   }
   // 手动指定 setter 的写法
   set h(int value) {
+    print("当你调用 xx.h 时，会打印这段话，表示你已经被监听到了");
     this.height = value;
   }
 
@@ -1387,7 +1543,10 @@ class Dog extends Animal {
 
 # 抽象类
 
-抽象类主要用于定义标准，抽象类不能被实例化，只有继承它的子类才可以被实例化。
+* 抽象类主要用于定义标准
+
+* 抽象类不能被实例化，只有继承它的子类才可以被实例化
+* 抽象类如果想被实例化，可以用工厂构造函数
 
 使用`abstract`关键字表示这是抽象类。
 
@@ -1396,15 +1555,17 @@ class Dog extends Animal {
 ```dart
 abstract class Animal {
   sound(); // 抽象方法
-  print() {} // 普通方法
+  print() {} // 普通方法 可以不被子类实现
 }
 
-// 子类中必须写同样的抽象方法
+// 子类中必须实现同样的抽象方法
 class Dog extends Animal {
   @override
   sound() {}
 }
 ```
+
+
 
 # 多态
 
@@ -1524,7 +1685,7 @@ class C implements A, B {
 
 # mixins混入
 
-使用 mixins 可以实现类似多继承的功能，mixins 用关键字 with
+使用 mixins 可以实现类似多继承的功能，mixins 用关键字 `with` 和 `mixin` 
 
 ```dart
 mixin A {
@@ -1544,7 +1705,7 @@ void main(List<String> args) {
 }
 ```
 
-上面的代码混入（mixins）了多个类的实例方法。
+上面的代码混入（mixins）了多个`mixins`类的实例方法。
 
 * **被 mixins 的类**只能继承自 Object，不能继承其他类。
 
@@ -1684,7 +1845,7 @@ void main(List<String> args) {
   
   ```
 
-* 使用泛型类
+* **使用泛型类**
 
   ```dart
   void main(List<String> args) {
@@ -1745,6 +1906,48 @@ void main(List<String> args) {
   m.setKey('key', 123);
 }
 ```
+
+
+
+# enum
+
+枚举的规则跟 Typescript 差别很大,最终目的还是用于定义常量值
+
+* 定义枚举
+
+  ```dart
+  enum Colors { RED, GREEN, BLUE }
+  ```
+
+* 访问枚举的下标
+
+  ```dart
+  assert(Color.red.index == 0);
+  ```
+
+* 获取全部枚举值
+
+  ```dart
+  Colors.values // [Colors.RED, Colors.GREEN, Colors.BLUE]
+  ```
+
+* 访问枚举值
+
+  ```dart
+  Colors.RED // Colors.RED
+  ```
+
+* 用下标访问枚举值
+
+  ```dart
+    assert(Colors.values[0] == Colors.RED);
+  ```
+
+* 枚举值的类型
+
+  ```dart
+  Colors.RED.runtimeType // Colors
+  ```
 
 
 
@@ -1901,6 +2104,17 @@ import 'package:lib2/lib2.dart' hide foo;
 
 
 
+## export
+
+使用 export 关键字导出
+
+```dart
+export 'package:lib1/lib1.dart';
+export 'src/middleware.dart' show Middleware, createMiddleware;
+```
+
+
+
 ## 延迟加载
 
 **延迟加载**（也常称为 **懒加载**）是有需要的时候再去加载。
@@ -1929,6 +2143,14 @@ Future<void> greet() async {
 - 延迟加载的代码库中的常量需要在代码库被加载的时候才会导入，未加载时是不会导入的。
 - 导入文件的时候无法使用延迟加载库中的类型。如果你需要使用类型，则考虑把接口类型转移到另一个库中然后让两个库都分别导入这个接口库。
 - Dart会隐式地将 `loadLibrary()` 导入到使用了 `deferred as *命名空间*` 的类中。 `loadLibrary()` 函数返回的是一个 [Future](https://dart.cn/guides/libraries/library-tour#future)。
+
+
+
+## 包管理建议
+
+如果我们有实现自己的代码库，为了提升性能，应该将代码放到`/lib/src`目录下，然后在`/lib`目录导出`src`目录内的 API，实现对` lib/src` 目录中 API 的公开。
+
+
 
 # 异步
 
@@ -2001,3 +2223,34 @@ try {
   // React to inability to look up the version
 }
 ```
+
+# Typedefs
+
+typedefs 是类型别名，是一种引用某一类型的简便方法，常用于封装类型，它使用 `typedef` 关键字。
+
+比如项目中有一个类型是数字类型的 List，我们将它封装起来变成一个类型别名,就可以直接使用
+
+```dart
+typedef IntList = List<int>;
+
+IntList a = [1, 2, 3];
+```
+
+当传参是函数并且需要明确的类型定义时，使用类型别名可以简化代码
+
+```dart
+  void PrintString(String getS(String str)) {
+    print(getString('name'));
+  }
+```
+
+上面的`PrintString`函数需要传入一个返回值和参数都为 String 的函数，使用`typedef`简化代码：
+
+```dart
+typedef GetString = String Function(String str);
+ 
+ void PrintString(GetString getS) {
+    print(getString('name'));
+  }
+```
+
