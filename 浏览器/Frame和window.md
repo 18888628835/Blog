@@ -630,3 +630,192 @@ window.addEventListener("message", function(event) {
    * `data` —— 数据，可以是任何对象。但是 IE 浏览器只支持字符串，因此我们需要对复杂的对象调用 `JSON.stringify` 方法进行处理，以支持该浏览器。
 
 应该使用`addEventListener`在目标窗口监听`message`事件
+
+
+
+# 点击劫持攻击
+
+点击劫持攻击就是恶意的页面 **以用户的名义** 点击受害网站。
+
+## 原理
+
+1. 访问者被恶意页面吸引
+2. 页面上有一个看起来无害的链接（例如：点我，超好玩）
+3. 恶意页面在这个按钮下方有一个透明的`<iframe>`，这个 `src`来自于`bilibili`，这就使得“点赞”按钮恰好位于该链接下方。这是使用透明+ `z-index`实现的
+4. 用户点击这个链接，实际上点击的是点赞按钮
+
+真实情况下点击后可能会损害用户的其他利益，这里用点赞代替。
+
+
+
+## 示例 
+
+**index.html  恶意网站**
+
+```html
+    <style>
+      iframe {
+        /* 来自受害网站的 iframe */
+        width: 400px;
+        height: 100px;
+        position: absolute;
+        top: 20px;
+        opacity: 0.5; /* 在实际中为 opacity:0 */
+        z-index: 1;
+      }
+    </style>
+
+    <div>点击即可变得富有：</div>
+
+    <!-- 来自受害网站的 url -->
+    <iframe src="bilibili.html" frameborder="0"></iframe>
+
+    <button>点这里！</button>
+
+    <div>……你很酷（我实际上是一名帅气的黑客）！</div>
+```
+
+**bilibili.html 受害网站**
+
+```html
+    <input type="button" onclick="alert('你成功点了个赞!')" value="点我!" />
+```
+
+整体的样子是这样的
+
+<img src="../assets/image-20220318142115322.png" alt="image-20220318142115322" style="zoom:50%;" />
+
+上面的例子中，我们有一个半透明的`<iframe src="bilibili.html" frameborder="0"></iframe>`,它位于点击按钮之上。用户的点击实际上会点击到 iframe 上，但是用户不知情，因为 iframe 是透明的。
+
+如果用户此时登陆了bilibili,那么点击劫持攻击行为就成功了。（B 站需要登陆才能点赞）
+
+点击劫持行为一般是对点击事件，而非键盘事件。
+
+很简单的原因—— 因为 iframe 是不可见的，用户键入的内容会被隐藏，当用户发现输入的字符看不见时，通常会停止打字。
+
+
+
+## 传统防御措施（弱）
+
+最早的防御措施是一段禁止在 frame 中打开页面的 JavaScript 代码，它是这样写的：
+
+```javascript
+if (top != window) {
+  top.location = window.location;
+}
+```
+
+意思是如果 window 发现它并不在顶部，那就顶部的 location 设置为自己的。
+
+但是这种方法并不牢靠。
+
+有多种方法可以让上面的代码无效，例如：
+
+* top 页面监听 `beforeunload`事件，阻止页面离开。
+
+  ```javascript
+  window.onbeforeunload = function() {
+    return false;
+  };
+  ```
+
+  当 `iframe` 试图更改 `top.location` 时，访问者会收到一条消息，询问他们是否要离开页面。
+
+  在大多数情况下，访问者会做出否定的回答，因为他们并不知道还有这么一个 iframe，他们所看到的只有顶级页面，他们没有理由离开。所以 `top.location` 不会变化！
+
+* Sandbox 特性
+
+  sandbox 特性的限制之一就是导航。沙箱化的 iframe 不能更改 `top.location`。
+
+  ```html
+  <iframe sandbox="allow-scripts allow-forms" src="facebook.html"></iframe>
+  ```
+
+  上述代码中添加了允许脚本和允许表单的属性，但没添加`allow-top-navigation`，因此更改`top.location`是被禁止的。
+
+
+
+## 有效的防御措施
+
+
+
+### 服务端设置[X-Frame-Options](https://zh.javascript.info/clickjacking#xframeoptions)
+
+服务端的 header属性`X-Frame-Options`允许或禁止在 `frame` 中显示页面。
+
+这个 header 包含 3 个值：
+
+* **DENY**
+
+  始终禁止在 frame 中显示此页面
+
+* **SAMEORIGIN**
+
+  允许在和父文档同源的 frame 中显示此页面
+
+* **ALLOW-FROM domain**
+
+  允许在来自给定域的父文档的 frame 中显示此页面
+
+例如，百度就是这样设置的
+
+```http
+X-Frame-Options:sameorigin
+```
+
+### 用一个 div 覆盖整个页面
+
+用一个覆盖全屏的`<div>`拦截所有点击，只有确定不需要保护时，才移除`<div>`按钮
+
+```html
+<style>
+  #protector {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 99999999;
+  }
+</style>
+
+<div id="protector">
+  <a href="/" target="_blank">前往网站</a>
+</div>
+
+<script>
+  // 如果顶级窗口来自其他源，这里则会出现一个 error
+  // 但是在本例中没有问题
+  if (top.document.domain == document.domain) {
+    protector.remove();
+  }
+</script>
+```
+
+
+
+### Samesite cookie 特性
+
+具有 `samesite` 特性的 `cookie` 仅在网站是通过直接方式打开（而不是通过 `frame` 或其他方式）的情况下才发送到网站。通过这种方式，即使用户点击了，`cookie` 也不会被发送出去，这样很多行为都会失效。
+
+它可以这样设置：
+
+```http
+Set-Cookie: authorization=secret; samesite
+```
+
+当不使用 cookie 时，`samesite` cookie 特性将不会有任何影响。这可以使其他网站能够轻松地在 iframe 中显示我们公开的、未进行身份验证的页面。
+
+唯一不好之处就是有些网站不使用 cookie 对用户身份进行验证，那还是会受到劫持攻击。
+
+
+
+## 总结
+
+点击劫持是一种诱骗用户在不知情的情况下点击恶意网站的方式。如果是重要的点击操作，这是非常危险的。
+
+我们有三种有效的方法来防范这种攻击：
+
+* 设置`X-Frame-Options: SAMEORIGIN`不让非同源的网站用 frame 嵌入
+* 用一个 div 覆盖，只有满足条件才删除这个 div，这样用户就没办法点到 frame 中的按钮了
+* 通过`samesit`特性，仅在网站通过直接方式打开的（而不是通过 frame 或其他方式）的情况下才发送 cookie，这样即使用户点击到也是无效的操作，这种方法仅适用于用 cookie 做身份验证的网站。
