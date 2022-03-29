@@ -137,8 +137,141 @@ RenderPadding => RenderShiftedBox => RenderBox => RenderObject
 StatelessElement => ComponentElement => Element
 ```
 
-在 Element 里，我们能看到mount 方法，并且还有一段注释
+在 ComponentElement 这个类中，可以看到 mount 方法
+
+```dart
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    assert(_child == null);
+    assert(_lifecycleState == _ElementLifecycle.active);
+    _firstBuild();
+    assert(_child != null);
+  }
+
+  void _firstBuild() {
+    // StatefulElement overrides this to also call state.didChangeDependencies.
+    rebuild(); // This eventually calls performRebuild.
+  }
+```
+
+这个 mount 方法调用了`super.mount`方法，并执行了`_firstBuild`,而`_firstBuild`方法则调用了 `rebuild`,进入`rebuild`后能看到它调用了`performRebuild()`方法，`performRebuild`是抽象方法，通过查看他的实现可以看到源码：
+
+<img src="../assets/image-20220329141832373.png" alt="image-20220329141832373" style="zoom:50%;" />
+
+在源码中可以看到它调用了 build 方法，接着查找 build 方法的实现，最终能够看到如下代码：
+
+<img src="../assets/image-20220329141955589.png" alt="image-20220329141955589" style="zoom:50%;" />
+
+这时候就可以知道原来 statelessElement 会调用 widget 中的 build 方法。
+
+整个过程就是这样的：
+
+1. `StatelessWidget` 调用` createElement` 方法，返回 实例 `StatelessElement(this)`
+2. `StatelessElement`的父类调用 `mount` 方法，接着调用 `firstBuild`
+3. 最终`firstBuild`会调用 `widget` 上的 `build` 方法
+
+那么这个 mount 有什么用？它主要是用来挂载Element 到 tree 树上的。
+
+在 Element 里，我们也能看到mount 方法，并且还有一段注释
 
 <img src="../assets/image-20220328223718577.png" alt="image-20220328223718577" style="zoom:50%;" />
 
-注释的意思是会将Element 挂载到树的给定父级的给定插槽中。
+注释的意思是会将Element 挂载到树的给定父级的给定插槽中。当新创建的元素首次添加到树中时，框架将调用此函数。
+
+结论：框架会调用 `mount` 方法，最终会调用到 `widget.build` 方法将结果挂载到 Element tree 上
+
+
+
+### 为什么能访问 widget.xxx 
+
+当我们使用`statefulWidget`时，经常会写`createState`方法并返回一个实例
+
+```dart
+class HomeContent extends StatefulWidget {
+  final name = 'my name';
+  const HomeContent({Key? key}) : super(key: key);
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  final List<Hotkey> hotKeyList = [];
+ 
+  @override
+  Widget build(BuildContext context) {
+     // widget.xxx 这里能够访问到上面的 name
+    final name = widget.name;
+		// ...return something
+  }
+}
+```
+
+为什么能够在访问到上面的 `name` 呢？这需要我们查看`createState`方法做了什么。
+
+这里的 `createState`方法实际上是由`StatefulWidget`抽象类中的`createElement`给调用了。
+
+```dart
+abstract class StatefulWidget extends Widget {
+  /// Initializes [key] for subclasses.
+  const StatefulWidget({ Key? key }) : super(key: key);
+
+  /// Creates a [StatefulElement] to manage this widget's location in the tree.
+  ///
+  /// It is uncommon for subclasses to override this method.
+  @override
+  StatefulElement createElement() => StatefulElement(this);
+  // 省略后面全部代码...
+}
+```
+
+它调用 `createElement` 后返回`StatefulElement`实例，并把**自己**传进去了。
+
+让我们看看`StatefulElement`这个类做了什么
+
+<img src="../assets/image-20220329150941177.png" alt="image-20220329150941177" style="zoom:50%;" />
+
+上面的代码括红的部分说明在实例化`StatefulElement`时用初始化列表的方式调用了传入的 widget（也就是我们写的widget）的 `createState` 方法,并把 `state` 存到 Element 的`_state`属性中了，接着用一个 `get state` 返回这个`_state`属性，并且将传入的 widget 赋值给这个 `get state`。
+
+```dart
+State<StatefulWidget> get state => _state!;
+state._widget = widget;
+```
+
+通过这一系列操作，最后的结果就是我们能够在我们的 `state` 中通过访问 `widget.xxx`属性得到`HomeContent`中的属性。
+
+
+
+### BuildContext是什么
+
+在 build 方法中，天然一个参数，他是 BuildContext 类型的。
+
+```dart
+class HomePage extends StatelessWidget {
+  final String title;
+  const HomePage({Key? key, required this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: AppBar(title: Text(title)), body: HomeContent());
+  }
+}
+```
+
+还是需要通过`StatelessWidget`中的源代码找
+
+```dart
+  @override
+  StatelessElement createElement() => StatelessElement(this);
+```
+
+在`StatelessElement`中，我们可以看到它里面有一个 `build` 方法
+
+```dart
+  @override
+  Widget build() => widget.build(this);
+```
+
+它调用了 `widget` 的 `build` 方法，这个 `widget` 就是我们写的 `widget`，而 `this` 就是`Element`自身，说明context 就是 `Element`
+
