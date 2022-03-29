@@ -275,3 +275,78 @@ class HomePage extends StatelessWidget {
 
 它调用了 `widget` 的 `build` 方法，这个 `widget` 就是我们写的 `widget`，而 `this` 就是`Element`自身，说明context 就是 `Element`
 
+## key
+
+key 的作用跟 React 的基本差不多，都是为了保证 diff 算法时给一个标记，Widget 这个抽象类中就有相关代码
+
+```dart
+  static bool canUpdate(Widget oldWidget, Widget newWidget) {
+    return oldWidget.runtimeType == newWidget.runtimeType
+        && oldWidget.key == newWidget.key;
+  }
+```
+
+它的意思是通过对比 `oldWidget` 和 `newWidget` 的类型和 `key` 来决定要不要 `update`，如果全部一样，说明 `Element`并不需要更新，这样就可以复用以前的 `Element`。这也是 `Element tree` 稳定的原因。
+
+### key的分类
+
+* LocalKey 用于相同父 Element 的 Widget 进行比较，也是 diff 算法的核心
+
+  LocalKey 有三个子类：
+
+  * ValueKey 用特定值作为 key 时使用，比如数字、字符串
+
+  * ObjectKey 用对象当 key
+
+  * UniqueKey 需要确保 key 的唯一性时使用
+
+  
+
+* GlobalKey可以帮助我们访问某个Widget的信息，包括Widget或State或Element等对象
+
+  我们来看下面的例子：我希望可以在HYHomePage中直接访问HYHomeContent中的内容
+
+  ```dart
+  class HYHomePage extends StatelessWidget {
+    final GlobalKey<_HYHomeContentState> homeKey = GlobalKey();
+  
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("列表测试"),
+        ),
+        body: HYHomeContent(key: homeKey),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.data_usage),
+          onPressed: () {
+            print("${homeKey.currentState.value}");
+            print("${homeKey.currentState.widget.name}");
+            print("${homeKey.currentContext}");
+          },
+        ),
+      );
+    }
+  }
+  
+  class HYHomeContent extends StatefulWidget {
+    final String name = "123";
+  
+    HYHomeContent({Key key}): super(key: key);
+  
+    @override
+    _HYHomeContentState createState() => _HYHomeContentState();
+  }
+  
+  class _HYHomeContentState extends State<HYHomeContent> {
+    final String value = "abc";
+  
+    @override
+    Widget build(BuildContext context) {
+      return Container();
+    }
+  }
+  ```
+
+  
+
