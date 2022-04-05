@@ -214,7 +214,7 @@
 
 [Git](https://github.com/18888628835/Blog/blob/main/Git/Git.md)
 
-## framework
+## Framework
 
 1.[vue3 composition-api](https://github.com/18888628835/Blog/blob/main/Vue/Vue3_basic.md)
 
