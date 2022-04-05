@@ -222,7 +222,8 @@ git branch -D xxx  强制删除xxx分支
 git branch | grep -v 'master' | xargs git branch -D 删除除了 master 以外的所有本地分支
 git checkout -b xxx  创建并切换到xxx分支
 git checkout xxx  切换到xxx分支
-git checkout -b xx分支 origin/xx分支。从远程xx分支创建并切换到xx分支
+git checkout -b xx分支 origin/xx分支  从远程xx分支创建并切换到xx分支
+git branch --set-upstream-to=origin/[remote branch]  本地分支跟远程分支关联
 ```
 
 修改message
