@@ -1225,3 +1225,143 @@ function say(message) {
 - `.right`
 - `.middle`
 
+
+
+# 表单输入绑定
+
+Vue 中的表单输入绑定是这样的
+
+```typescript
+let text = ref<string>('');
+
+const handleInput=(e:Event)=>{
+    text.value=(e.target as HTMLInputElement).value
+};
+```
+
+```vue
+<input type="text" :value="text" @input="handleInput">
+```
+
+上面的代码这样写略麻烦，所以 Vue 给了语法糖
+
+```vue
+<input v-model="text">
+```
+
+对于`v-model`还可以用于`<textarea>`，`<select>`等元素。它会根据所使用的的元素自动扩展到不同的 DOM 属性和事件的组合：
+
+1. `<input>`和`<textarea>`就使用 `value` 属性和 `input` 事件
+2. `<input type="checkbox">`和`<input type="radio">`就是使用`checked`属性和`change`事件
+3. `<select>`就是用 `value`，`change` 为事件
+
+如果绑定了 `v-model`，那么使用初始的`value`或者`checked`属性就会被忽略。
+
+用`v-model`时，如果用输入法打中文，会发现没有按下空格键是不会触发状态更新的，这点跟 React 不同，只要绑定好受控状态，React 会马上更新。
+
+## 值绑定
+
+单选、复选、选择器选项，`v-model`绑定的一般是静态字符串，或者复选框也可以绑定布尔值。
+
+```vue
+<!-- `picked` 在被选择时是字符串 "a" -->
+<input type="radio" v-model="picked" value="a" />
+
+<!-- `toggle` 只会为 true 或 false -->
+<input type="checkbox" v-model="toggle" />
+
+<!-- `selected` 在第一项被选中时为字符串 "abc" -->
+<select v-model="selected">
+  <option value="abc">ABC</option>
+</select>
+```
+
+使用`v-bind`能够让我们将选项绑定为非字符串类型
+
+**复选框**
+
+`true-value` 和 `false-value` 是 Vue 特有的 attributes 且仅会在 `v-model` 存在时工作。这里 `toggle` 属性的值会在选中时被设为 `'yes'`，取消选择时设为 `'no'`。
+
+```vue
+<input
+  type="checkbox"
+  v-model="toggle"
+  true-value="yes"
+  false-value="no" />
+```
+
+也可以用`v-bind`绑定到其他动态值上面。
+
+```vue
+<input
+  type="checkbox"
+  v-model="toggle"
+  :true-value="dynamicTrueValue"
+  :false-value="dynamicFalseValue" />
+```
+
+**单选按钮**
+
+```vue
+<input type="radio" v-model="pick" :value="first" />
+<input type="radio" v-model="pick" :value="second" />
+```
+
+`pick` 会在第一个按钮选中时被设为 `first`，在第二个按钮选中时被设为 `second`。
+
+**选择器选项**
+
+```vue
+<select v-model="selected">
+  <!-- 内联对象字面量 -->
+  <option :value="{ number: 123 }">123</option>
+</select>
+```
+
+`v-model` 同样也支持非字符串类型的值绑定！在上面这个例子中，当某个选项被选中，`selected` 会被设为该对象字面量值 `{ number: 123 }`。
+
+## 修饰符
+
+**.lazy**
+
+添加`last`修饰符可以让 `input` 在 `change`事件后更新状态
+
+```vue
+<!-- 在 "change" 事件后同步更新而不是 "input" -->
+<input v-model.lazy="msg" />
+```
+
+**.number**
+
+添加`.number`可以让用户输入自动转换为数字
+
+```vue
+<input v-model.number="age" />
+```
+
+这个用法会内部调用`parseFloat`,如果输入的值没办法被`parseFloat`处理的话会返回原值
+
+**.trim**
+
+自动去除用户输入内容中两端的空格，则可以使用`.trim`修饰符
+
+```vue
+<input v-model.trim="msg" />
+```
+
+# 生命周期
+
+生命周期钩子就是一系列的回调函数，在 vue 组件实例初始化的过程中vue 会调用这些钩子，这样开发者就可以在里面写代码，让 vue 在特定的阶段调用它。
+
+这些阶段可以分为：挂载实例到 DOM 上、数据侦听时、编译模板时、数据改变时等。
+
+**常见生命周期**
+
+* `onMounted`：组件完成初始渲染并创建 DOM 节点后运行
+* `onUpdated`：状态更新导致 DOM 更新之后调用
+* `onUnmounted`：组件被卸载之后调用
+
+[官方图例](https://staging-cn.vuejs.org/guide/essentials/lifecycle.html#lifecycle-diagram)
+
+[API说明](https://staging-cn.vuejs.org/api/composition-api-lifecycle.html)
+
