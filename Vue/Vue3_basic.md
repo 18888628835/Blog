@@ -1365,3 +1365,484 @@ const handleInput=(e:Event)=>{
 
 [API说明](https://staging-cn.vuejs.org/api/composition-api-lifecycle.html)
 
+
+
+# 侦听器
+
+`computed`允许我们声明一个派生状态，有些情况下，我们并不需要它。
+
+`Vue`用`watch`函数来监听状态改变，然后触发回调函数。
+
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+
+let input = ref<string>('');
+  // 直接侦听某个 ref
+watch(input, async (newInput, oldInput) => {
+  console.log(newInput);
+  console.log(oldInput);
+});
+</script>
+
+<template>
+  <input v-model="input" />
+  <div>{{ input }}</div>
+</template>
+```
+
+## 侦听来源
+
+`watch`的第一个参数可以有很多种：`ref`（以及它的`computed`状态）、一个响应式对象、一个`getter`函数、多个来源组成的数组：
+
+```js
+const x = ref(0)
+const y = ref(0)
+
+// 单个 ref
+watch(x, (newX) => {
+  console.log(`x is ${newX}`)
+})
+
+// getter 函数
+watch(
+  () => x.value + y.value,
+  (sum) => {
+    console.log(`sum of x + y is: ${sum}`)
+  }
+)
+
+// 多个来源组成的数组
+watch([x, () => y.value], ([newX, newY]) => {
+  console.log(`x is ${newX} and y is ${newY}`)
+})
+```
+
+不能侦听响应式对象的`property`，比如：
+
+```js
+const obj = reactive({ count: 0 })
+
+// 这不起作用，因为你是向 watch() 传入了一个 number
+watch(obj.count, (count) => {
+  console.log(`count is: ${count}`)
+})
+```
+
+而是用`getter`侦听：
+
+```js
+// 提供一个 getter 函数
+watch(
+  () => obj.count,
+  (count) => {
+    console.log(`count is: ${count}`)
+  }
+)
+```
+
+## deep选项
+
+直接给`watch`传入一个响应式对象，会隐式创建一个深层侦听器——该回调函数在所有嵌套的变更时都会被触发。
+
+```js
+import { reactive, ref, watch } from 'vue';
+
+let _ref = ref({ count: 0 });
+const obj = reactive({ count: 0 });
+
+watch(_ref.value, (newInput, oldInput) => {
+  // 嵌套的 property 变更时触发
+  // 两个对象相等，因为是一个引用
+  console.log(newInput === oldInput); // true
+});
+
+watch(obj, (newInput, oldInput) => {
+  console.log(newInput === oldInput); // true
+});
+_ref.value.count++;
+obj.count++;
+```
+
+跟返回响应式对象的`getter`不同，如果是`getter`函数，那么只有在返回的对象变了才会触发回调：
+
+```js
+let _ref = ref({ count: 0, name: '123' });
+// 只有 ref.value 整个变了才会触发，也就是引用地址改变才会触发
+watch(
+  () => _ref.value,
+  newInput => {
+    console.log(newInput);
+  }
+);
+_ref.value.count++;
+```
+
+但是如果想要上面的函数能起作用，可以添加`deep`选项,这样就可以创建深层侦听器。
+
+```js
+watch(
+  () => _ref.value,
+  newInput => {
+    console.log(newInput);
+  },
+  { deep: true }
+);
+```
+
+使用`deep`选项会遍历侦听对象的所有嵌套属性，如果数据量很大，那么开销也很大。
+
+## watchEffect
+
+当侦听源发生变化，那么`watch`会执行回调函数。有时我们希望在创建侦听器的时候立即执行一遍回调。
+
+比如，下面的例子是一个 `url`，每次 `url` 变化了，都需要动态改变某个 `data`。但我们希望`url` 第一次创建时也调用一次函数给`ref`一个初始值,如果仅仅用 `watch`写，需要这样写：
+
+```js
+const url = ref('https://...')
+const data = ref(null)
+
+async function fetchData() {
+  const response = await fetch(url.value)
+  data.value = await response.json()
+}
+
+// 立即获取
+fetchData()
+// ...再侦听 url 变化
+watch(url, fetchData)
+```
+
+上面的代码可以用`watchEffect`函数简化。它会立即调用一遍回调函数，如果这时函数产生副作用，Vue 会自动追踪副作用的依赖关系，自动分析出响应源。
+
+```js
+watchEffect(async () => {
+  const response = await fetch(url.value)
+  data.value = await response.json()
+})
+```
+
+这个例子中，回调会立即执行。在执行期间，它会自动追踪 `url.value` 作为依赖（近似于计算属性）。每当 `url.value` 变化时，回调会再次执行。
+
+> `watchEffect` 仅会在其**同步**执行期间，才追踪依赖。在使用异步回调时，只有在第一个 `await` 正常工作前访问到的 property 才会被追踪。
+
+## watch 和 watchEffect
+
+`watch`和`watchEffect`都能响应式执行有副作用的回调。它们之间的主要区别是追踪响应式依赖的方式：
+
+- `watch` 只追踪明确侦听的源。它不会追踪任何在回调中访问到的东西。另外，仅在响应源确实改变时才会触发回调。`watch` 会避免在发生副作用时追踪依赖，因此，我们能更加精确地控制回调函数的触发时机。
+- `watchEffect`，则会在副作用发生期间追踪依赖。它会在同步执行过程中，自动追踪所有能访问到的响应式 property。这更方便，而且代码往往更简洁，但其响应性依赖关系不那么明确。
+
+## 侦听器回调顺序
+
+当更改了响应式状态，它可能会同时触发 Vue 组件更新和侦听器回调。
+
+默认情况下，侦听器回调会在Vue 组件更新前被调用，这就代表侦听器回调中如果访问 DOM 则是被 Vue 更新前的状态。
+
+如果希望在侦听器回调中能访问被 Vue更新后的 DOM，需要`flush:'post'`选项：
+
+```js
+watch(source, callback, {
+  flush: 'post'
+})
+
+watchEffect(callback, {
+  flush: 'post'
+})
+```
+
+后置刷新的 `watchEffect()` 有个更方便的别名 `watchPostEffect()`：
+
+```js
+import { watchPostEffect } from 'vue'
+
+watchPostEffect(() => {
+  /* 在 Vue 更新后执行 */
+})
+```
+
+## 停止侦听器
+
+使用同步语句创建的侦听器，会自动绑定到组件宿主组件实例上，并且会在宿主组件卸载时自动停止。
+
+侦听器在异步创建时，不会绑定到当前组件上，我们必须手动停止它，以防内存泄露。
+
+```js
+<script setup>
+import { watchEffect } from 'vue'
+
+// 它会自动停止
+watchEffect(() => {})
+
+// ...这个则不会！
+setTimeout(() => {
+  watchEffect(() => {})
+}, 100)
+</script>
+```
+
+要手动停止一个侦听器，请调用 `watch` 或 `watchEffect` 返回的函数：
+
+```js
+const unwatch = watchEffect(() => {})
+
+// ...当该侦听器不再需要时
+unwatch()
+```
+
+，需要异步创建侦听器的情况很少，请尽可能选择同步创建。如果需要等待一些异步数据，你可以使用条件式的侦听逻辑：
+
+```js
+// 需要异步请求得到的数据
+const data = ref(null)
+
+watchEffect(() => {
+  if (data.value) {
+    // 数据加载后执行某些操作...
+  }
+})
+```
+
+# 模板 ref
+
+如果需要直接访问底层 DOM 元素，需要使用`ref`attribute：
+
+```html
+<input ref="input">
+```
+
+`ref`是一个特殊的`attribute`，我们可以用它获取一个 DOM 元素或子组件被挂载后的直接引用。
+
+## 访问模板 ref
+
+访问模板 ref，需要声明一个同名的 ref：
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue'
+
+// 声明一个 ref 来存放该元素的引用
+// 必须和模板 ref 同名
+const input = ref(null)
+
+onMounted(() => {
+  input.value.focus()
+})
+</script>
+
+<template>
+  <input ref="input" />
+</template>
+```
+
+只有在组件**被挂载**后才能访问ref。
+
+如果要用侦听器观察一个模板`ref`的变化情况，需要考虑到`ref` 的值可能为 `null`：
+
+```js
+watchEffect(() => {
+  if (input.value) {
+    input.value.focus()
+  } else {
+    // 此时还未挂载，或此元素已经被卸载（例如通过 v-if 控制）
+  }
+})
+```
+
+## 模板 ref 标注类型
+
+模板 ref 需要通过一个显式指定的泛型参数和一个初始值 `null` 来创建：
+
+```vue
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const el = ref<HTMLInputElement | null>(null)
+
+onMounted(() => {
+  el.value?.focus()
+})
+</script>
+
+<template>
+  <input ref="el" />
+</template>
+```
+
+注意为了严格的类型安全，有必要在访问 `el.value` 时使用可选链或类型守卫。这是因为直到组件被挂载前，这个 ref 的值都是初始的 `null`，并且在由于 `v-if` 的行为将引用的元素卸载时也可以被设置为 `null`。
+
+## v-for 中的 ref
+
+当 `ref` 在 `v-for` 中使用时，相应的 ref 中包含的值是一个数组，它将在元素被挂载后填充：
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue'
+
+const list = ref([
+  /* ... */
+])
+
+const itemRefs = ref([])
+
+onMounted(() => console.log(itemRefs.value))
+</script>
+
+<template>
+  <ul>
+    <li v-for="item in list" ref="itemRefs">
+      {{ item }}
+    </li>
+  </ul>
+</template>
+```
+
+ref 数组**不能**保证与源数组相同的顺序。
+
+## 函数型 ref
+
+除了使用字符串值作名字，`ref` attribute 还可以绑定为一个函数，会在每次组件更新时都被调用。函数接受该元素引用作为第一个参数：
+
+```vue
+<input :ref="(el) => { /* 将 el 分配给 property 或 ref */ }">
+```
+
+如果你正在使用一个动态的 `:ref` 绑定，我们也可以传一个函数。当元素卸载时，这个 `el` 参数会是 `null`。你当然也可以使用一个方法而不是内联函数。
+
+
+
+## 组件上的ref
+
+`ref` 也可以被用在一个子组件上。此时 ref 中引用的是组件实例
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue'
+import Child from './Child.vue'
+
+const child = ref(null)
+
+onMounted(() => {
+  // child.value 是 <Child /> 组件的实例
+})
+</script>
+
+<template>
+  <Child ref="child" />
+</template>
+```
+
+如果一个子组件使用的是选项式 API 或没有使用 `<script setup>`，被引用的组件实例和该子组件的 `this` 完全一致，这意味着父组件对子组件的每一个属性和方法都有完全的访问权。这使得在父组件和子组件之间创建紧密耦合的实现细节变得很容易，当然也因此，应该只在绝对需要时才使用组件引用。大多数情况下，你应该首先使用标准的 props 和 emit 接口来实现父子组件交互。
+
+有一个例外的情况，使用了 `<script setup>` 的组件是**默认私有**的：一个父组件无法访问到一个使用了 `<script setup>` 的子组件中的任何东西，除非子组件在其中通过 `defineExpose` 宏显式暴露：
+
+```html
+<script setup>
+import { ref } from 'vue'
+
+const a = 1
+const b = ref(2)
+
+defineExpose({
+  a,
+  b
+})
+</script>
+```
+
+当父组件通过模板 ref 获取到了该组件的实例时，得到的实例类型为 `{ a: number, b: number }` (ref 都会自动解包，和一般的实例一样)。
+
+## 组件 ref 定义类型
+
+```vue
+<!-- child.vue -->
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const a = 1;
+const b = ref(2);
+defineExpose({
+  a,
+  b,
+});
+</script>
+```
+
+```vue
+<!-- parent.vue -->
+<script setup lang="ts">
+import Child from './child.vue';
+import { onMounted, ref } from 'vue';
+
+let _ref = ref<InstanceType<typeof Child> | null>(null);
+onMounted(() => {
+  console.log(_ref.value?.a);
+  console.log(_ref.value?.b);
+});
+</script>
+
+<template>
+  <Child ref="_ref" />
+</template>
+```
+
+
+
+# 组件基础
+
+## 定义组件
+
+定义一个SFC（单文件组件）
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+</script>
+
+<template>
+  <button @click="count++">You clicked me {{ count }} times.</button>
+</template>
+```
+
+不适用 SFC 时，导出一个JS 对象来定义：
+
+```js
+import { ref } from 'vue'
+
+export default {
+  setup() {
+    const count = ref(0)
+    return { count }
+  },
+  template: `
+    <button @click="count++">
+      You clicked me {{ count }} times.
+    </button>`
+  // 或者 `template: '#my-template-element'`
+}
+```
+
+这里的模板是一个内联的 JS 字符串，Vue会编译它。
+
+上面的所有方式都会默认导出它自己。
+
+## 使用组件
+
+要使用一个子组件，我们需要在父组件中导入它。
+
+```vue
+<script setup>
+import ButtonCounter from './ButtonCounter.vue'
+</script>
+
+<template>
+  <h1>Here is a child component!</h1>
+  <ButtonCounter />
+</template>
+```
+
+通过 `<script setup>`，导入的组件都在模板中直接可用。
+
+每当你使用一个组件，就创建了一个新的**实例**。每一个组件都维护着自己的状态。
