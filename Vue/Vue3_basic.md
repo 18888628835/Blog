@@ -293,7 +293,7 @@ console.log(reactive(proxy) === proxy) // true
 
    
 
-## ref定义原始类型
+## ref定义
 
 为了解除`reactive`的限制，Vue 引进了 `ref`来创建任何值类型的响应式 `ref`
 
@@ -1846,3 +1846,667 @@ import ButtonCounter from './ButtonCounter.vue'
 通过 `<script setup>`，导入的组件都在模板中直接可用。
 
 每当你使用一个组件，就创建了一个新的**实例**。每一个组件都维护着自己的状态。
+
+## 传递 props
+
+props 是一种特殊的`attributes`,父组件可以传递属性给子组件。
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import Child from './child.vue';
+const count = ref(0);
+function addCount() {
+  count.value++;
+}
+</script>
+
+<template>
+  <Child :count="count" :addCount="addCount" />
+</template>
+```
+
+子组件使用则需要使用`defineProps`声明
+
+```vue
+<script setup lang="ts">
+defineProps(['count', 'addCount']);
+</script>
+
+<template>
+  <h1>{{ count }}</h1>
+  <h1>count:{{ count }}</h1>
+  <button @click="addCount">add</button>
+</template>
+```
+
+**`props` 和`v-for`结合**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import Child from './child.vue';
+const count = ref([
+  { id: 1, title: 'book1' },
+  { id: 2, title: 'book2' },
+  { id: 3, title: 'book3' },
+]);
+</script>
+
+<template>
+  <Child v-for="{ title, id } of count" :title="title" :key="id" />
+</template>
+```
+
+```vue
+<!-- child.vue -->
+<script setup lang="ts">
+defineProps(['title']);
+</script>
+
+<template>
+  <h1>{{ title }}</h1>
+</template>
+```
+
+## 监听事件
+
+除了直接将事件函数传递给子组件使用以外，还可以通过让父组件监听子组件事件，让子组件通过触发父组件里的方法。
+
+具体做法：
+
+1. 父组件在子组件上设置监听某个事件
+
+   ```js
+   const addCount = () => count.value.push({ id: 4, title: 'book4' });
+   ```
+
+   ```vue
+     <Child
+       v-for="{ title, id } of count"
+       :title="title"
+       :key="id"
+       @addCount="addCount"
+     />
+   ```
+
+   
+
+2. 子组件声明需要抛出的事件
+
+   ```js
+   defineEmits(['addCount']);
+   ```
+
+   
+
+3. 通过内置的`$emit`抛出事件
+
+   ```vue
+     <button @click="$emit('addCount')">addCount</button>
+   ```
+
+4. 由于父组件事先监听`addCount`，所以当子组件抛出后，父组件会捕获到这一事件并最终调用该方法。
+
+## 插槽
+
+插槽的概念类似于 `React` 的 `children`,`Vue`里用的是`<slot>`
+
+父组件里这么用：
+
+```vue
+  <Child>
+    <div>this is slot</div>
+  </Child>
+```
+
+子组件中把`<slot>`插到想要插入的位置
+
+```vue
+<template>
+  <div class="slot">
+    <slot />
+  </div>
+</template>
+```
+
+## 组件切换
+
+有些需求需要在多个组件间切换，可以用`<component>`元素和`is`attribute 实现。
+
+案例：
+
+两个子组件内容：
+
+```vue
+<script setup>
+const title = '组件 1';
+</script>
+<template>
+  <h1 class="slot">
+    {{ title }}
+  </h1>
+</template>
+```
+
+```vue
+<script setup>
+const title = '组件 2';
+</script>
+<template>
+  <h1 class="slot">
+    {{ title }}
+  </h1>
+</template>
+```
+
+父组件里这样用：
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import Child1 from './child1.vue';
+import Child2 from './child2.vue';
+let currentTab = ref('Child1');
+const tabs = { Child1, Child2 };
+function checkCurrentTab() {
+  if (currentTab.value === 'Child1') {
+    currentTab.value = 'Child2';
+  } else {
+    currentTab.value = 'Child1';
+  }
+}
+</script>
+
+<template>
+  <div>
+    <component :is="tabs[currentTab]"></component>
+    <button @click="checkCurrentTab">check tab</button>
+  </div>
+</template>
+```
+
+被传给 `:is` 的值可以是以下几种：
+
+* 被注册的组件名
+* 导入的组件对象
+
+也可以使用 `is` attribute 来创建一般的 HTML 元素。
+
+当使用`<component :is='...'`来给多个组件切换时，组件会在被切换后卸载。我们可以换成`<KeepAlive>`组件来强制让不活跃的组件保持存活状态。
+
+```vue
+<!-- 非活跃的组件将会被缓存！ -->
+<KeepAlive>
+  <component :is="activeComponent" />
+</KeepAlive>
+```
+
+# 组件注册
+
+## 全局注册
+
+`app.component()`方法让组件全局可用。
+
+在`main`文件中使用`app.component`来全局注册组件
+
+```js
+import { createApp } from 'vue';
+import App from './App.vue';
+import ChildA from './child1.vue';
+import ChildB from './child2.vue';
+
+const app = createApp(App);
+app.component('ChildA', ChildA).component('ChildB', ChildB);
+```
+
+在其他地方就可以直接用：
+
+```
+<!-- 这在当前应用的任意组件中都可用 -->
+<ComponentA/>
+<ComponentB/>
+```
+
+全局注册的组件即使没用也不会被`tree-shaking`删除，同时由于全局注册的组件不需要引入也可以使用，这就使得依赖关系不是很明确。
+
+## 局部注册
+
+局部注册就是通过`import`来引入子组件。
+
+```vue
+<script setup>
+import ComponentA from './ComponentA.vue'
+</script>
+
+<template>
+  <ComponentA />
+</template>
+```
+
+# Props
+
+子组件需要显式声明 prop，除了使用字符串数组外，还可以使用对象的形式
+
+```js
+defineProps({ title: String });
+defineProps(['title']);
+```
+
+对象形式声明中的每个属性，key 是 prop 的名称，而值应该是预期类型的构造函数。
+
+使用 TypeScript 的类型标注：
+
+```js
+const props = defineProps<{ title: string }>();
+
+{{ props.title }}
+```
+
+## 传递 prop 细节
+
+* props 属性名应使用小驼峰形式
+
+* 动态 prop 使用`v-bind`或者`:`绑定
+
+* 使用动态 prop传递字符串时需要带引号，否则会被认为是 number 类型
+
+* 传递true 时可以简写 `<BlogPost is-published />`
+
+* 可以用一个对象来传递多个 prop
+
+  ```vue
+  <Child1 v-bind="{ title, name }" />
+  ```
+
+  等价于：
+
+  ```vue
+  <Child1 :title="title" :name="name" />
+  ```
+
+
+  ## 单项数据
+
+  所有的 prop 都遵循着**单向绑定**原则，prop 因父组件的更新而变化，自然地将新的状态向下流往子组件，而不会逆向传递。这避免了子组件意外修改了父组件的状态，不然应用的数据流就会变得难以理解了。
+
+  子组件不能更改 prop，因为 prop 是只读的。（但是可以更改引用类型内部的值）
+
+  如果子组件想要更改 prop，可以这么做：
+
+  1. prop 用于被传入初始值，子组件定义一个新的局部属性，将 prop 当做初始值
+
+     ```js
+     const props = defineProps(['initialCounter'])
+     
+     // 计数器只是将 props.initialCounter 作为初始值
+     // 像下面这样做就使 prop 和后续更新无关了
+     const counter = ref(props.initialCounter)
+     ```
+
+  2. 子组件使用计算属性，而依赖则使用父组件传递下来的 prop
+
+     ```js
+     const props = defineProps(['size'])
+     
+     // 该 prop 变更时计算属性也会自动更新
+     const normalizedSize = computed(() => props.size.trim().toLowerCase())
+     ```
+
+  由于 prop 可以传递引用类型，所以其实可以更改引用类型内部的值，但是这样会使得数据变得难以推理，所以不要这么做，如果真的想改，则应该调用事件通知父组件更改。
+
+# 组件事件
+
+`$emit`触发组件自定义事件
+
+```vue
+<!-- MyComponent -->
+<button @click="$emit('someEvent')">click me</button>
+```
+
+父组件监听
+
+```vue
+<MyComponent @some-event="callback" />
+```
+
+自定义事件支持修饰符
+
+```vue
+<MyComponent @some-event.once="callback" />
+```
+
+Vue会自动将小驼峰方式转化成`kebab-case`,所以上面的示例中子组件使用`someEvent`触发，父组件则使用`@some-event`来监听。
+
+> 组件事件不会冒泡
+
+## 事件参数
+
+子组件通过`$emit`传递参数
+
+```vue
+<button @click="$emit('increaseBy', 1)">
+  Increase by 1
+</button>
+```
+
+父组件接收
+
+```vue
+<MyButton @increase-by="(n) => count += n" />
+```
+
+> 所有传入 `$emit()` 的额外参数都会被直接传向监听器。举个例子，`$emit('foo', 1, 2, 3)` 触发后，监听器函数将会收到这三个参数值。
+
+## 声明触发的事件
+
+子组件处声明：
+
+```js
+const emit = defineEmits(['inFocus', 'submit'])
+```
+
+使用`TypeScript`来标注类型
+
+```js
+<script setup lang="ts">
+const emit = defineEmits<{
+  (e: 'change', id: number): void
+  (e: 'update', value: string): void
+}>()
+</script>
+```
+
+如果一个原生事件的名字 (例如 `click`) 被定义在 `emits` 选项中，则监听器只会监听组件触发的 `click` 事件而不会再响应原生的 `click` 事件。
+
+
+
+## 配合 v-model
+
+子组件写法：
+
+```vue
+<script setup lang="ts">
+defineProps<{ modelValue: string }>();
+defineEmits(['update:modelValue']);
+</script>
+<template>
+  <input
+    type="text"
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target?.value)"
+  />
+</template>
+```
+
+父组件写法：
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import Child1 from './child1.vue';
+const modelValue = ref<string>('');
+</script>
+
+<template>
+  <div>
+    <Child1 v-model="modelValue" />
+    modelValue: {{ modelValue }}
+  </div>
+</template>
+```
+
+父组件的这行代码：
+
+```vue
+    <Child1 v-model="modelValue" />
+```
+
+相当于
+
+```vue
+    <Child1
+      :modelValue="modelValue"
+      @update:modelValue="(value:string) => (modelValue = value)"
+    />
+```
+
+
+
+### v-model传参
+
+默认情况下，`v-model` 在组件上都是使用 `modelValue` 作为 prop，以 `update:modelValue` 作为对应的事件。我们可以通过给 `v-model` 指定一个参数来更改这些名字：
+
+```vue
+<MyComponent v-model:title="bookTitle" />
+```
+
+在这个例子中，子组件应该有一个 `title` prop，并在变更时向父组件发射 `update:title` 事件
+
+```vue
+<!-- MyComponent.vue -->
+<script setup>
+defineProps(['title'])
+defineEmits(['update:title'])
+</script>
+
+<template>
+  <input
+    type="text"
+    :value="title"
+    @input="$emit('update:title', $event.target.value)"
+  />
+</template>
+```
+
+
+
+### 多个 v-model
+
+使用 v-model 参数配合来传递多个 v-model
+
+```vue
+<UserName
+  v-model:first-name="firstName"
+  v-model:last-name="lastName"
+/>
+```
+
+
+
+### 处理v-model 修饰符
+
+默认的修饰符通过`modelModifiers`这个 `props`属性传递给子组件。
+
+比如以下代码：
+
+```vue
+<script setup lang="ts">
+const props = defineProps(['modelValue', 'modelModifiers']);
+
+const emit = defineEmits(['update:modelValue']);
+
+function input(e: Event) {
+  let value = e?.target?.value as string;
+  if (props.modelModifiers.capitalize) {
+    value = value[0].toUpperCase() + value.slice(1);
+  }
+  emit('update:modelValue', value);
+}
+</script>
+<template>
+  <input type="text" :value="modelValue" @input="input" />
+</template>
+```
+
+上面的代码是子组件通过`modelModifiers`里面有没有`capitalize`来将首字母大写。
+
+`capitalize`是父组件传递过来的修饰符。
+
+父组件是这样传递修饰符的
+
+```vue
+    <Child1 v-model.capitalize="value" />
+```
+
+对于又有参数又有修饰符的 `v-model` 绑定，生成的 prop 名是 `arg + "Modifiers"`。举个例子：
+
+父组件里传递：
+
+```vue
+    <Child1 v-model:value.capitalize="value" />
+```
+
+那么子组件里就应该是这样的：
+
+```js
+const props = defineProps(['value', 'valueModifiers']);
+
+const emit = defineEmits(['update:value']);
+console.log(props.titleModifiers) // { capitalize: true }
+```
+
+
+
+# 透传 Attribute
+
+## Attribute 继承
+
+“透传 attribute”是传递给组件的 attribute 或者 `v-on` 事件监听器，但并没有显式地声明在所接收组件的 [props](https://staging-cn.vuejs.org/guide/components/props.html) 或 [emits](https://staging-cn.vuejs.org/guide/components/events.html#defining-custom-events) 上。最常见的例子就是 `class`、`style` 和 `id`。
+
+举个例子，一个子组件的模板是这样写的：
+
+```html
+<!-- <MyButton> 的模板 -->
+<button>click me</button>
+```
+
+父组件使用了这个组件：
+
+```vue
+<MyButton class="large" />
+```
+
+最后渲染出的 DOM 结果是：
+
+```html
+<button class="large">click me</button>
+```
+
+如果子组件的根元素有了 `class`或者`style`，就会跟父组件上继承过来的值互相合并。
+
+```html
+<!-- <MyButton> 的模板 -->
+<button class="btn">click me</button>
+```
+
+最后渲染出来的是这样：
+
+```html
+<button class="btn large">click me</button>
+```
+
+**`v-on`监听器继承**
+
+同样的规则也适用于 `v-on` 事件监听器：
+
+```vue
+<MyButton @click="onClick" />
+```
+
+监听器 `click` 会被添加到 `<MyButton>` 的根元素，即那个原生的 `<button>` 元素之上。当原生的 `<button>` 被点击，会触发父组件的 `onClick` 方法。如果原生 `button` 元素已经通过 `v-on` 绑定了一个事件监听器，则这些监听器都会被触发。
+
+## 深层组件继承
+
+如果一个组件在根节点上渲染另一个组件,即这样的：
+
+```vue
+<!-- <MyButton/> 的模板，只是渲染另一个组件 -->
+<BaseButton />
+```
+
+此时 `<MyButton>` 接收的透传 attribute 会直接传向 `<BaseButton>`。
+
+* 透传的 attribute 不会包含 `<MyButton>` 上声明过的 props 或是针对 `emits` 声明事件的 `v-on` 侦听函数，换句话说，声明过的 props 和侦听函数被 `<MyButton>`“消费”了。
+* 透传的 attribute 若符合声明，也可以作为 props 传入 `<BaseButton>`。
+
+
+
+## 禁用 Attribute 继承
+
+如果你**不想要**一个组件自动地继承 attribute，你可以在组件选项中设置 `inheritAttrs: false`。
+
+如果你使用了 `<script setup>`，你需要一个额外的 `<script>` 块来书写这个选项声明：
+
+```js
+<script>
+// 使用一个简单的 <script> to declare options
+export default {
+  inheritAttrs: false
+}
+</script>
+
+<script setup>
+// ...setup 部分逻辑
+</script>
+```
+
+最常见的需要禁用 attribute 继承的场景就是 attribute 需要应用在根节点以外的其他元素上。通过设置 `inheritAttrs` 选项为 `false`，你可以完全控制透传进来的 attribute 如何应用。
+
+这些透传进来的 attribute 可以在模板的表达式中直接用 `$attrs` 访问到。
+
+```vue
+<span>Fallthrough attribute: {{ $attrs }}</span>
+```
+
+这个 `$attrs` 对象包含了除组件的 `props` 和 `emits` 属性外的所有其他 attribute，例如 `class`，`style`，`v-on` 监听器等等。
+
+- 和 props 有所不同，透传 attributes 在 JavaScript 中保留了它们原始的大小写，所以像 `foo-bar` 这样的一个 attribute 需要通过 `$attrs['foo-bar']` 来访问。
+- 像 `@click` 这样的一个 `v-on` 事件监听器将在此对象下被暴露为一个函数 `$attrs.onClick`。
+
+有时候我们可能为了样式，需要在 `<button>` 元素外包装一层 `<div>`：
+
+```vue
+<div class="btn-wrapper">
+  <button class="btn">click me</button>
+</div>
+```
+
+我们想要所有像 `class` 和 `v-on` 监听器这样的透传 attribute 都应用在内部的 `<button>` 上而不是外层的 `<div>` 上。我们可以通过设定 `inheritAttrs: false` 和使用 `v-bind="$attrs"` 来实现：
+
+```vue
+<div class="btn-wrapper">
+  <button class="btn" v-bind="$attrs">click me</button>
+</div>
+```
+
+[没有参数的 `v-bind`](https://staging-cn.vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes) 会将一个对象的所有属性都作为 attribute 应用到目标元素上。
+
+## 多根节点的 Attribute 继承
+
+和单根节点组件有所不同，有着多个根节点的组件没有自动 attribute 透传行为。
+
+如果 `$attrs` 被显式绑定，则不会有警告：
+
+```vue
+<header>...</header>
+<main v-bind="$attrs">...</main>
+<footer>...</footer>
+```
+
+ 
+
+## 查看组件中所有透传的attribute
+
+可以在 `<script setup>` 中使用 `useAttrs()` API 来访问一个组件的所有透传 attribute：
+
+```vue
+<script setup>
+import { useAttrs } from 'vue'
+
+const attrs = useAttrs()
+</script>
+```
+
+
+
