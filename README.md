@@ -144,6 +144,8 @@
 
 6.[Node.js 基础](https://github.com/18888628835/Blog/blob/main/Node.js/Node.js基础.md)
 
+7.[GraphQL](https://github.com/18888628835/Blog/blob/main/Node.js/GraphQL.md)
+
 ## Webpack
 
 1.[babel](https://github.com/18888628835/Blog/blob/main/Webpack/babel.md)
