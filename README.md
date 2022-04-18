@@ -36,9 +36,13 @@
 
 6.[封装一个请求工具函数](https://github.com/18888628835/Blog/issues/59)
 
-7.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/前端可视化/如何使用Echarts和SVG文件写大屏地图.md)
+7.[前端性能优化](https://github.com/18888628835/Blog/blob/main/前端性能优化/前端性能优化.md)
 
-8.[前端性能优化](https://github.com/18888628835/Blog/blob/main/前端性能优化/前端性能优化.md)
+## 前端可视化
+
+1.[如何使用 Echarts 和 SVG 文件写大屏地图](https://github.com/18888628835/Blog/blob/main/前端可视化/如何使用Echarts和SVG文件写大屏地图.md)
+
+2.[Canvas](https://github.com/18888628835/Blog/blob/main/前端可视化/Canvas.md)
 
 ## JavaScript 设计模式
 
