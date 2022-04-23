@@ -86,6 +86,8 @@
 
 13.[WebSocket](https://github.com/18888628835/Blog/blob/main/JavaScript/WebSocket.md#websocket简介)
 
+14.[网络请求](https://github.com/18888628835/Blog/blob/main/JavaScript/网络请求.md)
+
 ## JavaScript 深入
 
 1.[深入理解原型](https://github.com/18888628835/Blogs/issues/1)
