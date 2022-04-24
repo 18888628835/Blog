@@ -381,3 +381,281 @@ for(let [name, value] of formData) {
 - `formData.delete(name)`
 - `formData.get(name)`
 - `formData.has(name)`
+
+
+
+# 用Fetch实现下载进度
+
+`fetch`方法没办法跟踪上传进度，但是可以跟踪**下载进度**。
+
+我们可以使用`response.body`属性，这是一个可读流——`ReadableStream`,它可以逐块（chunk）提供 body。
+
+我们在下载时可以通过`response.body.getReader()`方法来获取流读取器，然后通过这个流读取器来计算下载了多少。
+
+大概过程是这样的：
+
+```js
+// 代替 response.json() 以及其他方法
+const reader = response.body.getReader();
+
+// 在 body 下载时，一直为无限循环
+while(true) {
+  // 当最后一块下载完成时，done 值为 true
+  // value 是块字节的 Uint8Array
+  const {done, value} = await reader.read();
+
+  if (done) {
+    break;
+  }
+
+  console.log(`Received ${value.length} bytes`)
+}
+```
+
+调用`await reader.read()`方法会得到两个属性的对象：
+
+* `done` ——读取完成则为`true`，否则为`false`
+* `value`——字节的类型化数组：`Uint8Array`
+
+> 由于浏览器问题，上面循环异步迭代`ReadableStream`的方式不使用`for await..of`,而是`while`循环
+
+简单来说，我们需要在循环中接受响应块（response chunk），直到加载完成，也就是 `done` 为 `true`。
+
+要将进度打印出来，我们只需要将每个接收到的片段 `value` 的长度（length）加到 counter 即可。
+
+步骤是这样的：
+
+```js
+// Step 1：启动 fetch，并获得一个 reader
+let response = await fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits?per_page=100');
+
+const reader = response.body.getReader();
+
+// Step 2：获得总长度（length）
+const contentLength = +response.headers.get('Content-Length');
+
+// Step 3：读取数据
+let receivedLength = 0; // 当前接收到了这么多字节
+let chunks = []; // 接收到的二进制块的数组（包括 body）
+while(true) {
+  const {done, value} = await reader.read();
+
+  if (done) {
+    break;
+  }
+
+  chunks.push(value);
+  receivedLength += value.length;
+
+  console.log(`Received ${receivedLength} of ${contentLength}`)
+}
+
+// Step 4：将块连接到单个 Uint8Array
+let chunksAll = new Uint8Array(receivedLength); // 创建一个具有所有数据块合并后的长度的同类型数组。
+let position = 0;
+for(let chunk of chunks) {
+  chunksAll.set(chunk, position); // 使用 .set(chunk, position) 方法，从数组中一个个地复制这些 chunk
+  position += chunk.length;
+}
+
+// Step 5：解码成字符串
+let result = new TextDecoder("utf-8").decode(chunksAll);
+
+// 我们完成啦！
+let commits = JSON.parse(result);
+alert(commits[0].author.login);
+```
+
+步骤解读：
+
+1. 使用 fetch 获取数据，但不调用`response.json()`,而是获取一个流读取器（stream reader）`response.body.getReader()`
+
+   >  要么使用流读取器，要么使用 `response` 方法,不能同时用两种方法读取相同响应。
+
+2. 在读取数据之前，从`Content-Length`中获取完整的响应长度。
+
+3. 调用 `await reader.read()`,直到结果为`done:true`。
+
+   这时候需要将响应收集到数组`chunks`中。因为我们不能再用`response.json`来读取响应内容，所以需要有个地方把它存起来。
+
+4. 拥有了`chunks`结果之后，实际上里面是一段一段的 `Unit8Array`的字节块。
+
+   * **如果我们想要创建二进制内容（比如图片、文件**），就可以使用`Blob`类来创建一个 `Blob`对象。`Blob` 类直接可以接收内含`Unit8Array`字节块的数组，这里可以写为：
+
+     ```js
+     let blob = new Blob(chunks);
+     ```
+
+   * **如果我们想要做其他事情，比如将字节块解析成一段字符串**。我们首先需要将这些字节块拼起来：
+
+     这里使用一些代码来将其串联起来：
+
+     * 创建`chunksAll = new Uint8Array(receivedLength)`——一个具有所有数据块合并后的长度的同类型数组
+     * 使用`.set(chunk,position)`方法，从这些数组中挨个复制这些`chunk`
+     * 最后将结果拷贝到`chunksAll`中，但它们是字节数组，并不是字符串，我们需要解析这些字节——可以使用内建的`TextDecoder`对象来完成。
+
+以上，这就是使用`fetch`来跟踪**下载**进度的过程。
+
+
+
+# 用Fetch实现请求中止(Abort)
+
+JavaScript 没有中止`Promise`的概念。但我们可以取消`fetch`请求。
+
+有一个特殊的内置对象`AbortController`，它不单可以中止`fetch`，还可以中止其他异步任务。
+
+## AbortController 对象用法
+
+创建一个控制器：
+
+```js
+let controller = new AbortController();
+```
+
+控制器中有一个属性和一个方法：
+
+* `abort()`方法
+* `signal`属性，我们可以在这个属性上设置事件监听器
+
+当`abort`被调用时：
+
+* `controller.signal`会触发`abort`事件
+* `controller.signal.aborted` 属性变为 `true`。
+
+这个处理方式需要我们分两部分去做：
+
+1. 在`controller.signal`上设置一个监听器，里面放一个取消操作后的回调函数
+2. 调用`controller.abort()`来取消
+
+下面是一个取消`setTimeout`的例子：
+
+```html
+  <body>
+    <button id="button">点击我取消异步任务</button>
+    <script>
+      let controller = new AbortController();
+      let signal = controller.signal;
+      let timer = setTimeout(() => {
+        alert("这是 setTimeout 异步执行的任务");
+      }, 3000);
+      // 可取消的操作这一部分
+      // 获取 "signal" 对象，
+      // 并将监听器设置为在 controller.abort() 被调用时触发
+      signal.addEventListener("abort", () => clearTimeout(timer));
+      button.onclick = function () {
+        // 另一部分，取消（在之后的任何时候）：
+        controller.abort(); // 中止！
+        // 事件触发，signal.aborted 变为 true
+        alert(signal.aborted); // true
+      };
+    </script>
+  </body>
+```
+
+上面的代码会在点击 `button` 后取消`setTimeout`异步任务。
+
+其实就是在`abort()`后触发监听器里面的函数，跟正常的发布订阅模式没有区别。
+
+上面的实现完全没必要用到`AbortController`对象也可以实现。
+
+但这个对象有意思的地方在于与 `fetch` 的集成。
+
+## 与 fetch 集成实现取消请求的功能
+
+fetch 的 `options` 参数可以接受一个`signal`属性，我们可以将`AbortController` 的 `signal` 属性传递进去：
+
+```js
+let controller = new AbortController();
+fetch(url, {
+  signal: controller.signal
+});
+```
+
+这时候`fetch`会监听`signal`的 `abort` 事件。当我们想要中止`fetch`时，这样调用：
+
+```javascript
+controller.abort();
+```
+
+然后`fetch`就从 `signal` 获取了事件并中止了请求。
+
+当`fetch`被中止时，它的`promise`就会`reject`一个`name`为`AbortError`的`error`，我们需要用`try..catch`进行捕获。
+
+```js
+// 1 秒后中止
+let controller = new AbortController();
+setTimeout(() => controller.abort(), 1000);
+
+try {
+  let response = await fetch('/article/fetch-abort/demo/hang', {
+    signal: controller.signal
+  });
+} catch(err) {
+  if (err.name == 'AbortError') { // handle abort()
+    alert("Aborted!");
+  } else {
+    throw err;
+  }
+}
+```
+
+## 并行取消多个 fetch
+
+`AbortController` 是可伸缩的。它允许一次取消多个 fetch。
+
+```js
+let urls = [...]; // 要并行 fetch 的 url 列表
+
+let controller = new AbortController();
+
+// 一个 fetch promise 的数组
+let fetchJobs = urls.map(url => fetch(url, {
+  signal: controller.signal
+}));
+
+let results = await Promise.all(fetchJobs);
+
+// controller.abort() 被从任何地方调用，
+// 它都将中止所有 fetch
+```
+
+上面的代码能够并行 `fetch` 很多个 `urls`，并使用单个控制器使其全部中止。
+
+如果我们有自己的与 `fetch` 不同的异步任务，我们可以使用单个 `AbortController` 中止这些任务以及 fetch。
+
+```js
+let urls = [...];
+let controller = new AbortController();
+
+let ourJob = new Promise((resolve, reject) => { // 我们的任务
+  ...
+  controller.signal.addEventListener('abort', reject);
+});
+
+let fetchJobs = urls.map(url => fetch(url, { // fetches
+  signal: controller.signal
+}));
+
+// 等待完成我们的任务和所有 fetch
+let results = await Promise.all([...fetchJobs, ourJob]);
+
+// controller.abort() 被从任何地方调用，
+// 它都将中止所有 fetch 和 ourJob
+```
+
+## 小结
+
+* `AbortController`是一个简单对象，当`abort()`方法被调用时，会调用自身`signal`属性监听的`abort`事件，并将`singnal.aborted`设置为`true`
+
+* `signal`可以传递给 fetch 的` options.signal`属性，这样 fetch 就能够监听到他，因此可以中断 `fetch`
+
+* 我们也可以在自己的代码中使用`AbortController`，先监听`abort`事件，在调用`abort()`方法后触发`abort`事件来中止某些任务
+
+  
+
+# Fetch API
+
+https://zh.javascript.info/fetch-api
+
+
+
