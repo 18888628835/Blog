@@ -314,21 +314,28 @@ git push -u origin main //推送本地的分支到远程的main分支 写过一�
 
 如果遇到git pull 那就输入git pull一下 一般需要git pull的情况是远程仓库发生了变动 需要与本地做合并
 
-如何上传其他分支 
+**如何上传其他分支** 
 
 ```bash
-git push origin x:x
+$ git push origin x:x
 ```
 
 方法2:
 
 ```bash
-git checkout x
+$ git checkout x
 
-git push -u origin x 
+$ git push -u origin x 
 ```
 
-下载别人的代码
+**如何修改远程url 地址：**
+
+```bash
+$ git remote set-url origin xxxxx
+$ git remote get-url origin
+```
+
+**下载别人的代码**
 
 ```bash
 git clone git@xxxxxxx 如果是自己的代码 可以用ssh 如果是别人的 可以用http的码
