@@ -34,23 +34,25 @@
 
 API 解释：
 
-`canvas.getContext(2d)`获取这个元素的`context`，图像通过这个位置渲染
+`canvas.getContext("2d")`获取这个元素的`context`，图像通过上下文来绘制。
 
-实际的绘制则通过[`CanvasRenderingContext2D`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D)来完成。
+2d 表示实际的绘制通过[`CanvasRenderingContext2D`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D)来完成。
 
-当前使用的是`fillStyle`来填充颜色，`fillRect`用来将绘制的图像的左上角放在`canvas`的`(0,0)`位置，图像的大小为宽 150，高 100。
+当前使用的是`fillStyle`来填充颜色，`fillRect`用来绘制矩形，这个 `API`将绘制的图像的左上角放在`canvas`的`(0,0)`位置，图像的大小为宽 150，高 100。
 
 每个`canvas`的默认大小为 300*150，上面的代码会绘制出以下图形
 
 ![image-20220418200845308](../assets/image-20220418200845308.png)
 
-# 基本用法
+# 基本概念
 
 ## canvas元素
 
-`<canvas>`标签只有两个属性——`width` 和 `height`。也可以使用 CSS 定义大小，但是绘制时图像会伸缩以适应它的框架尺寸，有时候会引发扭曲，所以我们需要用`width`和`height`来明确宽高。
+如果需要使用 canvas，我们需要创建画布——这就是`<canvas>`标签。
 
-`<canvas>`元素可以设置样式，如果没有规定时，会完全变成透明。
+`<canvas>`标签只有两个`attribute`属性——`width` 和 `height`。也可以使用 CSS 定义大小，但是绘制时图像会伸缩以适应它的框架尺寸，有时候会引发扭曲，所以我们需要用`width`和`height`来明确宽高。
+
+`<canvas>`元素可以设置样式，如果没有规定规则时，会完全变成透明。
 
 如果在里面放一些内容，那么浏览器会将其忽略。
 
@@ -83,32 +85,9 @@ if (canvas.getContext){
 }
 ```
 
-获取了上下文之后，我们可以用来画多个图形
+获取了上下文之后，我们可以用来绘制图形了。但在绘制图形之前，我们需要知道图形会画到画布的哪个位置。
 
-```js
-    <script>
-      function drawn() {
-        let canvas = document.getElementById("canvas");
-        if (canvas.getContext) {
-          const ctx = canvas.getContext("2d");
-          ctx.fillStyle = "green";
-          ctx.fillRect(10, 10, 150, 100);
-
-          ctx.fillStyle = "red";
-          ctx.fillRect(30, 30, 150, 100);
-        }
-      }
-      drawn();
-    </script>
-```
-
-上面的代码会渲染出以下图形：
-
-![image-20220418202948249](../assets/image-20220418202948249.png)
-
-
-
-# 绘制形状
+`canvas` 栅格可以抽象表示画布的坐标和网格。
 
 ## canvas 栅格
 
@@ -120,70 +99,9 @@ if (canvas.getContext){
 
 图中蓝色的坐标为距离左边 x 像素，距离顶部 y 像素，坐标为(x,y)。
 
-## 绘制矩形
+## 绘制步骤
 
 `<canvas>`只支持两种形式的图形绘制：**矩形和路径**，路径指的是由一个系列点连成的线段。
-
-所有其他类型的图形都是通过一条或者多条路径组合而成的。
-
-绘制矩形可以使用三个方法：
-
-* `fillRect(x,y,width,height)` 绘制一个填充的矩形
-* `strokeRect(x,y,width,height)`绘制一个矩形的边框
-* `clearRect(x,y,width,height)` 清除指定矩形区域，让清除部分完全透明
-
-所有方法的参数都是一致的：
-
-`x`和`y`是指定了在 canvas 画布上所绘制矩形的左上角的坐标。`width` 和` height`设置矩形的尺寸。
-
-```js
-      function drawn() {
-        let canvas = document.getElementById("canvas");
-        if (canvas.getContext) {
-          const ctx = canvas.getContext("2d");
-          ctx.fillRect(25, 25, 100, 100);
-          ctx.clearRect(45, 45, 60, 60);
-          ctx.strokeRect(50, 50, 50, 50);
-        }
-      }
-```
-
-`fillRect`绘制了边长为 100 的黑色正方形
-
-`clearRect`从正方形的中心开始擦除一个 60*60 的正方形
-
-`strokeRect`在清除区域内生成一个 50*50 的正方形边框
-
-最终效果：
-
-![image-20220418223111736](../assets/image-20220418223111736.png)
-
-还有一个画矩形的方法：
-
-`rect(x, y, width, height)`
-
-绘制一个左上角坐标为（x,y），宽高为width以及height的矩形。
-
-当该方法执行的时候，moveTo()方法自动设置坐标参数（0,0）。也就是说，当前笔触自动重置回默认坐标。
-
-这个方式需要手动调用`stroke`或者`fill`方法来渲染路径，相当于
-
- `fillRect = rect + fill` 
-
-`strokeRect = rect + stroke`
-
-```js
-      function draw() {
-        var canvas = document.getElementById("canvas");
-        if (canvas.getContext) {
-          const ctx = canvas.getContext("2d");
-          ctx.rect(25, 25, 100, 100);
-          ctx.stroke();
-        }
-      }
-```
-
-## 绘制路径
 
 图形的基本元素是路径，路径是由不同颜色和宽度的线段或曲线相连形成的不同形状的点的集合。
 
@@ -191,7 +109,7 @@ if (canvas.getContext){
 
 1. 创建路径起始点
 2. 使用画图命令画路径
-3. 封闭路径
+3. 闭合路径
 4. 一旦路径生成，就只能通过描边或填充路径区域来渲染图形
 
 对应的 API 如下：
@@ -210,34 +128,6 @@ if (canvas.getContext){
 第三，就是闭合路径`closePath()`,这个方法不是必需要写的。这个方法会通过绘制一条从当前点到开始点的直线来闭合图形。如果图形已经闭合，那么什么都不做。
 
 > 当调用 `fill` 函数时,所有没有闭合的形状都会自动闭合，所以我们不需要调用`closePath`函数。但是调用`stroke`不会自动闭合。
-
-## 绘制三角形
-
-```html
-  <body>
-    <canvas id="canvas"></canvas>
-    <script>
-      function draw() {
-        var canvas = document.getElementById("canvas");
-        if (canvas.getContext) {
-          var ctx = canvas.getContext("2d");
-
-          ctx.beginPath();
-          ctx.moveTo(75, 50); // 设置 canvas 内x 轴为 75，y 轴 50 的起点
-          ctx.lineTo(100, 75); // 从起点往x 轴为 100，y 轴为 75 的地方绘制路径
-          ctx.lineTo(100, 25); // 从上面的位置到x 轴为 100，y 轴为 25 的地方绘制路径
-          ctx.closePath(); // 关闭路径，从现在的点回到起始点
-          ctx.stroke(); // 绘制路径
-        }
-      }
-      draw();
-    </script>
-  </body>
-```
-
-<img src="../assets/image-20220419212041647.png" alt="image-20220419212041647" style="zoom:100%;" />
-
-只有调用了`stroke`之后才会给路径渲染轮廓，否则只是把路径给绘制出来了，对视觉来说是透明的。
 
 ## moveTo 移动笔触
 
@@ -273,7 +163,7 @@ if (canvas.getContext){
 
 ![image-20220419212927355](../assets/image-20220419212927355.png)
 
-
+# 绘制形状
 
 ## lineTo 绘制直线
 
@@ -312,6 +202,120 @@ if (canvas.getContext){
 
 由于`fill`会自动填充三角形，所以我们并不需要调用`closePath`来闭合它。但是`stroke`则需要`closePath`。
 
+## 绘制矩形
+
+绘制矩形可以使用三个语法糖方法：
+
+* `fillRect(x,y,width,height)` 绘制一个填充的矩形
+* `strokeRect(x,y,width,height)`绘制一个矩形的边框
+* `clearRect(x,y,width,height)` 清除指定矩形区域，让清除部分完全透明
+
+所有方法的参数都是一致的：
+
+`x`和`y`是指定了在 canvas 画布上所绘制矩形的左上角的坐标。`width` 和` height`设置矩形的尺寸。
+
+```js
+      function drawn() {
+        let canvas = document.getElementById("canvas");
+        if (canvas.getContext) {
+          const ctx = canvas.getContext("2d");
+          ctx.fillRect(25, 25, 100, 100);
+          ctx.clearRect(45, 45, 60, 60);
+          ctx.strokeRect(50, 50, 50, 50);
+        }
+      }
+```
+
+`fillRect`绘制了边长为 100 的黑色正方形
+
+`clearRect`从正方形的中心开始擦除一个 60*60 的正方形
+
+`strokeRect`在清除区域内生成一个 50*50 的正方形边框
+
+最终效果：
+
+![image-20220418223111736](../assets/image-20220418223111736.png)
+
+以上三种画矩形的方法都是基于`rect`方法来实现的语法糖：
+
+`rect(x, y, width, height)`
+
+绘制一个左上角坐标为（x,y），宽高为width以及height的矩形。
+
+当该方法执行的时候，moveTo()方法自动设置坐标参数（0,0）。也就是说，当前笔触自动重置回默认坐标。
+
+这个方式需要手动调用`stroke`或者`fill`方法来渲染路径，相当于
+
+ `fillRect = rect + fill` 
+
+`strokeRect = rect + stroke`
+
+```js
+      function draw() {
+        var canvas = document.getElementById("canvas");
+        if (canvas.getContext) {
+          const ctx = canvas.getContext("2d");
+          ctx.rect(25, 25, 100, 100);
+          ctx.stroke();
+        }
+      }
+```
+
+画多个图形
+
+```js
+    <script>
+      function drawn() {
+        let canvas = document.getElementById("canvas");
+        if (canvas.getContext) {
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "green";
+          ctx.fillRect(10, 10, 150, 100);
+
+          ctx.fillStyle = "red";
+          ctx.fillRect(30, 30, 150, 100);
+        }
+      }
+      drawn();
+    </script>
+```
+
+上面的代码会渲染出以下图形：
+
+![image-20220418202948249](../assets/image-20220418202948249.png)
+
+所有其他类型的图形都是通过一条或者多条路径组合而成的。
+
+## 绘制三角形
+
+```html
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      function draw() {
+        var canvas = document.getElementById("canvas");
+        if (canvas.getContext) {
+          var ctx = canvas.getContext("2d");
+
+          ctx.beginPath();
+          ctx.moveTo(75, 50); // 设置 canvas 内x 轴为 75，y 轴 50 的起点
+          ctx.lineTo(100, 75); // 从起点往x 轴为 100，y 轴为 75 的地方绘制路径
+          ctx.lineTo(100, 25); // 从上面的位置到x 轴为 100，y 轴为 25 的地方绘制路径
+          ctx.closePath(); // 关闭路径，从现在的点回到起始点
+          ctx.stroke(); // 绘制路径
+        }
+      }
+      draw();
+    </script>
+  </body>
+```
+
+<img src="../assets/image-20220419212041647.png" alt="image-20220419212041647" style="zoom:100%;" />
+
+只有调用了`stroke`之后才会给路径渲染轮廓，否则只是把路径给绘制出来了，对视觉来说是透明的。
+
+
+
 ## arc 绘制圆弧
 
 如果要画圆或者圆弧，我们使用`arc`方法。
@@ -320,7 +324,7 @@ if (canvas.getContext){
 
 这个 API 的意思是以(x,y)为圆心的以 radius 为半径的，从`startAngle`开始到`endAngle`结束，按照`anticlockwise`给定的方法（默认为顺时针）来生成。
 
-`startAngle`以及`endAngle`参数用弧度定义了开始以及结束的弧度。这些都是以x轴为基准。参数`anticlockwise`为一个布尔值。为true时，是逆时针方向，否则顺时针方向。
+`startAngle`以及`endAngle`参数用弧度定义了开始以及结束的弧度。这些都是以x轴为基准。参数`anticlockwise`为一个布尔值。为`true`时，是逆时针方向，否则顺时针方向。
 
 弧度的计算：0 到`Math.PI`是半圆，0 到`Math.PI * 2`是全圆。
 
@@ -439,7 +443,387 @@ Path2D.addPath(path[,transform])
 添加一条路径到当前路径。
 ```
 
+```html
+  <body>
+    <canvas width="300" height="300"></canvas>
+    <script>
+      const canvas = document.querySelector("canvas");
+      function draw() {
+        let ctx = canvas.getContext("2d");
+
+        // 用一个 Path2D将绘制矩形的路径保存起来
+        var rectangle = new Path2D();
+        rectangle.rect(10, 10, 50, 50);
+        // 用一个 Path2D将绘制圆形的路径保存起来
+        var circle = new Path2D();
+        circle.moveTo(125, 35);
+        circle.arc(100, 35, 25, 0, 2 * Math.PI);
+        //ctx.fill和 ctx.stroke传入 Path2D进行绘制
+        ctx.stroke(rectangle);
+        ctx.fill(circle);
+      }
+      if (canvas.getContext) {
+        draw();
+      }
+    </script>
+  </body>
+```
+
+上面的代码是用 Path2D 对象来保存绘制出来的矩形和圆形，最后用 stroke 或者 fill 来把对象绘制在画布上。
+
+![img](https://mdn.mozillademos.org/files/9851/path2d.png)
+
+Path2D对象还可以将 SVG paths绘制到画布上。
+
+```js
+        var strokeSvg = new Path2D("M10 10 h 80 v 80 h -80 Z");
+        var fillSvg = new Path2D("M10 10 h 80 v 80 h -80 Z");
+        
+        ctx.stroke(strokeSvg);
+        ctx.fill(fillSvg);
+```
+
+# 绘制样式
+
+## 画颜色
+
+给图形上色需要用到两个 api：
+
+* fillStyle 填充颜色——相当于background-color
+* strokeStyle 线条颜色——相当于 border-color
+
+默认情况下线条或填充颜色都是黑色。
+
+> 一旦您设置了 `strokeStyle` 或者 `fillStyle` 的值，那么这个新值就会成为新绘制的图形的默认值。
+
+颜色只要符合 css 标准即可，也就是说，我们可以用以下形式的字符串：
+
+1. `rgba(x,x,x,x,1)`
+2. `rgb(x,x,x)`
+3. `##FFA500`
+4. `orange`
+
+示例：绘制一个填充背景颜色的格子
+
+```js
+      function draw() {
+        let ctx = canvas.getContext("2d");
+        if (canvas.getContext) {
+          ctx.fillStyle = "rgba(0,255,70,1)";
+          ctx.fillRect(10, 10, 20, 20);
+        }
+      }
+```
+
+用两层 for 循环绘制出颜色板
+
+```js
+      function draw() {
+        let ctx = canvas.getContext("2d");
+        if (canvas.getContext) {
+          for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 6; j++) {
+              ctx.fillStyle = `rgb(0,${Math.floor(255 - 42.5 * i)},${Math.floor(
+                255 - 42.5 * j
+              )})`;
+              ctx.fillRect(20 * i, 20 * j, 20, 20);
+            }
+          }
+        }
+      }
+```
+
+![image-20220515160849873](../assets/image-20220515160849873.png)
+
+## 透明度
+
+透明度用两种方法可以实现，一种是使用`rgba()`实现，另外一种是通过 `canvas` 提供的`globalAlpha`来实现。
+
+```js
+      function draw() {
+        let ctx = canvas.getContext("2d");
+        let colors = [
+          "red",
+          "green",
+          "rgba(200,200,200,0.5)",
+          "rgba(100,100,100,0.3)"
+        ];
+        if (canvas.getContext) {
+          // 画正方形
+          ctx.fillStyle = colors[0];
+          ctx.fillRect(0, 0, 100, 100);
+          ctx.fillStyle = colors[1];
+          ctx.fillRect(100, 0, 100, 100);
+          ctx.fillStyle = colors[2];
+          ctx.fillRect(0, 100, 100, 100);
+          ctx.fillStyle = colors[3];
+          ctx.fillRect(100, 100, 100, 100);
+
+          // 画圆形
+          ctx.beginPath();
+          // 用 globalAlpha 设置透明度
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = "orange";
+          ctx.arc(100, 100, 50, 0, Math.PI * 2, true);
+          ctx.fill();
+        }
+      }
+```
+
+![image-20220515165515712](../assets/image-20220515165515712.png)
+
+## 线型样式
+
+lineWidth 线条宽度
+
+lineCap 线条末端样式
+
+lineJoin 线条
+
+miterLimit 限制当两条线相交时交接处的最大长度
+
+getLineDash 获取当前虚线的样式
+
+setLineDash 设置当前虚线的样式
+
+lineDashOffset 设置虚线样式的起始偏移量
+
+### lineWidth线宽
+
+`lineWidth` 能够控制线条的粗细，默认是 1。
+
+```js
+      function draw() {
+        let ctx = canvas.getContext("2d");
+        if (canvas.getContext) {
+          ctx.lineWidth = 10;
+          ctx.beginPath();
+          ctx.moveTo(10, 10);
+          ctx.lineTo(10, 100);
+          ctx.stroke();
+        }
+      }
+```
+
+以上代码设置了一个宽为 10 的线条。
+
+![2022-05-15.170258](../assets/2022-05-15.170258.png)
+
+线宽是指给定路径的中心到两边的粗细，换句话说，会在路线的两边各绘制线宽的一半。因为画布的坐标并不和像素直接对应，当需要获得精确的水平或垂直线的时候要特别注意。
+
+下面是一个例子，由于路径的定位问题，最左边的以及所有宽度为奇数的线并不能精确呈现：
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  for (var i = 0; i < 10; i++){
+    ctx.lineWidth = 1+i;
+    ctx.beginPath();
+    ctx.moveTo(5+i*14,5);
+    ctx.lineTo(5+i*14,140);
+    ctx.stroke();
+  }
+}
+```
+
+![img](https://mdn.mozillademos.org/files/239/Canvas_linewidth.png)
+
+想要获取精确的线条，必须知道线条是如何被描绘出来的。我们用网格来替代canvas 的坐标格，每一个都是一个像素点。
+
+![img](https://developer.mozilla.org/@api/deki/files/601/=Canvas-grid.png)
+
+在第一幅图中，矩阵的线刚好填充了`(2,1)`到`(5,5)`，区域的边界刚好落在像素边缘上，这样就可以得到清晰的矩阵。
+
+而如果我们想要画一根线，这根线的线条路径在`(3,1)`到`(3,5)`,我们就可以得到图 2 的结果，深蓝色的填充区域仅仅延伸到路径两旁各一半像素。这一半像素仅仅是部分着色，结果就是以实际笔触颜色一半色调的颜色来填充整个区域（浅蓝和深蓝的部分）。这就是上例中为何宽度为 1.0 的线并不准确的原因。
+
+如果想要解决这个问题，就需要必须对路径施以更加精确的控制。已知粗 1.0 的线条会在路径两边各延伸半像素，那么像第三幅图那样绘制从 (3.5,1) 到 (3.5,5) 的线条，其边缘正好落在像素边界，填充出来就是准确的宽为 1.0 的线条。
+
+> 上面竖条的 Y 轴刚好落在对应的网格线上，否则也会出现跟 X 轴一样的问题。但是Y 轴的这个问题可以通过设置 `lineCap:square`来解决。通过设置成`square`可以让线条末端的样式得到扩展，这样就能够完全覆盖整个像素格。
+
+### lineCap线条末端样式
+
+属性 `lineCap` 的值决定了线段端点显示的样子。它可以为下面的三种的其中之一：`butt`，`round` 和 `square`。默认是 `butt。`
+
+下面的例子绘制了三条直线，分别赋予不同的 lineCap 值，为了刚好看到他们的区别，还有两根辅助线。
+
+```js
+      function draw() {
+        let ctx = canvas.getContext("2d");
+        if (canvas.getContext) {
+          // 绘制辅助线
+          ctx.beginPath();
+          ctx.strokeStyle = "red";
+          ctx.moveTo(10, 10);
+          ctx.lineTo(140, 10);
+          ctx.stroke();
+          ctx.moveTo(10, 140);
+          ctx.lineTo(140, 140);
+          ctx.stroke();
+
+          const lineCap = ["butt", "round", "square"];
+          ctx.lineWidth = 10;
+          ctx.strokeStyle = "black";
+          for (let i = 0; i < lineCap.length; i++) {
+            ctx.beginPath();
+            ctx.lineCap = lineCap[i];
+            ctx.moveTo(20 + 50 * i, 10);
+            ctx.lineTo(20 + 50 * i, 140);
+            ctx.stroke();
+          }
+        }
+      }
+```
+
+![image-20220515184927413](../assets/image-20220515184927413.png)
+
+最左边的线用了默认的 `butt` 。可以注意到它是与辅助线齐平的。中间的是 `round` 的效果，端点处加上了半径为一半线宽的半圆。右边的是 `square` 的效果，端点处加上了等宽且高度为一半线宽的方块。
+
+# 绘制文本
+
+canvas 提供两种方法来绘制文本
+
+* fillText(text,x,y[,maxWidth]) —— 在指定的(x,y)位置填充指定的文本，绘制的最大宽度是可选的.
+* strokeText(text,x,y[,maxWidth]) —— 在指定的(x,y)位置绘制文本边框，绘制的最大宽度是可选的.
+
+`fillText`示例：
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.font = "48px serif";
+  ctx.fillText("Hello world", 10, 50);
+}
+```
+
+![img](../assets/B26A3338-C876-4B41-90E1-D6FB01C47970.png)
+
+`strokeText`示例：
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.font = "48px serif";
+  ctx.strokeText("Hello world", 10, 50);
+}
+```
+
+![img](../assets/3AFCD0EB-6F44-4303-9CF7-004533323CB5.png)
+
+文本样式：
+
+1. font —— 当前我们用来绘制文本的样式
+2. textAlign —— 文本对齐选项. 可选的值包括：`start`, `end`, `left`, `right` or `center`. 默认值是 `start`。 
+3. textBaseline —— 基线对齐选项. 可选的值包括：`top`, `hanging`, `middle`, `alphabetic`, `ideographic`, `bottom`。默认值是 `alphabetic。`
+4. direction —— 文本方向。可能的值包括：`ltr`, `rtl`, `inherit`。默认值是 `inherit。`
 
 
 
+## 测量文本宽度
+
+当你需要获得更多的文本细节时，下面的方法可以给你测量文本的方法。
+
+- [`measureText()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/measureText)
+
+  将返回一个 [`TextMetrics`](https://developer.mozilla.org/zh-CN/docs/Web/API/TextMetrics)对象的宽度、所在像素，这些体现文本特性的属性。
+
+下面的代码段将展示如何测量文本来获得它的宽度：
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var text = ctx.measureText("foo"); // TextMetrics object
+  text.width; // 16;
+}
+```
+
+# 操作图片
+
+canvas更有意思的一项特性就是图像操作能力。可以用于动态的图像合成或者作为图形的背景，以及游戏界面（Sprites）等等。
+
+引入图像到canvas里需要以下两步基本操作：
+
+* 获得一个指向`HTMLImageElement`的对象或者另一个 canvas元素的引用作为源，也可以通过提供一个 URL的方式来使用图片
+* 使用`drawImage()`函数将图片绘制到画布上
+
+## 获取图片
+
+canvas 的 api 可以使用以下类型的任意一种作为图片的源：
+
+* HTMLImageElement
+
+  这些图片可以是`Image()`函数构成的，或者任何的`<img>`元素
+
+* HTMLVideoElement
+
+  用一个 HTML 的`<video>`元素作为图片的源,会从中抓取当前帧作为一个图像
+
+* HTMLCanvasElement
+
+  可以使用另一个`<canvas>`元素作为图片源
+
+* ImageBitMap
+
+  这是一个高性能的位图，可以延迟绘制
+
+## 创建HTMLImageElement对象
+
+下面是一个例子，我们使用 `HTMLImageElement` 来创建图像对象。
+
+我们不单单使用`<img>`标签，也可以使用`Image()`构造函数来创建 `HTMLImageElement`对象。
+
+```js
+var img=new Image()
+img.src='xxx.png'
+```
+
+当脚本执行后，图片开始装载。
+
+我们需要等图片加载完成才继续操作下一步：
+
+```js
+img.onload=function(){
+  // 执行drawImage语句
+}
+```
+
+img的 src 不单单可以是图片的链接，也可以是 `base64url`
+
+```js
+img.src = 'data:image/gif;base64,R0lGODlhCwALAIAAAAAA3pn/ZiH5BAEAAAEALAAAAAALAAsAAAIUhA+hkcuO4lmNVindo7qyrIXiGBYAOw==';
+```
+
+## 绘制图片
+
+一旦获得了源图对象，我们就可以使用 `drawImage` 方法将它渲染到 canvas 里。`drawImage` 方法有三种形态，下面是最基础的一种。
+
+**`drawImage(image, x, y)`**
+
+其中 `image` 是 image 或者 canvas 对象，`x` 和 `y 是其在目标 canvas 里的起始坐标。`
+
+> 如果 image 是 svg图像，那么必须在`<svg>`根指定元素的宽度和高度
+
+下面是使用外部图像作为背景，然后画一个折线图的示例：
+
+```js
+  function draw() {
+    var ctx = document.getElementById('canvas').getContext('2d');
+    var img = new Image();
+    img.onload = function(){
+      ctx.drawImage(img,0,0);
+      ctx.beginPath();
+      ctx.moveTo(30,96);
+      ctx.lineTo(70,66);
+      ctx.lineTo(103,76);
+      ctx.lineTo(170,15);
+      ctx.stroke();
+    }
+    img.src = 'https://mdn.mozillademos.org/files/5395/backdrop.png';
+  }
+```
+
+用背景图我们就不需要绘制复杂的背景，省下不少代码。这里只用到一个 image 对象，于是就在它的 `onload` 事件响应函数中触发绘制动作。`drawImage` 方法将背景图放置在 canvas 的左上角 (0,0) 处。
+
+最终结果是这样的：
+
+![img](https://mdn.mozillademos.org/files/206/Canvas_backdrop.png)
 
