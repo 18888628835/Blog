@@ -827,3 +827,136 @@ img.src = 'data:image/gif;base64,R0lGODlhCwALAIAAAAAA3pn/ZiH5BAEAAAEALAAAAAALAAs
 
 ![img](https://mdn.mozillademos.org/files/206/Canvas_backdrop.png)
 
+## 缩放图片
+
+`drawImage`方法能够传递`width`和`height`来控制画出来的图片的大小。
+
+[`drawImage(image, x, y, width, height)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/drawImage)
+
+```js
+      function draw() {
+        if (canvas.getContext) {
+          let ctx = canvas.getContext("2d");
+          let image = new Image();
+          image.src = "https://mdn.mozillademos.org/files/5397/rhino.jpg";
+          image.onload = function () {
+            ctx.drawImage(image, 0, 0, 30, 30);
+          };
+        }
+      }
+```
+
+上面的代码可以绘制出 30*30 的图片
+
+![image-20220516211830509](../assets/image-20220516211830509.png)
+
+## 切片
+
+切片也用`drawImage` 完成，参数是 8 个
+
+[`drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/drawImage)
+
+第一个参数是源的引用，其它8个参数最好是参照右边的图解，前4个是定义图像源的切片位置和大小，后4个则是定义切片的目标显示位置和大小。
+
+![img](https://developer.mozilla.org/@api/deki/files/79/=Canvas_drawimage.jpg)
+
+以下代码会截取原图片`(40,80)`位置的头像，并将其做成 100*100 大小的图片，放到`canvas` 画布坐标为`(120,120)`的位置。
+
+```js
+      function draw() {
+        if (canvas.getContext) {
+          let ctx = canvas.getContext("2d");
+          let image = new Image();
+          image.src = "https://mdn.mozillademos.org/files/5397/rhino.jpg";
+          image.onload = function () {
+            ctx.drawImage(image, 40, 80, 100, 100, 120, 120, 100, 100);
+          };
+        }
+      }
+```
+
+换句话说，切片就是在缩放图片API中间加了 4 个参数来定义从哪个位置开始切片，切多大的图片。
+
+## draw多个图片
+
+一个 canvas 画布可以同时画多个图片，下面的例子是用多个图片来画相框的例子：
+
+```html
+    <canvas width="300" height="300"></canvas>
+    <img
+      class="picture_frame"
+      hidden
+      src="https://mdn.mozillademos.org/files/242/Canvas_picture_frame.png"
+      alt=""
+    />
+    <script>
+      const canvas = document.querySelector("canvas");
+      const frame = document.querySelector(".picture_frame");
+      function draw() {
+        if (canvas.getContext) {
+          let ctx = canvas.getContext("2d");
+          let image = new Image();
+          image.src = "https://mdn.mozillademos.org/files/5397/rhino.jpg";
+          image.onload = function () {
+            ctx.drawImage(image, 40, 80, 100, 100, 120, 120, 100, 100);
+            frame;
+            ctx.drawImage(frame, 110, 110, 120, 120);
+          };
+        }
+      }
+      draw();
+    </script>
+```
+
+![image-20220516214126146](../assets/image-20220516214126146.png)
+
+# 状态保存和恢复
+
+* `save()`
+
+  保存画布的所有状态
+
+* `restore()`
+
+  恢复canvas的状态
+
+Canvas 的状态就是当前画面应用的所有样式和变形的一个快照。
+
+当 `save` 时，`canvas`会将当前状态推送到一个栈中保存。
+
+当`restore`调用后，上一个保存的状态就会从栈中弹出，状态会被恢复到上一次保存的状态。（注意，这不是撤销功能，而是将修改的状态变成上一个保存的状态）
+
+下面的代码使用 `save` 和 `restore` 功能来绘制嵌套的矩形。
+
+```js
+      function draw() {
+        if (canvas.getContext) {
+          let ctx = canvas.getContext("2d");
+          // 先画一个黑色的框
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, 300, 300);
+          // 保存黑色样式
+          ctx.save();
+          // 再画一个蓝色的框
+          ctx.fillStyle = "blue";
+          ctx.fillRect(20, 20, 260, 260);
+          // 保存蓝色样式
+          ctx.save();
+          // 最后画一个白色的框
+          ctx.fillStyle = "white";
+          ctx.fillRect(40, 40, 220, 220);
+          // 恢复成蓝色
+          ctx.restore();
+          ctx.fillRect(60, 60, 180, 180);
+          // 恢复成黑色
+          ctx.restore();
+          ctx.fillRect(80, 80, 140, 140);
+        }
+      }
+```
+
+![image-20220516220938915](../assets/image-20220516220938915.png)
+
+# 变形
+
+变形`Transformations`可以对网格进行移动、缩放和旋转。（类似于 css3 的 transform）
