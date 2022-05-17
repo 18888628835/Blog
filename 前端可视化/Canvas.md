@@ -960,3 +960,138 @@ Canvas 的状态就是当前画面应用的所有样式和变形的一个快照�
 # 变形
 
 变形`Transformations`可以对网格进行移动、缩放和旋转。（类似于 css3 的 transform）
+
+## translate 移动
+
+使用`translate`可以将 canvas 移动到不同的位置
+
+```
+translate(x, y)
+```
+
+`translate `方法接受两个参数。x 是左右偏移量，y 是上下偏移量。
+
+![img](https://developer.mozilla.org/@api/deki/files/85/=Canvas_grid_translate.png)
+
+在使用变形相关 API 时最好配合 `save`以及`restore`来保存和恢复状态，比如以下例子：
+
+```js
+      const canvas = document.querySelector("canvas");
+      if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        ctx.strokeStyle = "red";
+        // 保存红色边框颜色
+        ctx.save();
+        ctx.strokeStyle = "green";
+        // 移动原点到（10,10）的位置
+        ctx.translate(10, 10);
+        ctx.strokeRect(0, 0, 50, 50);
+        // 恢复状态
+        ctx.restore();
+        ctx.strokeRect(0, 0, 50, 50);
+      }
+```
+
+![image-20220517193706147](../assets/image-20220517193706147.png)
+
+这个例子显示了一些移动 canvas 原点的好处。如果不使用 `translate `方法，那么所有矩形都将被绘制在相同的位置（0,0）。`translate `方法同时让我们可以任意放置这些图案，而不需要在 `strokeRect()` 方法中手工调整坐标值，既好理解也方便使用。
+
+## rotate 旋转
+
+ `rotate `方法，它用于以原点为中心旋转 canvas。
+
+- `rotate(angle)`
+
+  这个方法只接受一个参数：旋转的角度(angle)，它是顺时针方向的，以弧度为单位的值。
+
+旋转的中心点始终是 canvas 的原点，如果要改变它，我们需要用到 `translate `方法。
+
+![img](https://developer.mozilla.org/@api/deki/files/84/=Canvas_grid_rotate.png)
+
+```js
+      const canvas = document.querySelector("canvas");
+      if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        ctx.save();
+        ctx.strokeStyle = "green";
+        // 改变原点
+        ctx.translate(100, 100);
+        // 旋转
+        ctx.rotate(45);
+        ctx.strokeRect(0, 0, 50, 50);
+      }
+```
+
+![image-20220517205235280](../assets/image-20220517205235280.png)
+
+## scaling 缩放
+
+```js
+scale(x, y)
+```
+
+`scale ` 方法可以缩放画布的水平和垂直的单位。两个参数都是实数，可以为负数，x 为水平缩放因子，y 为垂直缩放因子，如果比1小，会缩小图形， 如果比1大会放大图形。默认值为1， 为实际大小。
+
+```js
+      const canvas = document.querySelector("canvas");
+      if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        ctx.save();
+        ctx.strokeStyle = "green";
+        ctx.translate(40, 40);
+
+        ctx.scale(2, 2);
+        ctx.strokeRect(0, 0, 50, 50);
+
+        ctx.restore();
+        ctx.strokeStyle = "red";
+        ctx.translate(75, 75);
+        ctx.scale(0.5, 0.5);
+        ctx.strokeRect(0, 0, 50, 50);
+      }
+```
+
+![image-20220517210254989](../assets/image-20220517210254989.png)
+
+## transforms 变形
+
+最后一个方法允许对变形矩阵直接修改。
+
+```js
+transform(a, b, c, d, e, f)
+```
+
+a是水平缩放
+
+b 是垂直倾斜
+
+c 是水平倾斜
+
+d 是垂直缩放
+
+e 是水平移动
+
+f 是垂直移动
+
+a 跟 d 相当于 scale，e 跟 f 相当于 translate
+
+默认值是`(1,0,0,1,0,0)`
+
+其中还有两个相关的 API：
+
+* [`setTransform(a, b, c, d, e, f)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/setTransform)
+
+  这个方法会将当前的变形矩阵重置为单位矩阵，然后用相同的参数调用 `transform `方法。
+
+  从根本上来说，该方法是取消了当前变形,然后设置为指定的变形,一步完成。
+
+* [`resetTransform()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/resetTransform)
+
+  重置当前变形为单位矩阵，它和调用以下语句是一样的：`ctx.setTransform(1, 0, 0, 1, 0, 0);`
+
+这里有个例子可以尝试一下：
+
+[mdn-transform](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/transform#示例)
+
+
+
