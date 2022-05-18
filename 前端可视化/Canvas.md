@@ -1095,3 +1095,82 @@ a 跟 d 相当于 scale，e 跟 f 相当于 translate
 
 
 
+# 组合 Compositing
+
+## globalCompositeOperation
+
+使用`globalCompositeOperation`属性能够控制绘制顺序。比如默认情况下新的图形总是在旧的图形之上，但是通过`globalCompositeOperation`可以改变这种情况。
+
+MDN 的示例写得已经很清楚了
+
+[Compositing 示例](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Compositing/Example)
+
+
+
+## clip
+
+这里有一段代码，可以绘制星星
+
+```js
+       function drawStar(ctx, r) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        for (var i = 0; i < 9; i++) {
+          ctx.rotate(Math.PI / 5);
+          if (i % 2 == 0) {
+            ctx.lineTo((r / 0.525731) * 0.200811, 0);
+          } else {
+            ctx.lineTo(r, 0);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+```
+
+我们用它来绘制满屏的星星
+
+```js
+      function draw() {
+        var ctx = document.getElementById("canvas").getContext("2d");
+        ctx.fillRect(0, 0, 150, 150);
+        ctx.translate(75, 75);
+
+        // draw stars
+        for (var j = 1; j < 50; j++) {
+          ctx.save();
+          ctx.fillStyle = "#fff";
+          ctx.translate(
+            75 - Math.floor(Math.random() * 150),
+            75 - Math.floor(Math.random() * 150)
+          );
+          drawStar(ctx, Math.floor(Math.random() * 4) + 2);
+          ctx.restore();
+        }
+      }
+```
+
+![image-20220518231439343](../assets/image-20220518231439343.png)
+
+但是如果我们在 draw stars 前将其裁剪一下，那么就可以先裁剪出一片区域，之后所有出现在它里面的东西才会画出来。
+
+```js
+        // Create a circular clipping path
+        ctx.beginPath();
+        ctx.arc(0, 0, 60, 0, Math.PI * 2, true);
+        ctx.clip();
+
+        // draw background
+        var lingrad = ctx.createLinearGradient(0, -75, 0, 75);
+        lingrad.addColorStop(0, "#232256");
+        lingrad.addColorStop(1, "#143778");
+        ctx.fillStyle = lingrad;
+        ctx.fillRect(-75, -75, 150, 150);
+
+					// draw stars
+							...
+```
+
+![image-20220518231807055](../assets/image-20220518231807055.png)
