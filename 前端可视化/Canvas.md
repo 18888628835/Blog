@@ -1174,3 +1174,87 @@ MDN 的示例写得已经很清楚了
 ```
 
 ![image-20220518231807055](../assets/image-20220518231807055.png)
+
+
+
+# 实战 sign 签名板
+
+基于上面的 API，我实现了一个签名功能的画板，演示一下：
+
+![sign](../assets/sign.gif)
+
+代码如下，很简单，不多解释了：
+
+```html
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      canvas {
+        border: 1px solid black;
+        margin: 50px 50px;
+      }
+    </style>
+```
+
+```html
+<body>
+    <canvas width="300" height="300"></canvas>
+    <button id="clear">清除 canvas</button>
+    <button id="download">下载 签名</button>
+    <script>
+      const canvas = document.querySelector("canvas");
+
+      if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        // 写字
+        function write(e) {
+          ctx.lineWidth = 3;
+          // canvas 元素可能出现在滚动页面，所以需要用鼠标在当前窗口坐标-canvas 的窗口坐标=canvas 内部坐标
+          ctx.lineTo(
+            e.clientX - canvas.getBoundingClientRect().left,
+            e.clientY - canvas.getBoundingClientRect().top
+          );
+
+          ctx.stroke();
+        }
+        // 画白色底图
+        function drawBG() {
+          ctx.globalCompositeOperation = "destination-over";
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, 300, 300);
+        }
+        // 下载
+        function downloadImage() {
+          let url = canvas.toDataURL("png");
+          const a = document.createElement("a");
+          a.download = new Date().getTime();
+          a.href = url;
+          document.body.append(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+        // 清空画布
+        function clearCanvas() {
+          ctx.clearRect(0, 0, 300, 300);
+        }
+        canvas.addEventListener("mousedown", () => {
+          ctx.beginPath();
+          document.addEventListener("mousemove", write);
+        });
+        document.addEventListener("mouseup", () => {
+          document.removeEventListener("mousemove", write);
+        });
+
+        clear.addEventListener("click", clearCanvas);
+        download.addEventListener("click", () => {
+          drawBG();
+          downloadImage();
+        });
+      }
+    </script>
+  </body>
+```
+
